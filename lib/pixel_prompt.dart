@@ -1,3 +1,3 @@
-int calculate() {
-  return 6 * 7;
-}
+library pixel_prompt;
+
+String greet() => "Welcome to pixel prompt!";
