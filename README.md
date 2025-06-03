@@ -1,2 +1,3 @@
-A sample command-line application with an entrypoint in `bin/`, library code
-in `lib/`, and example unit test in `test/`.
+# PixelPrompt 
+
+A terminal UI (TUI) framework for `Dart`.
