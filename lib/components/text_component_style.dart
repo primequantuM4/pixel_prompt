@@ -6,15 +6,15 @@ class TextComponentStyle {
   AnsiColorType? bgColor;
   Set<FontStyle> styles = {};
 
-  int _paddingLeft = 0;
-  int _paddingRight = 0;
-  int _paddingTop = 0;
-  int _paddingBottom = 0;
+  int _leftPadding = 0;
+  int _rightPadding = 0;
+  int _topPadding = 0;
+  int _bottomPadding = 0;
 
-  int _marginLeft = 0;
-  int _marginRight = 0;
-  int _marginTop = 0;
-  int _marginBottom = 0;
+  int _leftMargin = 0;
+  int _rightMargin = 0;
+  int _topMargin = 0;
+  int _bottomMargin = 0;
 
   TextComponentStyle foreground(AnsiColorType color) {
     this.color = color;
@@ -47,42 +47,42 @@ class TextComponentStyle {
   }
 
   TextComponentStyle paddingTop(int padding) {
-    _paddingTop = padding;
+    _topPadding = padding;
     return this;
   }
 
   TextComponentStyle paddingLeft(int padding) {
-    _paddingLeft = padding;
+    _leftPadding = padding;
     return this;
   }
 
   TextComponentStyle paddingRight(int padding) {
-    _paddingRight = padding;
+    _rightPadding = padding;
     return this;
   }
 
   TextComponentStyle paddingBottom(int padding) {
-    _paddingBottom = padding;
+    _bottomPadding = padding;
     return this;
   }
 
   TextComponentStyle marginTop(int margin) {
-    _marginTop = margin;
+    _topMargin = margin;
     return this;
   }
 
   TextComponentStyle marginBottom(int margin) {
-    _marginBottom = margin;
+    _bottomMargin = margin;
     return this;
   }
 
   TextComponentStyle marginLeft(int margin) {
-    _marginLeft = margin;
+    _leftMargin = margin;
     return this;
   }
 
   TextComponentStyle marginRight(int margin) {
-    _marginRight = margin;
+    _rightMargin = margin;
     return this;
   }
 
@@ -96,18 +96,18 @@ class TextComponentStyle {
     return codes;
   }
 
-  int get horizontalPadding => _paddingLeft + _paddingRight;
-  int get verticalPadding => _paddingTop + _paddingBottom;
-  int get horizontalMargin => _marginLeft + _marginRight;
-  int get verticalMargin => _marginTop + _marginBottom;
+  int get horizontalPadding => _leftPadding + _rightPadding;
+  int get verticalPadding => _topPadding + _bottomPadding;
+  int get horizontalMargin => _leftMargin + _rightMargin;
+  int get verticalMargin => _topMargin + _bottomMargin;
 
-  int get leftPadding => _paddingLeft;
-  int get rightPadding => _paddingRight;
-  int get topPadding => _paddingTop;
-  int get bottomPadding => _paddingBottom;
+  int get leftPadding => _leftPadding;
+  int get rightPadding => _rightPadding;
+  int get topPadding => _topPadding;
+  int get bottomPadding => _bottomPadding;
 
-  int get leftMargin => _marginLeft;
-  int get rightMargin => _marginRight;
-  int get topMargin => _marginTop;
-  int get bottomMargin => _marginBottom;
+  int get leftMargin => _leftMargin;
+  int get rightMargin => _rightMargin;
+  int get topMargin => _topMargin;
+  int get bottomMargin => _bottomMargin;
 }
