@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.3](https://github.com/primequantuM4/pixel_prompt/compare/v0.0.2...v0.0.3) (2025-06-12)
+
+
+### Features
+
+* **layout:** implement layout engine with row and column support ([299a651](https://github.com/primequantuM4/pixel_prompt/commit/299a6516b1df8609c415fe2ba52262b9bd70cbf4))
+
 ### [0.0.2](https://github.com/primequantuM4/pixel_prompt/compare/v0.0.1...v0.0.2) (2025-06-12)
 
 
