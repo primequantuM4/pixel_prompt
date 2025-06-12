@@ -1,5 +1,5 @@
 import 'package:pixel_prompt/core/canvas_buffer.dart';
-import 'package:pixel_prompt/core/components.dart';
+import 'package:pixel_prompt/core/component.dart';
 
 class RenderManager {
   final CanvasBuffer buffer;
