@@ -1,0 +1,1 @@
+enum Axis { horizontal, vertical }
