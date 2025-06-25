@@ -1,4 +1,6 @@
+import 'package:pixel_prompt/common/response_input.dart';
 import 'package:pixel_prompt/core/component.dart';
+import 'package:pixel_prompt/events/input_event.dart';
 
 abstract class InteractableComponent extends Component {
   bool isFocused = false;
@@ -34,5 +36,5 @@ abstract class InteractableComponent extends Component {
   void onBlur();
   void onHover();
 
-  void handleInput(String input);
+  ResponseInput handleInput(InputEvent event);
 }

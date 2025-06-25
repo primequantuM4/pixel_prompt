@@ -9,7 +9,7 @@ class CommandModeHandler implements InputHandler {
   @override
   ResponseInput handleInput(InputEvent event) {
     if (!_shouldHandle(event)) {
-      return ResponseInput(commands: ResponseCommands.none, handled: true);
+      return ResponseInput(commands: ResponseCommands.none, handled: false);
     }
 
     event = event as CharEvent;
@@ -52,7 +52,6 @@ class CommandModeHandler implements InputHandler {
   void _enterCommandMode() {
     _inCommandMode = true;
     _buffer.clear();
-    _buffer.write(':');
   }
 
   void _exitCommandMode() {

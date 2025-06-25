@@ -59,4 +59,16 @@ class UnknownEvent extends InputEvent {
   const UnknownEvent({this.byte});
 }
 
+class UpKeyEvent extends InputEvent {}
+
+class DownKeyEvent extends InputEvent {}
+
+class LeftKeyEvent extends InputEvent {}
+
+class RightKeyEvent extends InputEvent {}
+
+class EnterKeyEvent extends InputEvent {}
+
+class SpaceKeyEvent extends InputEvent {}
+
 enum MouseEventType { click, release, hover, error }

@@ -8,7 +8,7 @@ class FocusManager implements InputHandler {
   final Context context;
 
   final List<InteractableComponent> components = [];
-  InteractableComponent? _currentComponent;
+  InteractableComponent? currentComponent;
   InteractableComponent? _hoveredComponent;
   int currentIndex = -1;
 
@@ -26,18 +26,18 @@ class FocusManager implements InputHandler {
     if (currentIndex == -1) {
       currentIndex = shiftPressed ? components.length - 1 : 0;
       components[currentIndex].focus();
-      _currentComponent = components[currentIndex];
+      currentComponent = components[currentIndex];
 
       return ResponseInput(
         commands: ResponseCommands.none,
         handled: true,
-        dirty: [_currentComponent!],
+        dirty: [currentComponent!],
       );
     }
 
     final List<InteractableComponent> dirtyComponents = [];
 
-    _currentComponent!.blur();
+    currentComponent!.blur();
     dirtyComponents.add(components[currentIndex]);
 
     if (shiftPressed) {
@@ -45,9 +45,9 @@ class FocusManager implements InputHandler {
     } else {
       currentIndex = (currentIndex + 1) % components.length;
     }
-    _currentComponent = components[currentIndex];
-    _currentComponent!.focus();
-    dirtyComponents.add(_currentComponent!);
+    currentComponent = components[currentIndex];
+    currentComponent!.focus();
+    dirtyComponents.add(currentComponent!);
 
     return ResponseInput(
       commands: ResponseCommands.none,
@@ -76,15 +76,15 @@ class FocusManager implements InputHandler {
             component.hover();
             dirtyComponents.add(component);
           } else if (event.type == MouseEventType.click) {
-            _currentComponent?.blur();
+            currentComponent?.blur();
             component.focus();
 
-            if (_currentComponent != null) {
-              dirtyComponents.add(_currentComponent!);
+            if (currentComponent != null) {
+              dirtyComponents.add(currentComponent!);
             }
             dirtyComponents.add(component);
 
-            _currentComponent = component;
+            currentComponent = component;
           }
           break;
         }

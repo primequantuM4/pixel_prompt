@@ -12,4 +12,8 @@ class ResponseInput {
     required this.handled,
     this.dirty,
   });
+
+  static ResponseInput ignored() {
+    return ResponseInput(commands: ResponseCommands.none, handled: false);
+  }
 }

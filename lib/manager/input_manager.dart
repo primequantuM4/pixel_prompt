@@ -101,7 +101,15 @@ class InputManager {
         final List<int> sequence = _inputBuffer.sublist(0, 3);
         // EVENT IS A NORMAL SPECIAL KEY EVENT
 
-        if (sequence[2] == 0x5A) {
+        if (sequence[2] == 0x41) {
+          dispatchedEvent = UpKeyEvent();
+        } else if (sequence[2] == 0x42) {
+          dispatchedEvent = DownKeyEvent();
+        } else if (sequence[2] == 0x43) {
+          dispatchedEvent = RightKeyEvent();
+        } else if (sequence[2] == 0x44) {
+          dispatchedEvent = LeftKeyEvent();
+        } else if (sequence[2] == 0x5A) {
           dispatchedEvent = ShiftTabEvent();
         } else {
           dispatchedEvent = SequenceEvent(sequence: sequence);
@@ -110,7 +118,15 @@ class InputManager {
         _inputBuffer.removeRange(0, 3);
       } else if (_inputBuffer[0] == 0xE0 && _inputBuffer.length >= 2) {
         final sequence = _inputBuffer.sublist(0, 2);
-        if (sequence[1] == 0x5A) {
+        if (sequence[2] == 0x41) {
+          dispatchedEvent = UpKeyEvent();
+        } else if (sequence[2] == 0x42) {
+          dispatchedEvent = DownKeyEvent();
+        } else if (sequence[2] == 0x43) {
+          dispatchedEvent = RightKeyEvent();
+        } else if (sequence[2] == 0x44) {
+          dispatchedEvent = LeftKeyEvent();
+        } else if (sequence[2] == 0x5A) {
           dispatchedEvent = ShiftTabEvent();
         } else {
           dispatchedEvent = SequenceEvent(sequence: sequence);
@@ -119,14 +135,18 @@ class InputManager {
         _inputBuffer.removeRange(0, 2);
       } else if (_inputBuffer.length == 1) {
         final byte = _inputBuffer.removeAt(0);
-        final input = String.fromCharCode(byte);
-        // EVENT IS A NORMAL KEY for any device
-        if (input == '\t') {
-          dispatchedEvent = TabEvent();
-        } else if (byte >= 32 && byte <= 126) {
-          dispatchedEvent = CharEvent(char: input);
+        if (byte == 0x0A || byte == 0x0D) {
+          dispatchedEvent = CharEvent(char: '\n');
         } else {
-          dispatchedEvent = UnknownEvent(byte: byte);
+          final input = String.fromCharCode(byte);
+          // EVENT IS A NORMAL KEY for any device
+          if (input == '\t') {
+            dispatchedEvent = TabEvent();
+          } else if (byte >= 32 && byte <= 126) {
+            dispatchedEvent = CharEvent(char: input);
+          } else {
+            dispatchedEvent = UnknownEvent(byte: byte);
+          }
         }
       } else {
         // UNKNOWN INPUT EVENT
