@@ -22,7 +22,7 @@ class CheckboxList extends InteractableComponent with ParentComponent {
   final AnsiColorType? hoverColor;
   final AnsiColorType? textColor;
   int focusedItem = 0;
-  // final Set<int> _selected = {};
+  final Set<int> _selected = {};
 
   CheckboxList({
     required this.items,
@@ -42,7 +42,21 @@ class CheckboxList extends InteractableComponent with ParentComponent {
              ),
            )
            .toList(),
-       spacing = spacing ?? 1;
+       spacing = spacing ?? 1 {
+    assignParent();
+  }
+
+  void assignParent() {
+    for (var checkbox in children) {
+      checkbox.focusable = false;
+    }
+  }
+
+  @override
+  bool get isFocusable => true;
+
+  @override
+  bool get wantsInput => true;
 
   @override
   int fitHeight() {
@@ -103,6 +117,7 @@ class CheckboxList extends InteractableComponent with ParentComponent {
     final positionedComponent = engine.compute();
     for (int i = 0; i < positionedComponent.length; i++) {
       final item = positionedComponent[i];
+
       item.component.render(
         buffer,
         Rect(width: bounds.width, height: bounds.height, x: x, y: y),
@@ -123,7 +138,7 @@ class CheckboxList extends InteractableComponent with ParentComponent {
 
     for (int i = 0; i < positionedComponent.length; i++) {
       final item = positionedComponent[i];
-      (item.component as Checkbox).isHovered = i == focusedItem;
+
       item.component.render(
         buffer,
         Rect(width: bounds.width, height: bounds.height, x: x, y: y),
@@ -135,68 +150,86 @@ class CheckboxList extends InteractableComponent with ParentComponent {
   @override
   ResponseInput handleInput(InputEvent event) {
     if (event is! KeyEvent) return ResponseInput.ignored();
+    if (event.code == KeyCode.arrowUp ||
+        event.code == KeyCode.arrowDown ||
+        event.code == KeyCode.arrowLeft ||
+        event.code == KeyCode.arrowRight) {
+      int prevFocusedItem = focusedItem;
 
-    bool handled = false;
-    int prevFocusedItem = focusedItem;
+      _handleArrowEvents(event);
+
+      children[prevFocusedItem].isHovered = false;
+      children[focusedItem].isHovered = true;
+
+      final List<Checkbox> dirtyComponents = [
+        children[focusedItem],
+        children[prevFocusedItem],
+      ];
+      return ResponseInput(
+        commands: ResponseCommands.none,
+        handled: true,
+        dirty: dirtyComponents,
+      );
+    }
+
+    if (event.char == '\n' || event.char == ' ') {
+      if (_selected.contains(focusedItem)) {
+        _selected.remove(focusedItem);
+      } else {
+        _selected.add(focusedItem);
+      }
+      return children[focusedItem].handleInput(event);
+    }
+
+    return ResponseInput.ignored();
+  }
+
+  void _handleArrowEvents(KeyEvent event) {
     switch (event.code) {
       case KeyCode.arrowUp:
         if (direction == Axis.vertical && focusedItem > 0) {
           focusedItem = (focusedItem - 1 + children.length) % children.length;
         }
-        handled = true;
         break;
       case KeyCode.arrowDown:
         if (direction == Axis.vertical && focusedItem < children.length - 1) {
           focusedItem = (focusedItem + 1) % children.length;
         }
-        handled = true;
         break;
       case KeyCode.arrowRight:
         if (direction == Axis.horizontal && focusedItem < children.length - 1) {
           focusedItem = (focusedItem + 1) % children.length;
         }
-        handled = true;
       case KeyCode.arrowLeft:
         if (direction == Axis.horizontal && focusedItem > 0) {
           focusedItem = (focusedItem - 1 + children.length) % children.length;
         }
-        handled = true;
         break;
-
       default:
-      // handle other cases here ignore for now
+        throw Exception("Trying to handle other key than arrow key");
     }
-
-    if (handled) {
-      children[prevFocusedItem].isHovered = false;
-      children[focusedItem].isHovered = true;
-      children[focusedItem].handleInput(event);
-    }
-    final List<Checkbox> dirtyComponents = [
-      children[focusedItem],
-      children[prevFocusedItem],
-    ];
-    return ResponseInput(
-      commands: ResponseCommands.none,
-      handled: true,
-      dirty: dirtyComponents,
-    );
   }
 
   @override
   void onBlur() {
-    // TODO: implement onBlur
+    // make sure to remove any unrelated drawings like hovering color etc when blurred
+    for (final child in children) {
+      child.isHovered = false;
+    }
   }
 
   @override
   void onFocus() {
-    // TODO: implement onFocus
+    // when checkbox list gains focus
+    // make sure to have one of the components as hovered
+    for (int i = 0; i < children.length; i++) {
+      children[i].isHovered = i == focusedItem;
+    }
   }
 
   @override
-  void onHover() {
-    // TODO: implement onHover
-  }
+  void onHover() {}
+
   @override
   void onClick() {}
 }

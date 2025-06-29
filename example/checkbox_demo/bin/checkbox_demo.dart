@@ -9,8 +9,8 @@ void main() {
           TextComponent(
             "Choose your Settings",
             style: TextComponentStyle()
-                .foreground(ColorRGB(143, 188, 187)) // Frost Blue
-                .background(ColorRGB(46, 52, 64)) // Dark Slate
+                .foreground(ColorRGB(143, 188, 187))
+                .background(ColorRGB(46, 52, 64))
                 .paddingTop(1)
                 .paddingBottom(1)
                 .paddingLeft(12)
