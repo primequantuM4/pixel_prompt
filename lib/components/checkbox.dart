@@ -1,5 +1,4 @@
 import 'package:pixel_prompt/common/response_input.dart';
-import 'package:pixel_prompt/components/checkbox_list.dart';
 import 'package:pixel_prompt/components/colors.dart';
 import 'package:pixel_prompt/components/text_component_style.dart';
 import 'package:pixel_prompt/core/canvas_buffer.dart';
@@ -9,7 +8,6 @@ import 'package:pixel_prompt/core/size.dart';
 import 'package:pixel_prompt/events/input_event.dart';
 
 class Checkbox extends InteractableComponent {
-  CheckboxList? parent;
   final String label;
   bool checked = false;
   bool focusable = true;
@@ -21,7 +19,6 @@ class Checkbox extends InteractableComponent {
   Checkbox({
     required this.label,
     int? padding,
-    this.parent,
     this.selectionColor,
     this.hoverColor,
     this.textColor,
