@@ -134,27 +134,29 @@ class CheckboxList extends InteractableComponent with ParentComponent {
 
   @override
   ResponseInput handleInput(InputEvent event) {
+    if (event is! KeyEvent) return ResponseInput.ignored();
+
     bool handled = false;
     int prevFocusedItem = focusedItem;
-    switch (event) {
-      case UpKeyEvent():
+    switch (event.code) {
+      case KeyCode.arrowUp:
         if (direction == Axis.vertical && focusedItem > 0) {
           focusedItem = (focusedItem - 1 + children.length) % children.length;
         }
         handled = true;
         break;
-      case DownKeyEvent():
+      case KeyCode.arrowDown:
         if (direction == Axis.vertical && focusedItem < children.length - 1) {
           focusedItem = (focusedItem + 1) % children.length;
         }
         handled = true;
         break;
-      case RightKeyEvent():
+      case KeyCode.arrowRight:
         if (direction == Axis.horizontal && focusedItem < children.length - 1) {
           focusedItem = (focusedItem + 1) % children.length;
         }
         handled = true;
-      case LeftKeyEvent():
+      case KeyCode.arrowLeft:
         if (direction == Axis.horizontal && focusedItem > 0) {
           focusedItem = (focusedItem - 1 + children.length) % children.length;
         }

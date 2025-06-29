@@ -58,9 +58,9 @@ class FocusManager implements InputHandler {
 
   @override
   ResponseInput handleInput(InputEvent event) {
-    if (event is ShiftTabEvent) {
+    if (event is KeyEvent && event.code == KeyCode.shiftTab) {
       return handleTab(true);
-    } else if (event is TabEvent) {
+    } else if (event is KeyEvent && event.code == KeyCode.tab) {
       return handleTab(false);
     } else if (event is MouseEvent) {
       final List<InteractableComponent> dirtyComponents = [];

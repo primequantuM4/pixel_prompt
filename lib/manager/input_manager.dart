@@ -102,15 +102,15 @@ class InputManager {
         // EVENT IS A NORMAL SPECIAL KEY EVENT
 
         if (sequence[2] == 0x41) {
-          dispatchedEvent = UpKeyEvent();
+          dispatchedEvent = KeyEvent(code: KeyCode.arrowUp);
         } else if (sequence[2] == 0x42) {
-          dispatchedEvent = DownKeyEvent();
+          dispatchedEvent = KeyEvent(code: KeyCode.arrowDown);
         } else if (sequence[2] == 0x43) {
-          dispatchedEvent = RightKeyEvent();
+          dispatchedEvent = KeyEvent(code: KeyCode.arrowRight);
         } else if (sequence[2] == 0x44) {
-          dispatchedEvent = LeftKeyEvent();
+          dispatchedEvent = KeyEvent(code: KeyCode.arrowLeft);
         } else if (sequence[2] == 0x5A) {
-          dispatchedEvent = ShiftTabEvent();
+          dispatchedEvent = KeyEvent(code: KeyCode.shiftTab);
         } else {
           dispatchedEvent = SequenceEvent(sequence: sequence);
         }
@@ -119,15 +119,15 @@ class InputManager {
       } else if (_inputBuffer[0] == 0xE0 && _inputBuffer.length >= 2) {
         final sequence = _inputBuffer.sublist(0, 2);
         if (sequence[2] == 0x41) {
-          dispatchedEvent = UpKeyEvent();
+          dispatchedEvent = KeyEvent(code: KeyCode.arrowUp);
         } else if (sequence[2] == 0x42) {
-          dispatchedEvent = DownKeyEvent();
+          dispatchedEvent = KeyEvent(code: KeyCode.arrowDown);
         } else if (sequence[2] == 0x43) {
-          dispatchedEvent = RightKeyEvent();
+          dispatchedEvent = KeyEvent(code: KeyCode.arrowRight);
         } else if (sequence[2] == 0x44) {
-          dispatchedEvent = LeftKeyEvent();
+          dispatchedEvent = KeyEvent(code: KeyCode.arrowLeft);
         } else if (sequence[2] == 0x5A) {
-          dispatchedEvent = ShiftTabEvent();
+          dispatchedEvent = KeyEvent(code: KeyCode.shiftTab);
         } else {
           dispatchedEvent = SequenceEvent(sequence: sequence);
         }
@@ -136,14 +136,14 @@ class InputManager {
       } else if (_inputBuffer.length == 1) {
         final byte = _inputBuffer.removeAt(0);
         if (byte == 0x0A || byte == 0x0D) {
-          dispatchedEvent = CharEvent(char: '\n');
+          dispatchedEvent = KeyEvent(code: KeyCode.character, char: '\n');
         } else {
           final input = String.fromCharCode(byte);
           // EVENT IS A NORMAL KEY for any device
           if (input == '\t') {
-            dispatchedEvent = TabEvent();
+            dispatchedEvent = KeyEvent(code: KeyCode.tab);
           } else if (byte >= 32 && byte <= 126) {
-            dispatchedEvent = CharEvent(char: input);
+            dispatchedEvent = KeyEvent(code: KeyCode.character, char: input);
           } else {
             dispatchedEvent = UnknownEvent(byte: byte);
           }

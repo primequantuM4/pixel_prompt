@@ -12,10 +12,11 @@ class CommandModeHandler implements InputHandler {
       return ResponseInput(commands: ResponseCommands.none, handled: false);
     }
 
-    event = event as CharEvent;
-    if (event.char == '\r' || event.char == '\n') {
+    event = event as KeyEvent;
+    if (event.code == KeyCode.character &&
+        (event.char == '\r' || event.char == '\n')) {
       return executeCommand();
-    } else if (event.char == '\b' || event.char == '\x7F') {
+    } else if (event.code == KeyCode.backspace) {
       String value = _buffer.toString();
       if (value.isNotEmpty) {
         value = value.substring(0, value.length - 1);
@@ -42,11 +43,11 @@ class CommandModeHandler implements InputHandler {
   }
 
   bool _shouldHandle(InputEvent event) {
-    if (!_inCommandMode && event is CharEvent && event.char == ':') {
+    if (!_inCommandMode && event is KeyEvent && event.char == ':') {
       _enterCommandMode();
     }
     return _inCommandMode ||
-        (!_inCommandMode && event is CharEvent && event.char == ':');
+        (!_inCommandMode && event is KeyEvent && event.char == ':');
   }
 
   void _enterCommandMode() {

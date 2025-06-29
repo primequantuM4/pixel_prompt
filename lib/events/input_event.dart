@@ -2,6 +2,26 @@ sealed class InputEvent {
   const InputEvent();
 }
 
+class KeyEvent extends InputEvent {
+  final KeyCode code;
+  final String? char;
+
+  const KeyEvent({required this.code, this.char});
+}
+
+enum KeyCode {
+  character,
+  enter,
+  tab,
+  shiftTab,
+  escape,
+  backspace,
+  arrowUp,
+  arrowDown,
+  arrowLeft,
+  arrowRight,
+}
+
 class CharEvent extends InputEvent {
   final String char;
 
@@ -19,18 +39,6 @@ class SequenceEvent extends InputEvent {
     this.origin = SequenceOrigin.generic,
   });
 }
-
-enum NavigationKeyType { tab, shiftTab, escape, unknown }
-
-class NavigationKeyEvent {
-  final NavigationKeyType type;
-
-  const NavigationKeyEvent({required this.type});
-}
-
-class TabEvent extends InputEvent {}
-
-class ShiftTabEvent extends InputEvent {}
 
 class EscapeEvent extends InputEvent {}
 
@@ -58,17 +66,5 @@ class UnknownEvent extends InputEvent {
 
   const UnknownEvent({this.byte});
 }
-
-class UpKeyEvent extends InputEvent {}
-
-class DownKeyEvent extends InputEvent {}
-
-class LeftKeyEvent extends InputEvent {}
-
-class RightKeyEvent extends InputEvent {}
-
-class EnterKeyEvent extends InputEvent {}
-
-class SpaceKeyEvent extends InputEvent {}
 
 enum MouseEventType { click, release, hover, error }

@@ -51,19 +51,23 @@ class Checkbox extends InteractableComponent {
 
   @override
   ResponseInput handleInput(InputEvent event) {
-    switch (event) {
-      case SpaceKeyEvent():
-      case EnterKeyEvent():
-        checked = !checked;
-      default:
-      // handle other inputs
+    if (event is KeyEvent) {
+      switch (event.char) {
+        case ' ':
+        case '\n':
+          checked = !checked;
+        default:
+        // handle other inputs
+      }
+
+      return ResponseInput(
+        commands: ResponseCommands.none,
+        handled: true,
+        dirty: [this],
+      );
     }
 
-    return ResponseInput(
-      commands: ResponseCommands.none,
-      handled: true,
-      dirty: [this],
-    );
+    return ResponseInput.ignored();
   }
 
   @override
