@@ -1,4 +1,5 @@
 import 'package:pixel_prompt/common/response_input.dart';
+import 'package:pixel_prompt/components/checkbox_list.dart';
 import 'package:pixel_prompt/components/colors.dart';
 import 'package:pixel_prompt/components/text_component_style.dart';
 import 'package:pixel_prompt/core/canvas_buffer.dart';
@@ -8,8 +9,10 @@ import 'package:pixel_prompt/core/size.dart';
 import 'package:pixel_prompt/events/input_event.dart';
 
 class Checkbox extends InteractableComponent {
+  CheckboxList? parent;
   final String label;
   bool checked = false;
+  bool focusable = true;
 
   final AnsiColorType? selectionColor;
   final AnsiColorType? hoverColor;
@@ -18,6 +21,7 @@ class Checkbox extends InteractableComponent {
   Checkbox({
     required this.label,
     int? padding,
+    this.parent,
     this.selectionColor,
     this.hoverColor,
     this.textColor,
@@ -26,6 +30,11 @@ class Checkbox extends InteractableComponent {
   int get contentWidth => 4 + label.length;
 
   @override
+  bool get isHoverable => true;
+
+  @override
+  bool get isFocusable => focusable;
+  @override
   int fitHeight() => 1;
 
   @override
@@ -33,7 +42,14 @@ class Checkbox extends InteractableComponent {
 
   @override
   void render(CanvasBuffer buffer, Rect bounds) {
-    final checkbox = (checked) ? '[X]' : '[]';
+    String checkbox = (checked) ? '[X]' : '[ ]';
+
+    if ((isFocused || isHovered) && checked) {
+      checkbox = '[-]';
+    } else if ((isFocused || isHovered) && !checked) {
+      checkbox = '[.]';
+    }
+
     final component = '$checkbox $label';
 
     TextComponentStyle style = TextComponentStyle().foreground(
@@ -86,5 +102,11 @@ class Checkbox extends InteractableComponent {
   @override
   void onHover() {
     // TODO: implement onHover
+  }
+
+  @override
+  void onClick() {
+    checked = !checked;
+    markDirty();
   }
 }

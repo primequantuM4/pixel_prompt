@@ -4,15 +4,50 @@ import 'package:pixel_prompt/pixel_prompt.dart';
 void main() {
   App(
     children: [
-      CheckboxList(
-        direction: Axis.vertical,
-        hoverColor: ColorRGB(255, 0, 0),
-        items: ['Imagine Dragons', 'Coldplay', 'Walking the wire'],
-      ),
-      CheckboxList(
-        direction: Axis.horizontal,
-        hoverColor: ColorRGB(255, 0, 0),
-        items: ['Clocks', 'Sing for the moment', 'Moments'],
+      Column(
+        children: [
+          TextComponent(
+            "Choose your Settings",
+            style: TextComponentStyle()
+                .foreground(ColorRGB(143, 188, 187)) // Frost Blue
+                .background(ColorRGB(46, 52, 64)) // Dark Slate
+                .paddingTop(1)
+                .paddingBottom(1)
+                .paddingLeft(12)
+                .paddingRight(12)
+                .marginLeft(4),
+          ),
+          CheckboxList(
+            direction: Axis.vertical,
+            hoverColor: ColorRGB(76, 86, 106),
+            selectionColor: ColorRGB(0, 191, 165),
+            textColor: ColorRGB(94, 129, 172),
+            items: ['Enable Notifications', 'Dark Mode', 'Use Custom DNS'],
+          ),
+
+          Row(
+            children: [
+              Checkbox(
+                label: 'Linux',
+                hoverColor: ColorRGB(76, 86, 106),
+                selectionColor: ColorRGB(0, 191, 165),
+                textColor: ColorRGB(94, 129, 172),
+              ),
+              Checkbox(
+                label: 'Windows',
+                hoverColor: ColorRGB(76, 86, 106),
+                selectionColor: ColorRGB(0, 191, 165),
+                textColor: ColorRGB(94, 129, 172),
+              ),
+              Checkbox(
+                label: 'Mac',
+                hoverColor: ColorRGB(76, 86, 106),
+                selectionColor: ColorRGB(0, 191, 165),
+                textColor: ColorRGB(94, 129, 172),
+              ),
+            ],
+          ),
+        ],
       ),
     ],
   ).run();

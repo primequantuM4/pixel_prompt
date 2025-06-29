@@ -17,7 +17,6 @@ abstract class Component {
     return _bounds!;
   }
 
-  void markDirty() {}
   Component({this.position});
 
   Size measure(Size maxSize);

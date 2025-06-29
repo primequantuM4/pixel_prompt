@@ -197,4 +197,6 @@ class CheckboxList extends InteractableComponent with ParentComponent {
   void onHover() {
     // TODO: implement onHover
   }
+  @override
+  void onClick() {}
 }
