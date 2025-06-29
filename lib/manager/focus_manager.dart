@@ -18,36 +18,86 @@ class FocusManager implements InputHandler {
     components.add(c);
   }
 
-  ResponseInput handleTab(bool shiftPressed) {
-    if (components.isEmpty) {
-      return ResponseInput(commands: ResponseCommands.none, handled: false);
-    }
-
-    if (currentIndex == -1) {
-      currentIndex = shiftPressed ? components.length - 1 : 0;
-      components[currentIndex].focus();
-      currentComponent = components[currentIndex];
-
-      return ResponseInput(
-        commands: ResponseCommands.none,
-        handled: true,
-        dirty: [currentComponent!],
-      );
-    }
+  ResponseInput _handleTab(bool shiftPressed) {
+    if (components.isEmpty) return ResponseInput.ignored();
 
     final List<InteractableComponent> dirtyComponents = [];
 
-    currentComponent!.blur();
-    dirtyComponents.add(components[currentIndex]);
+    int nextIndex = currentIndex;
+    final int direction = shiftPressed ? -1 : 1;
+    final int total = components.length;
 
-    if (shiftPressed) {
-      currentIndex = (currentIndex - 1 + components.length) % components.length;
-    } else {
-      currentIndex = (currentIndex + 1) % components.length;
+    if (nextIndex == -1) {
+      nextIndex = shiftPressed ? 0 : -1;
     }
-    currentComponent = components[currentIndex];
-    currentComponent!.focus();
-    dirtyComponents.add(currentComponent!);
+
+    for (int attempt = 0; attempt < total; attempt++) {
+      nextIndex = (nextIndex + direction + total) % total;
+      if (components[nextIndex].isFocusable) {
+        // blur previous component
+        if (currentComponent != null) {
+          currentComponent!.blur();
+          dirtyComponents.add(currentComponent!);
+        }
+
+        // focus on new component
+        currentComponent = components[nextIndex];
+        currentIndex = nextIndex;
+        currentComponent!.focus();
+        dirtyComponents.add(currentComponent!);
+
+        return ResponseInput(
+          commands: ResponseCommands.none,
+          handled: true,
+          dirty: dirtyComponents,
+        );
+      }
+    }
+    return ResponseInput.ignored();
+  }
+
+  ResponseInput _handleMouseInput(MouseEvent event) {
+    final dirtyComponents = <InteractableComponent>[];
+    InteractableComponent? hoveredNow;
+
+    for (int i = components.length - 1; i >= 0; i--) {
+      final component = components[i];
+
+      if (!component.isHoverable) continue;
+
+      if (_isWithinBounds(event.x, event.y, component)) {
+        hoveredNow = component;
+
+        if (event.type == MouseEventType.release) {
+          component.hover();
+          dirtyComponents.add(component);
+        } else if (event.type == MouseEventType.click) {
+          if (component.isFocusable) {
+            currentComponent?.blur();
+
+            if (currentComponent != null) {
+              dirtyComponents.add(currentComponent!);
+            }
+
+            component.focus();
+            currentComponent = component;
+            currentIndex = i;
+            dirtyComponents.add(component);
+          }
+
+          component.onClick();
+        }
+        break;
+      }
+    }
+
+    if (_hoveredComponent != hoveredNow) {
+      if (_hoveredComponent != null) {
+        _hoveredComponent!.unhover();
+        dirtyComponents.add(_hoveredComponent!);
+      }
+      _hoveredComponent = hoveredNow;
+    }
 
     return ResponseInput(
       commands: ResponseCommands.none,
@@ -59,52 +109,13 @@ class FocusManager implements InputHandler {
   @override
   ResponseInput handleInput(InputEvent event) {
     if (event is KeyEvent && event.code == KeyCode.shiftTab) {
-      return handleTab(true);
+      return _handleTab(true);
     } else if (event is KeyEvent && event.code == KeyCode.tab) {
-      return handleTab(false);
+      return _handleTab(false);
     } else if (event is MouseEvent) {
-      final List<InteractableComponent> dirtyComponents = [];
-
-      InteractableComponent? hoveredNow;
-
-      for (int i = 0; i < components.length; i++) {
-        final component = components[i];
-        if (_isWithinBounds(event.x, event.y, component)) {
-          hoveredNow = component;
-
-          if (event.type == MouseEventType.release) {
-            component.hover();
-            dirtyComponents.add(component);
-          } else if (event.type == MouseEventType.click) {
-            currentComponent?.blur();
-            component.focus();
-
-            if (currentComponent != null) {
-              dirtyComponents.add(currentComponent!);
-            }
-            dirtyComponents.add(component);
-
-            currentComponent = component;
-          }
-          break;
-        }
-      }
-
-      if (_hoveredComponent != hoveredNow) {
-        if (_hoveredComponent != null) {
-          _hoveredComponent!.unhover();
-          dirtyComponents.add(_hoveredComponent!);
-        }
-        _hoveredComponent = hoveredNow;
-      }
-
-      return ResponseInput(
-        commands: ResponseCommands.none,
-        handled: true,
-        dirty: dirtyComponents,
-      );
+      return _handleMouseInput(event);
     }
-    return ResponseInput(commands: ResponseCommands.none, handled: false);
+    return ResponseInput.ignored();
   }
 
   bool _isWithinBounds(int x, int y, InteractableComponent component) {

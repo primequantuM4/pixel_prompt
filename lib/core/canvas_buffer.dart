@@ -106,6 +106,7 @@ class CanvasBuffer {
   }
 
   void render() {
+    stdout.write('\x1B[?25l');
     final renderY = isFullscreen ? 1 : cursorOriginalY;
     final renderX = isFullscreen ? 1 : cursorOriginalX;
 
