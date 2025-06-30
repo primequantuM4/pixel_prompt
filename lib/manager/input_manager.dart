@@ -137,6 +137,8 @@ class InputManager {
         final byte = _inputBuffer.removeAt(0);
         if (byte == 0x0A || byte == 0x0D) {
           dispatchedEvent = KeyEvent(code: KeyCode.character, char: '\n');
+        } else if (byte == 0x08 || byte == 127) {
+          dispatchedEvent = KeyEvent(code: KeyCode.backspace);
         } else {
           final input = String.fromCharCode(byte);
           // EVENT IS A NORMAL KEY for any device
