@@ -106,7 +106,7 @@ class CanvasBuffer {
   }
 
   void render() {
-    stdout.write('\x1B[?25l');
+    hideCursor();
     final renderY = isFullscreen ? 1 : cursorOriginalY;
     final renderX = isFullscreen ? 1 : cursorOriginalX;
 
@@ -129,6 +129,22 @@ class CanvasBuffer {
       buffer.write('\n');
       stdout.write(buffer.toString());
     }
+  }
+
+  void moveCursorTo(int x, int y) {
+    final int renderX = isFullscreen ? 1 : cursorOriginalX;
+    final int renderY = isFullscreen ? 1 : cursorOriginalY;
+
+    String cursorPosition = '\x1B[${renderY + y};${renderX + x}H';
+    stdout.write(cursorPosition);
+  }
+
+  void hideCursor() {
+    stdout.write('\x1B[?25l');
+  }
+
+  void showCursor() {
+    stdout.write('\x1B[?25h');
   }
 
   bool _sameStyle(BufferCell cell, BufferCell lastCell) {

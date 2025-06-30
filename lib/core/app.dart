@@ -86,39 +86,39 @@ extension AppRunner on App {
     inputManager.getCursorPosition((x, y) {
       buffer.setTerminalOffset(x + 1, y + 1);
       context.setInitialCursorPosition(x, y);
+
+      final FocusManager focusManager = FocusManager(context: context);
+      final ComponentInputHandler componentInputHandler = ComponentInputHandler(
+        focusManager,
+      );
+
+      final InteractableRegistry registry = InteractableRegistry();
+
+      registry.registerInteractables(this, focusManager, renderer);
+
+      final List<InputHandler> handlers = [
+        focusManager,
+        CommandModeHandler(),
+        componentInputHandler,
+      ];
+
+      for (var handler in handlers) {
+        dispatcher.registerHandler(handler);
+      }
+
+      final measuredSize = measure(
+        Size(width: terminalWidth, height: terminalHeight),
+      );
+
+      final bounds = Rect(
+        x: 0,
+        y: 0,
+        width: measuredSize.width,
+        height: measuredSize.height,
+      );
+
+      render(buffer, bounds);
+      buffer.render();
     });
-
-    final FocusManager focusManager = FocusManager(context: context);
-    final ComponentInputHandler componentInputHandler = ComponentInputHandler(
-      focusManager,
-    );
-
-    final InteractableRegistry registry = InteractableRegistry();
-
-    registry.registerInteractables(this, focusManager);
-
-    final List<InputHandler> handlers = [
-      focusManager,
-      CommandModeHandler(),
-      componentInputHandler,
-    ];
-
-    for (var handler in handlers) {
-      dispatcher.registerHandler(handler);
-    }
-
-    final measuredSize = measure(
-      Size(width: terminalWidth, height: terminalHeight),
-    );
-
-    final bounds = Rect(
-      x: 0,
-      y: 0,
-      width: measuredSize.width,
-      height: measuredSize.height,
-    );
-
-    render(buffer, bounds);
-    buffer.render();
   }
 }

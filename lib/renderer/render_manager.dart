@@ -3,6 +3,8 @@ import 'package:pixel_prompt/core/component.dart';
 
 class RenderManager {
   final CanvasBuffer buffer;
+  int? _cursorX;
+  int? _cursorY;
 
   final List<Component> _dirtyComponents = [];
 
@@ -21,7 +23,21 @@ class RenderManager {
     render();
   }
 
+  void requestCursorMove(int x, int y) {
+    _cursorX = x;
+    _cursorY = y;
+  }
+
   void render() {
     buffer.render();
+
+    if (_cursorX != null && _cursorY != null) {
+      buffer.moveCursorTo(_cursorX!, _cursorY!);
+      buffer.showCursor();
+      _cursorX = null;
+      _cursorY = null;
+    } else {
+      buffer.hideCursor();
+    }
   }
 }
