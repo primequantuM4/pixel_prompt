@@ -189,10 +189,14 @@ class InputManager {
     if (Platform.isWindows) {
       _restoreWindowsConsoleMode();
     } else {
-      stdin
-        ..echoMode = true
-        ..lineMode = true;
+        if (stdin.hasTerminal) {
+
+            stdin
+                ..echoMode = true
+                ..lineMode = true;
+        }
     }
+
     stdout.write(
       '\x1B[?1049l',
     ); // TODO: make sure ONLY to handle this in full screen mode
