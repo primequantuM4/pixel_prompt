@@ -66,7 +66,7 @@ class TextfieldComponent extends InteractableComponent {
 
     final style = value.isEmpty && placeHolder != null
         ? placeHolderStyle
-        : isHovered
+        : (isHovered || isFocused)
         ? hoverStyle
         : textStyle;
 
@@ -140,9 +140,7 @@ class TextfieldComponent extends InteractableComponent {
   }
 
   @override
-  void onFocus() {
-    // TODO: implement onFocus
-  }
+  void onFocus() {}
 
   @override
   int fitHeight() => 1;
