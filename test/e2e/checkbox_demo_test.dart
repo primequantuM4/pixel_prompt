@@ -8,7 +8,7 @@ void main() {
   group('Checkbox demo E2E', () {
     test('Should match golden file before and after toggle', () async {
       final process = await Process.start('dart', [
-        'example/checkbox_demo/bin/checkbox_demo.dart',
+        'example/interactable_component_demo/bin/checkbox_demo.dart',
       ], runInShell: true);
 
       final outputLines = <String>[];
