@@ -71,54 +71,63 @@ class App extends Component with ParentComponent {
 }
 
 extension AppRunner on App {
-  void run() {
+  void run({bool testMode = false}) {
     // TODO: replace constant integers with terminalColumns and terminalLines
     final terminalWidth = 80;
-    final terminalHeight = 44;
+    final terminalHeight = 20;
 
-    final buffer = CanvasBuffer(width: terminalWidth, height: terminalHeight);
+    final buffer = CanvasBuffer(
+      width: terminalWidth,
+      height: terminalHeight,
+      testMode: testMode,
+    );
     final RenderManager renderer = RenderManager(buffer: buffer);
     final Context context = Context();
 
     final InputDispatcher dispatcher = InputDispatcher(renderer: renderer);
-    final InputManager inputManager = InputManager(dispatcher: dispatcher);
+    final InputManager inputManager = InputManager(
+      dispatcher: dispatcher,
+      testMode: testMode,
+    );
 
-    inputManager.getCursorPosition((x, y) {
-      buffer.setTerminalOffset(x + 1, y + 1);
-      context.setInitialCursorPosition(x, y);
+    if (!testMode) {
+      inputManager.getCursorPosition((x, y) {
+        buffer.setTerminalOffset(x + 1, y + 1);
+        context.setInitialCursorPosition(x, y);
+      });
+    }
 
-      final FocusManager focusManager = FocusManager(context: context);
-      final ComponentInputHandler componentInputHandler = ComponentInputHandler(
-        focusManager,
-      );
+    final FocusManager focusManager = FocusManager(context: context);
+    final ComponentInputHandler componentInputHandler = ComponentInputHandler(
+      focusManager,
+    );
 
-      final InteractableRegistry registry = InteractableRegistry();
+    final InteractableRegistry registry = InteractableRegistry();
 
-      registry.registerInteractables(this, focusManager, renderer);
+    registry.registerInteractables(this, focusManager, renderer);
 
-      final List<InputHandler> handlers = [
-        focusManager,
-        CommandModeHandler(),
-        componentInputHandler,
-      ];
+    final List<InputHandler> handlers = [
+      focusManager,
+      CommandModeHandler(),
+      componentInputHandler,
+    ];
 
-      for (var handler in handlers) {
-        dispatcher.registerHandler(handler);
-      }
+    for (var handler in handlers) {
+      dispatcher.registerHandler(handler);
+    }
 
-      final measuredSize = measure(
-        Size(width: terminalWidth, height: terminalHeight),
-      );
+    final measuredSize = measure(
+      Size(width: terminalWidth, height: terminalHeight),
+    );
 
-      final bounds = Rect(
-        x: 0,
-        y: 0,
-        width: measuredSize.width,
-        height: measuredSize.height,
-      );
+    final bounds = Rect(
+      x: 0,
+      y: 0,
+      width: measuredSize.width,
+      height: measuredSize.height,
+    );
 
-      render(buffer, bounds);
-      buffer.render();
-    });
+    render(buffer, bounds);
+    buffer.render();
   }
 }

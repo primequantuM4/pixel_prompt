@@ -43,11 +43,11 @@ class CommandModeHandler implements InputHandler {
   }
 
   bool _shouldHandle(InputEvent event) {
-    if (!_inCommandMode && event is KeyEvent && event.char == ':') {
+    if (event is! KeyEvent) return false;
+    if (!_inCommandMode && event.char == ':') {
       _enterCommandMode();
     }
-    return _inCommandMode ||
-        (!_inCommandMode && event is KeyEvent && event.char == ':');
+    return _inCommandMode || (!_inCommandMode && event.char == ':');
   }
 
   void _enterCommandMode() {
