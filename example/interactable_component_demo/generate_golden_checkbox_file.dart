@@ -4,7 +4,7 @@ import 'dart:io';
 
 Future<void> main() async {
   final process = await Process.start('dart', [
-    'example/checkbox_demo/bin/checkbox_demo.dart',
+    'example/interactable_component_demo/bin/checkbox_demo.dart',
   ], runInShell: true);
 
   final completer = Completer<void>();
@@ -18,7 +18,7 @@ Future<void> main() async {
       .transform(utf8.decoder)
       .transform(const LineSplitter())
       .listen((line) {
-        print('[stdout] $line'); // For debugging
+        print('[stdout] $line');
 
         if (step != 1) {
           outputLines.add(line);
