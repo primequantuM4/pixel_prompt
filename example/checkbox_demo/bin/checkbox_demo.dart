@@ -2,6 +2,7 @@ import 'package:pixel_prompt/core/axis.dart';
 import 'package:pixel_prompt/pixel_prompt.dart';
 
 void main() {
+  print('--READY--');
   App(
     children: [
       Column(
@@ -50,5 +51,5 @@ void main() {
         ],
       ),
     ],
-  ).run();
+  ).run(testMode: true);
 }
