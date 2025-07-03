@@ -9,6 +9,7 @@ import 'package:win32/win32.dart';
 class InputManager {
   bool _isInputPaused = false;
   bool _expectingCursorResponse = false;
+  final bool testMode;
 
   void Function(int, int)? _cursorCallback;
 
@@ -20,22 +21,25 @@ class InputManager {
   final List<int> _inputBuffer = [];
   final List<int> _cursorInputBuffer = [];
 
-  InputManager({required InputDispatcher dispatcher})
+  InputManager({required InputDispatcher dispatcher, required this.testMode})
     : _dispatcher = dispatcher {
     _configureStdin();
-    _enableMouseInput();
+    if (!testMode) {
+      _enableMouseInput();
 
-    if (Platform.isWindows) {
-      _enableWindowsAnsi();
+      if (Platform.isWindows) {
+        _enableWindowsAnsi();
+      }
     }
-
     _stdinSubscription = stdin.listen(_manageHandlers);
   }
 
   void _configureStdin() {
-    stdin
-      ..echoMode = false
-      ..lineMode = false;
+    if (stdin.hasTerminal) {
+      stdin
+        ..echoMode = false
+        ..lineMode = false;
+    }
   }
 
   void _enableMouseInput() {
@@ -193,6 +197,7 @@ class InputManager {
       '\x1B[?1049l',
     ); // TODO: make sure ONLY to handle this in full screen mode
     _stdinSubscription?.cancel();
+    exit(0);
   }
 
   void pauseInput() {
