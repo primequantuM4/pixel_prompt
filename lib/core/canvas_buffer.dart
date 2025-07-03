@@ -14,13 +14,15 @@ class CanvasBuffer {
   int cursorOriginalY = -1;
 
   bool isFullscreen = false;
+  bool testMode;
   final List<List<BufferCell>> _screenBuffer;
 
-  CanvasBuffer({required this.width, required this.height})
+  CanvasBuffer({required this.width, required this.height, bool? testMode})
     : _screenBuffer = List.generate(
         height,
         (_) => List.filled(width, BufferCell(char: ' ')),
-      );
+      ),
+      testMode = testMode ?? false;
 
   setTerminalOffset(int x, int y) {
     cursorOriginalX = x;
@@ -128,6 +130,9 @@ class CanvasBuffer {
       buffer.write('\x1B[0m');
       buffer.write('\n');
       stdout.write(buffer.toString());
+    }
+    if (testMode) {
+      print('--RENDERED--');
     }
   }
 
