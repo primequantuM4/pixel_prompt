@@ -17,9 +17,9 @@ class RenderManager {
 
   void requestRedraw() {
     for (var component in _dirtyComponents) {
-      buffer.clearBufferArea(component.getBounds());
-      buffer.flushArea(component.getBounds());
-      component.render(buffer, component.getBounds());
+      buffer.clearBufferArea(component.bounds);
+      buffer.flushArea(component.bounds);
+      component.render(buffer, component.bounds);
     }
 
     _dirtyComponents.clear();
