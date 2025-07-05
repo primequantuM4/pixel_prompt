@@ -10,17 +10,21 @@ import 'package:pixel_prompt/core/position.dart';
 import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/core/size.dart';
 import 'package:pixel_prompt/layout_engine/layout_engine.dart';
+import 'package:pixel_prompt/logger/logger.dart';
 import 'package:pixel_prompt/manager/command_mode_handler.dart';
 import 'package:pixel_prompt/manager/component_input_handler.dart';
 import 'package:pixel_prompt/manager/focus_manager.dart';
 import 'package:pixel_prompt/manager/input_dispatcher.dart';
 import 'package:pixel_prompt/manager/input_manager.dart';
 import 'package:pixel_prompt/renderer/render_manager.dart';
+import 'package:pixel_prompt/terminal/terminal_functions.dart';
 
 class App extends Component with ParentComponent {
   @override
   final List<Component> children;
   final Axis direction;
+
+  static const String _tag = 'App';
 
   App({required this.children, this.direction = Axis.vertical});
 
@@ -71,15 +75,28 @@ class App extends Component with ParentComponent {
 }
 
 extension AppRunner on App {
-  void run({bool testMode = false}) {
-    // TODO: replace constant integers with terminalColumns and terminalLines
-    final terminalWidth = 80;
-    final terminalHeight = 20;
+  void run() async {
+    final rawTerminalWidth =
+        TerminalFunctions.hasTerminal ? TerminalFunctions.terminalWidth : 80;
+    final rawTerminalHeight =
+        TerminalFunctions.hasTerminal ? TerminalFunctions.terminalHeight : 20;
+
+    final LayoutEngine engine = LayoutEngine(
+      children: children,
+      direction: direction,
+      bounds:
+          Rect(x: 0, y: 0, width: rawTerminalWidth, height: rawTerminalHeight),
+    );
+
+    final layoutHeight = engine.fitHeight();
+    final layoutWidth = engine.fitWidth();
+
+    final terminalWidth = min(rawTerminalWidth, layoutWidth);
+    final terminalHeight = min(rawTerminalHeight, layoutHeight);
 
     final buffer = CanvasBuffer(
       width: terminalWidth,
       height: terminalHeight,
-      testMode: testMode,
     );
     final RenderManager renderer = RenderManager(buffer: buffer);
     final Context context = Context();
@@ -87,14 +104,22 @@ extension AppRunner on App {
     final InputDispatcher dispatcher = InputDispatcher(renderer: renderer);
     final InputManager inputManager = InputManager(
       dispatcher: dispatcher,
-      testMode: testMode,
     );
-
-    if (!testMode) {
+    final supportsCursor = await inputManager.isCursorSupported();
+    if (supportsCursor) {
+      Logger.trace(App._tag, "Supports cursor fetching cursor position");
       inputManager.getCursorPosition((x, y) {
         buffer.setTerminalOffset(x + 1, y + 1);
         context.setInitialCursorPosition(x, y);
+
+        inputManager.returnedCursorPositionX = x + 1;
+        inputManager.returnedCursorPositionY = y + terminalHeight + 2;
       });
+    } else {
+      Logger.warn(
+        App._tag,
+        "Terminal doesn't support cursor. Ignore if this is a test environment",
+      );
     }
 
     final FocusManager focusManager = FocusManager(context: context);
@@ -117,7 +142,7 @@ extension AppRunner on App {
     }
 
     final measuredSize = measure(
-      Size(width: terminalWidth, height: terminalHeight),
+      Size(width: rawTerminalWidth, height: rawTerminalHeight),
     );
 
     final bounds = Rect(
@@ -127,7 +152,12 @@ extension AppRunner on App {
       height: measuredSize.height,
     );
 
+    Logger.trace(App._tag, 'Writing Components to Canvas Buffer');
     render(buffer, bounds);
+    Logger.trace(
+      App._tag,
+      'READY',
+    );
     buffer.render();
   }
 }

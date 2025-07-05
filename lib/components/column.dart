@@ -11,8 +11,9 @@ import 'package:pixel_prompt/layout_engine/layout_engine.dart';
 class Column extends Component with ParentComponent {
   @override
   final List<Component> children;
+  final int childGap;
 
-  Column({required this.children});
+  Column({required this.children, this.childGap = 1});
 
   @override
   Size measure(Size maxSize) {
@@ -48,13 +49,23 @@ class Column extends Component with ParentComponent {
 
   @override
   int fitHeight() {
-    // TODO: Implement once dynamic sizing (flex/grow/shrink) is supported
-    throw UnimplementedError();
+    int total = 0;
+    for (final child in children) {
+      total += child.fitHeight();
+    }
+
+    total += max(0, children.length - 1) * childGap;
+    return total;
   }
 
   @override
   int fitWidth() {
-    // TODO: Implement once dynamic sizing (flex/grow/shrink) is supported
-    throw UnimplementedError();
+    int maxWidth = 0;
+
+    for (final child in children) {
+      maxWidth = max(child.fitWidth(), maxWidth);
+    }
+
+    return maxWidth;
   }
 }

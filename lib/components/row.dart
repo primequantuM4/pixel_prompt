@@ -12,7 +12,9 @@ class Row extends Component with ParentComponent {
   @override
   final List<Component> children;
 
-  Row({required this.children});
+  final int childGap;
+
+  Row({required this.children, this.childGap = 1});
 
   @override
   Size measure(Size maxSize) {
@@ -36,6 +38,7 @@ class Row extends Component with ParentComponent {
     final engine = LayoutEngine(
       children: children,
       direction: Axis.horizontal,
+      childGap: childGap,
       bounds: bounds,
     );
 
@@ -48,13 +51,25 @@ class Row extends Component with ParentComponent {
 
   @override
   int fitHeight() {
-    // TODO: Implement once dynamic sizing (flex/grow/shrink) is supported
-    throw UnimplementedError();
+    int maxHeight = 0;
+
+    for (final child in children) {
+      maxHeight = max(maxHeight, child.fitHeight());
+    }
+
+    return maxHeight;
   }
 
   @override
   int fitWidth() {
-    // TODO: Implement once dynamic sizing (flex/grow/shrink) is supported
-    throw UnimplementedError();
+    int total = 0;
+
+    for (final child in children) {
+      total += child.fitWidth();
+    }
+
+    total += max(0, children.length - 1) * childGap;
+
+    return total;
   }
 }
