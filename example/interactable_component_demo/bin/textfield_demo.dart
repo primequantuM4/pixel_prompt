@@ -2,7 +2,6 @@ import 'package:pixel_prompt/components/text_field_component.dart';
 import 'package:pixel_prompt/pixel_prompt.dart';
 
 void main() {
-  print('--READY--');
   App(
     children: [
       TextfieldComponent(
@@ -16,5 +15,5 @@ void main() {
         hoverStyle: TextComponentStyle().background(ColorRGB(38, 38, 38)),
       ),
     ],
-  ).run(testMode: true);
+  ).run();
 }
