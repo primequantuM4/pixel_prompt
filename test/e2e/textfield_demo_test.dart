@@ -4,90 +4,101 @@ import 'dart:io';
 
 import 'package:test/test.dart';
 
+import '../utils/test_utils.dart';
+
+final _traceRegex =
+    RegExp(r'^==PIXEL_PROMPT_TRACING_(\w+)==\[(.*?)\]\[(.*?)\] (.*)$');
+
 void main() {
-    group('Textboxfield E2E', () {
-          
+  group('Textboxfield E2E', () {
     test('Should match golden file before and after toggle', () async {
-      final process = await Process.start('dart', [
-        'example/interactable_component_demo/bin/textfield_demo.dart',
-      ], runInShell: true);
+      final process = await Process.start(
+          'dart',
+          [
+            'example/interactable_component_demo/bin/textfield_demo.dart',
+          ],
+          environment: {'PIXEL_PROMPT_TRACING': '1'},
+          runInShell: true);
 
       final outputLines = <String>[];
       final completer = Completer<void>();
 
       int step = 0;
 
-      late final StreamSubscription<String> sub;
+      late final StreamSubscription<String> stdoutSub;
+      late final StreamSubscription<String> stderrSub;
       bool locked = false;
 
-  sub = process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen((line) async {
-        outputLines.add(line);
+      stdoutSub = process.stdout
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((line) {
+        if (!_traceRegex.hasMatch(line) && !locked) {
+          outputLines.add(line);
+        }
+      });
 
-        if (locked) return;
+      stderrSub = process.stderr
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((line) async {
+        final match = _traceRegex.firstMatch(line);
+
+        if (match == null || locked) return;
+
+        // 1 -> level, ie logger TRACE, WARN, INFO, ERROR
+        // 2 -> ISO timestamp
+        // 3 -> tag, ie App, CanvasBuffer etc..
+
+        final message = match[4];
 
         switch (step) {
           case 0:
-            if (line.contains('--READY--')) {
-              locked = true;
-              await Future.delayed(Duration(seconds: 2));
+            if (message == 'RENDERED') {
+              final before = outputLines.join('\n');
 
-              String actualOutput = await File(
-                'test/golden/textfield_before_write.txt',
-              ).readAsString();
-              String expectedOutput = outputLines.join('\n');
+              await compareOrUpdateGolden(
+                path: 'test/golden/textfield_before_write.txt',
+                actual: before,
+              );
 
-              expect(actualOutput.trim(), equals(expectedOutput.trim()));
-
-              await Future.delayed(Duration(milliseconds: 200));
               process.stdin.write('\t');
               outputLines.clear();
               step++;
-              locked = false;
             }
             break;
-
           case 1:
-              locked = true;
-              await Future.delayed(Duration(seconds: 2));
-              const valueInserted = 'John Doe';
+            locked = true;
+            const valueInserted = 'John Doe';
 
-              for (final char in valueInserted.split('')) {
-                process.stdin.write(char);
-                await Future.delayed(Duration(milliseconds: 100));
-              }
+            for (final char in valueInserted.split('')) {
+              process.stdin.write(char);
+              await Future.delayed(Duration(milliseconds: 100));
+            }
 
-              await Future.delayed(Duration(milliseconds: 300));
-              process.stdin.write('\t');
-              await Future.delayed(Duration(milliseconds: 300));
+            process.stdin.write('\t');
+            await Future.delayed(Duration(milliseconds: 100));
 
-              const emailValue = 'john.example@gmail.com';
-              for (final char in emailValue.split('')) {
-                process.stdin.write(char);
-                await Future.delayed(Duration(milliseconds: 100));
-              }
+            const emailValue = 'john.example@gmail.com';
+            for (final char in emailValue.split('')) {
+              process.stdin.write(char);
+              await Future.delayed(Duration(milliseconds: 100));
+            }
 
-              await Future.delayed(Duration(milliseconds: 500));
+            outputLines.clear();
+            step++;
 
-              outputLines.clear();
-              step++;
-
-              locked = false;
-              process.stdin.write('\n');
-              break;
+            locked = false;
+            process.stdin.write('\n');
+            break;
 
           case 2:
-              locked = true;
-              await Future.delayed(Duration(milliseconds: 1000));
-
-              final actualOutput= await File(
-                'test/golden/textfield_after_write.txt',
-              ).readAsString();
-              final expectedOutput = outputLines.join('\n');
-
-              expect(actualOutput.trim(), equals(expectedOutput.trim()));
+            if (message == 'RENDERED') {
+              final after = outputLines.join('\n');
+              await compareOrUpdateGolden(
+                path: 'test/golden/textfield_after_write.txt',
+                actual: after,
+              );
 
               await Future.delayed(Duration(milliseconds: 100));
               process.stdin.write(':');
@@ -98,18 +109,19 @@ void main() {
               await Future.delayed(Duration(milliseconds: 100));
 
               break;
+            }
         }
       });
 
+      await process.exitCode.then((code) {
+        expect(code, 0);
+        completer.complete();
+      });
+      await completer.future.timeout(Duration(seconds: 50));
+      await stdoutSub.cancel();
+      await stderrSub.cancel();
 
-  await process.exitCode.then((code) {
-      expect(code, 0);
-    completer.complete();
-  });
-  await completer.future.timeout(Duration(seconds: 50));
-  await sub.cancel();
-
-  process.kill();
-        });
+      process.kill();
     });
+  });
 }
