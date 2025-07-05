@@ -12,12 +12,13 @@ class LayoutEngine {
   final List<Component> children;
   final Axis direction;
   final Rect bounds;
-  final int childGap = 1;
+  final int childGap;
 
   LayoutEngine({
     required this.children,
     required this.direction,
     required this.bounds,
+    this.childGap = 1,
   });
 
   List<PositionedComponent> compute() {

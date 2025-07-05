@@ -2,14 +2,20 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 import 'package:pixel_prompt/events/input_event.dart';
+import 'package:pixel_prompt/logger/logger.dart';
 import 'package:pixel_prompt/manager/input_dispatcher.dart';
 import 'package:ffi/ffi.dart';
 import 'package:win32/win32.dart';
 
 class InputManager {
   bool _isInputPaused = false;
+  bool? _cursorSupported;
   bool _expectingCursorResponse = false;
-  final bool testMode;
+
+  int returnedCursorPositionX = -1;
+  int returnedCursorPositionY = -1;
+
+  static const String _tag = 'InputManager';
 
   void Function(int, int)? _cursorCallback;
 
@@ -21,15 +27,13 @@ class InputManager {
   final List<int> _inputBuffer = [];
   final List<int> _cursorInputBuffer = [];
 
-  InputManager({required InputDispatcher dispatcher, required this.testMode})
-    : _dispatcher = dispatcher {
+  InputManager({required InputDispatcher dispatcher})
+      : _dispatcher = dispatcher {
     _configureStdin();
-    if (!testMode) {
-      _enableMouseInput();
+    _enableMouseInput();
 
-      if (Platform.isWindows) {
-        _enableWindowsAnsi();
-      }
+    if (Platform.isWindows) {
+      _enableWindowsAnsi();
     }
     _stdinSubscription = stdin.listen(_manageHandlers);
   }
@@ -44,6 +48,32 @@ class InputManager {
 
   void _enableMouseInput() {
     stdout.write('\x1B[?1006h\x1B[?1003h');
+  }
+
+  Future<bool> supportsCursorResponse(
+      {Duration timeout = const Duration(milliseconds: 200)}) {
+    final completer = Completer<bool>();
+    getCursorPosition((x, y) {
+      if (!completer.isCompleted) {
+        completer.complete(true);
+      }
+    });
+
+    Future.delayed(timeout, () {
+      if (!completer.isCompleted) {
+        _expectingCursorResponse = false;
+        _cursorInputBuffer.clear();
+        completer.complete(false);
+      }
+    });
+
+    return completer.future;
+  }
+
+  Future<bool> isCursorSupported() async {
+    if (_cursorSupported != null) return _cursorSupported!;
+    _cursorSupported = await supportsCursorResponse();
+    return _cursorSupported!;
   }
 
   void _enableWindowsAnsi() {
@@ -78,6 +108,7 @@ class InputManager {
   }
 
   void _manageHandlers(List<int> data) {
+    Logger.trace(_tag, "Stream recieved $data");
     if (_isInputPaused) return;
 
     if (_expectingCursorResponse) {
@@ -147,6 +178,7 @@ class InputManager {
           final input = String.fromCharCode(byte);
           // EVENT IS A NORMAL KEY for any device
           if (input == '\t') {
+            Logger.trace(_tag, 'Tab pressed');
             dispatchedEvent = KeyEvent(code: KeyCode.tab);
           } else if (byte >= 32 && byte <= 126) {
             dispatchedEvent = KeyEvent(code: KeyCode.character, char: input);
@@ -189,17 +221,18 @@ class InputManager {
     if (Platform.isWindows) {
       _restoreWindowsConsoleMode();
     } else {
-        if (stdin.hasTerminal) {
-
-            stdin
-                ..echoMode = true
-                ..lineMode = true;
-        }
+      if (stdin.hasTerminal) {
+        stdin
+          ..echoMode = true
+          ..lineMode = true;
+      }
     }
 
     stdout.write(
       '\x1B[?1049l',
     ); // TODO: make sure ONLY to handle this in full screen mode
+    stdout.write('\x1B[?25h');
+    stdout.write('\x1B[$returnedCursorPositionY;${returnedCursorPositionX}H');
     _stdinSubscription?.cancel();
     exit(0);
   }
