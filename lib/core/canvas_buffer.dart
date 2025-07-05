@@ -5,6 +5,7 @@ import 'package:pixel_prompt/components/font_style.dart';
 import 'package:pixel_prompt/components/text_component_style.dart';
 import 'package:pixel_prompt/core/buffer_cell.dart';
 import 'package:pixel_prompt/core/rect.dart';
+import 'package:pixel_prompt/logger/logger.dart';
 
 class CanvasBuffer {
   final int width;
@@ -13,16 +14,16 @@ class CanvasBuffer {
   int cursorOriginalX = -1;
   int cursorOriginalY = -1;
 
+  static const String _tag = 'CanvasBuffer';
+
   bool isFullscreen = false;
-  bool testMode;
   final List<List<BufferCell>> _screenBuffer;
 
-  CanvasBuffer({required this.width, required this.height, bool? testMode})
-    : _screenBuffer = List.generate(
-        height,
-        (_) => List.filled(width, BufferCell(char: ' ')),
-      ),
-      testMode = testMode ?? false;
+  CanvasBuffer({required this.width, required this.height})
+      : _screenBuffer = List.generate(
+          height,
+          (_) => List.filled(width, BufferCell(char: ' ')),
+        );
 
   setTerminalOffset(int x, int y) {
     cursorOriginalX = x;
@@ -38,9 +39,8 @@ class CanvasBuffer {
     Set<FontStyle>? styles,
   }) {
     if (x >= 0 && x < width && y >= 0 && y < height) {
-      final Set<FontStyle> effectiveStyle = (char.trim().isEmpty)
-          ? {}
-          : (styles ?? {});
+      final Set<FontStyle> effectiveStyle =
+          (char.trim().isEmpty) ? {} : (styles ?? {});
       _screenBuffer[y][x] = BufferCell(
         char: char,
         fg: fg,
@@ -95,8 +95,11 @@ class CanvasBuffer {
     final int renderX = isFullscreen ? 1 : cursorOriginalX;
     final int renderY = isFullscreen ? 1 : cursorOriginalY;
 
-    String cursorPosition = '\x1B[$renderY;${renderX}H';
-    stdout.write(cursorPosition);
+    if (renderX != -1 && renderX != -1) {
+      String cursorPosition = '\x1B[$renderY;${renderX}H';
+      stdout.write(cursorPosition);
+    }
+
     for (int y = area.y; y < area.y + area.height; y++) {
       if (y > _screenBuffer.length) break;
       for (int x = area.x; x < area.x + area.width; x++) {
@@ -112,7 +115,10 @@ class CanvasBuffer {
     final renderY = isFullscreen ? 1 : cursorOriginalY;
     final renderX = isFullscreen ? 1 : cursorOriginalX;
 
-    stdout.write('\x1B[$renderY;${renderX}H');
+    if (renderX != -1 && renderX != -1) {
+      stdout.write('\x1B[$renderY;${renderX}H');
+    }
+
     for (int y = 0; y < _screenBuffer.length; y++) {
       final row = _screenBuffer[y];
       final buffer = StringBuffer();
@@ -131,12 +137,12 @@ class CanvasBuffer {
       buffer.write('\n');
       stdout.write(buffer.toString());
     }
-    if (testMode) {
-      print('--RENDERED--');
-    }
+
+    Logger.trace(_tag, 'RENDERED');
   }
 
   void moveCursorTo(int x, int y) {
+    if (x == -1 || y == -1) return;
     final int renderX = isFullscreen ? 1 : cursorOriginalX;
     final int renderY = isFullscreen ? 1 : cursorOriginalY;
 

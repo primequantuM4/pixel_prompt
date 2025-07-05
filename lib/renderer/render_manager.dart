@@ -1,5 +1,6 @@
 import 'package:pixel_prompt/core/canvas_buffer.dart';
 import 'package:pixel_prompt/core/component.dart';
+import 'package:pixel_prompt/logger/logger.dart';
 
 class RenderManager {
   final CanvasBuffer buffer;
@@ -7,6 +8,8 @@ class RenderManager {
   int? _cursorY;
 
   final List<Component> _dirtyComponents = [];
+
+  static const String _tag = 'RenderManager';
 
   RenderManager({required this.buffer});
 
@@ -29,6 +32,7 @@ class RenderManager {
   }
 
   void render() {
+    Logger.trace(_tag, 'Redraw requested to canvas buffer');
     buffer.render();
 
     if (_cursorX != null && _cursorY != null) {
