@@ -1,8 +1,8 @@
+import 'package:pixel_prompt/common/border.dart';
 import 'package:pixel_prompt/core/axis.dart';
 import 'package:pixel_prompt/pixel_prompt.dart';
 
 void main() {
-  print('--READY--');
   App(
     children: [
       Column(
@@ -24,8 +24,8 @@ void main() {
             selectionColor: ColorRGB(0, 191, 165),
             textColor: ColorRGB(94, 129, 172),
             items: ['Enable Notifications', 'Dark Mode', 'Use Custom DNS'],
+            borderType: BorderType.rounded,
           ),
-
           Row(
             children: [
               Checkbox(
@@ -51,5 +51,5 @@ void main() {
         ],
       ),
     ],
-  ).run(testMode: true);
+  ).run();
 }
