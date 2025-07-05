@@ -1,8 +1,10 @@
 import 'dart:math';
 
+import 'package:pixel_prompt/common/border.dart';
 import 'package:pixel_prompt/common/response_input.dart';
 import 'package:pixel_prompt/components/checkbox.dart';
 import 'package:pixel_prompt/components/colors.dart';
+import 'package:pixel_prompt/components/text_component_style.dart';
 import 'package:pixel_prompt/core/axis.dart';
 import 'package:pixel_prompt/core/canvas_buffer.dart';
 import 'package:pixel_prompt/core/component.dart';
@@ -21,8 +23,12 @@ class CheckboxList extends InteractableComponent with ParentComponent {
   final AnsiColorType? selectionColor;
   final AnsiColorType? hoverColor;
   final AnsiColorType? textColor;
+  final BorderType borderType;
   int focusedItem = 0;
   final Set<int> _selected = {};
+
+  final int _addedBorderHeight = 2;
+  final int _addedBorderWidth = 2;
 
   CheckboxList({
     required this.items,
@@ -31,18 +37,19 @@ class CheckboxList extends InteractableComponent with ParentComponent {
     this.selectionColor,
     this.hoverColor,
     this.textColor,
-  }) : direction = direction ?? Axis.vertical,
-       children = items
-           .map(
-             (label) => Checkbox(
-               label: label,
-               selectionColor: selectionColor,
-               hoverColor: hoverColor,
-               textColor: textColor,
-             ),
-           )
-           .toList(),
-       spacing = spacing ?? 1 {
+    this.borderType = BorderType.border,
+  })  : direction = direction ?? Axis.vertical,
+        children = items
+            .map(
+              (label) => Checkbox(
+                label: label,
+                selectionColor: selectionColor,
+                hoverColor: hoverColor,
+                textColor: textColor,
+              ),
+            )
+            .toList(),
+        spacing = spacing ?? 1 {
     assignParent();
   }
 
@@ -62,9 +69,9 @@ class CheckboxList extends InteractableComponent with ParentComponent {
   int fitHeight() {
     switch (direction) {
       case Axis.vertical:
-        return items.length + (items.length - 1) * spacing;
+        return items.length + _addedBorderHeight + (items.length - 1) * spacing;
       case Axis.horizontal:
-        return 1;
+        return 1 + _addedBorderHeight;
     }
   }
 
@@ -78,14 +85,14 @@ class CheckboxList extends InteractableComponent with ParentComponent {
         for (var item in items) {
           width = max(item.length, width);
         }
-        return width + checkboxWidth;
+        return width + checkboxWidth + _addedBorderWidth;
       case Axis.horizontal:
         int width = 0;
         for (var item in items) {
           width += checkboxWidth + item.length;
         }
 
-        return width + (items.length - 1) * spacing;
+        return width + _addedBorderWidth + (items.length - 1) * spacing;
     }
   }
 
@@ -94,19 +101,58 @@ class CheckboxList extends InteractableComponent with ParentComponent {
     return Size(width: fitWidth(), height: fitHeight());
   }
 
+  void drawBorder(CanvasBuffer buffer, Rect bounds) {
+    final x = bounds.x;
+    final y = bounds.y;
+
+    final width = bounds.width;
+    final height = bounds.height;
+
+    final horizontal = horizontalBorderLine(borderType);
+    final vertical = verticalBorderLine(borderType);
+    final topLeft = topLeftBorderCorner(borderType);
+    final topRight = topRightBorderCorner(borderType);
+    final bottomLeft = bottomLeftBorderCorner(borderType);
+    final bottomRight = bottomRightBorderCorner(borderType);
+
+    buffer.drawAt(x, y, topLeft, TextComponentStyle());
+    buffer.drawAt(x + width - 1, y, topRight, TextComponentStyle());
+    buffer.drawAt(x, y + height - 1, bottomLeft, TextComponentStyle());
+    buffer.drawAt(
+        x + width - 1, y + height - 1, bottomRight, TextComponentStyle());
+
+    for (int i = 1; i < width - 1; i++) {
+      buffer.drawAt(x + i, y, horizontal, TextComponentStyle());
+      buffer.drawAt(x + i, y + height - 1, horizontal, TextComponentStyle());
+    }
+
+    for (int i = 1; i < height - 1; i++) {
+      buffer.drawAt(x, y + i, vertical, TextComponentStyle());
+      buffer.drawAt(x + width - 1, y + i, vertical, TextComponentStyle());
+    }
+  }
+
   @override
   void render(CanvasBuffer buffer, Rect bounds) {
+    drawBorder(buffer, bounds);
+
+    final innerBounds = Rect(
+      x: bounds.x + 1,
+      y: bounds.y + 1,
+      width: bounds.width - 2,
+      height: bounds.height - 2,
+    );
     final engine = LayoutEngine(
       children: children,
       direction: direction,
-      bounds: bounds,
+      bounds: innerBounds,
     );
 
     switch (direction) {
       case Axis.vertical:
-        _renderVertical(buffer, bounds, engine);
+        _renderVertical(buffer, innerBounds, engine);
       case Axis.horizontal:
-        _renderHorizontal(buffer, bounds, engine);
+        _renderHorizontal(buffer, innerBounds, engine);
     }
   }
 
