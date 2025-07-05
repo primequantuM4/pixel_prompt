@@ -10,6 +10,7 @@ repository: https://github.com/primequantuM4/pixel_prompt
 issue_tracker: https://github.com/primequantuM4/pixel_prompt/issues
 
 dependencies:
+  dartdoc: ^8.3.4
   ffi: ^2.1.4
   win32: ^5.14.0
   # path: ^1.8.0

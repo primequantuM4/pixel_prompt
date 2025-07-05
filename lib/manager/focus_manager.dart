@@ -119,7 +119,7 @@ class FocusManager implements InputHandler {
   }
 
   bool _isWithinBounds(int x, int y, InteractableComponent component) {
-    final bounds = component.getBounds();
+    final bounds = component.bounds;
 
     final adjustedX = bounds.x + context.cursorX;
     final adjustedY = bounds.y + context.cursorY;
