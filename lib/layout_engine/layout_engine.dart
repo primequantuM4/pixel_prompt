@@ -40,7 +40,7 @@ class LayoutEngine {
           height: size.height,
         );
         result.add(PositionedComponent(component: child, rect: bounds));
-        child.setBounds = bounds;
+        child.bounds = bounds;
         continue;
       }
 
@@ -65,7 +65,7 @@ class LayoutEngine {
       }
 
       result.add(PositionedComponent(component: child, rect: childBounds));
-      child.setBounds = bounds;
+      child.bounds = bounds;
 
       if (direction == Axis.vertical) {
         cursorY += size.height + childGap;
