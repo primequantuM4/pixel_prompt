@@ -12,7 +12,7 @@ import 'package:pixel_prompt/core/size.dart';
 /// buttons, etc.
 ///
 /// Each component may be optionally positioned using a [Position].
-/// The layout engine is responsible for calling [setBounds] during layout
+/// The layout engine is responsible for calling [bounds] during layout
 /// computation, which must happen before [render] is called.
 ///
 /// Subclasses must implement:
@@ -36,7 +36,7 @@ abstract class Component {
   /// Sets the computed bounding rectangle of this component.
   ///
   /// Called by the layout engine during layout phase.
-  set setBounds(Rect bounds) => _bounds = bounds;
+  set bounds(Rect bounds) => _bounds = bounds;
 
   /// Creates a component with an optional [position].
   Component({this.position});
