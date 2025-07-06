@@ -25,17 +25,16 @@ abstract class Component {
 
   Rect? _bounds;
 
-  /// Returns the bounding rectangle of the component.
+  /// The bounding rectangle of the component.
   ///
-  /// Throws an [Exception] if the bounds have not yet been set.
+  /// This is set by the layout engine during layout, and is required
+  /// before rendering. Accessing [bounds] before it is set will throw
+  /// an [Exception]
   Rect get bounds {
     if (_bounds == null) throw Exception("Component bounds not set yet");
     return _bounds!;
   }
 
-  /// Sets the computed bounding rectangle of this component.
-  ///
-  /// Called by the layout engine during layout phase.
   set bounds(Rect bounds) => _bounds = bounds;
 
   /// Creates a component with an optional [position].
