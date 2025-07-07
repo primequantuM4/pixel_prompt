@@ -33,6 +33,11 @@ class InputManager {
     _configureStdin();
     _enableMouseInput();
 
+    ProcessSignal.sigint.watch().listen((signal) {
+      // handles and quits gracefully when ctrl + c is pressed
+      // 3 is the code for ctrl c
+      _manageHandlers([0x03]);
+    });
     if (Platform.isWindows) {
       _enableWindowsAnsi();
     }
@@ -173,6 +178,9 @@ class InputManager {
         final byte = _inputBuffer.removeAt(0);
         if (byte == 0x0A || byte == 0x0D) {
           dispatchedEvent = KeyEvent(code: KeyCode.character, char: '\n');
+        } else if (byte == 0x03) {
+          Logger.trace(_tag, 'Received the exit signal, [Ctrl-C]');
+          dispatchedEvent = KeyEvent(code: KeyCode.ctrlC);
         } else if (byte == 0x08 || byte == 0x7f) {
           dispatchedEvent = KeyEvent(code: KeyCode.backspace);
         } else {

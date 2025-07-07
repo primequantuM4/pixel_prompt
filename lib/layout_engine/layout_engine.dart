@@ -30,15 +30,21 @@ class LayoutEngine {
 
   List<PositionedComponentInstance> compute(Size maxSize) {
     final Size measured = rootInstance.measure(maxSize);
-    final Rect rootBounds =
-        Rect(x: 0, y: 0, width: measured.width, height: measured.height);
+    final Rect rootBounds = Rect(
+      x: 0,
+      y: 0,
+      width: measured.width,
+      height: measured.height,
+    );
     _layoutRecursiveCompute(rootInstance, rootBounds);
 
     return result;
   }
 
   void _layoutRecursiveCompute(
-      ComponentInstance componentInstance, Rect bounds) {
+    ComponentInstance componentInstance,
+    Rect bounds,
+  ) {
     componentInstance.bounds = bounds;
 
     Logger.trace(
@@ -90,11 +96,15 @@ class LayoutEngine {
             );
       child.bounds = rect;
       bool isRenderedByParent = componentInstance.shouldRenderChild(child);
-      result.add(PositionedComponentInstance(
-        componentInstance: child,
-        rect: rect,
-        parentComponentInstance: isRenderedByParent ? componentInstance : null,
-      ));
+      result.add(
+        PositionedComponentInstance(
+          componentInstance: child,
+          rect: rect,
+          parentComponentInstance: isRenderedByParent
+              ? componentInstance
+              : null,
+        ),
+      );
       _layoutRecursiveCompute(child, rect);
 
       if (!isAbsolute) {

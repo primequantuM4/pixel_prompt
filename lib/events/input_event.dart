@@ -20,6 +20,7 @@ enum KeyCode {
   arrowDown,
   arrowLeft,
   arrowRight,
+  ctrlC,
 }
 
 class CharEvent extends InputEvent {

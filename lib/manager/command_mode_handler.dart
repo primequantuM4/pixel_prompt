@@ -16,6 +16,8 @@ class CommandModeHandler implements InputHandler {
     if (event.code == KeyCode.character &&
         (event.char == '\r' || event.char == '\n')) {
       return executeCommand();
+    } else if (event.code == KeyCode.ctrlC) {
+      return ResponseInput(commands: ResponseCommands.exit, handled: true);
     } else if (event.code == KeyCode.backspace) {
       String value = _buffer.toString();
       if (value.isNotEmpty) {
@@ -47,7 +49,9 @@ class CommandModeHandler implements InputHandler {
     if (!_inCommandMode && event.char == ':') {
       _enterCommandMode();
     }
-    return _inCommandMode || (!_inCommandMode && event.char == ':');
+    return _inCommandMode ||
+        (!_inCommandMode && event.char == ':') ||
+        event.code == KeyCode.ctrlC;
   }
 
   void _enterCommandMode() {
