@@ -36,6 +36,14 @@ class ColorRGB implements AnsiColorType {
   final int r, g, b;
   const ColorRGB(this.r, this.g, this.b);
 
+  ColorRGB dimmed({dimFactor = 0.5}) {
+    return ColorRGB(
+      (r * dimFactor).round(),
+      (g * dimFactor).round(),
+      (b * dimFactor).round(),
+    );
+  }
+
   @override
   String get fg => '38;2;$r;$g;$b';
 
@@ -50,4 +58,7 @@ class ColorRGB implements AnsiColorType {
 
   @override
   int get hashCode => Object.hash(r, g, b);
+
+  @override
+  String toString() => 'ColorRGB: r: $r, g: $g, b: $b';
 }

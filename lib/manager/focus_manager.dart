@@ -68,7 +68,8 @@ class FocusManager implements InputHandler {
       if (_isWithinBounds(event.x, event.y, component)) {
         hoveredNow = component;
 
-        if (event.type == MouseEventType.release) {
+        if (event.type == MouseEventType.release ||
+            event.type == MouseEventType.hover) {
           component.hover();
           dirtyComponents.add(component);
         } else if (event.type == MouseEventType.click) {

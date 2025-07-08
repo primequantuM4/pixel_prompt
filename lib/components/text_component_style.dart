@@ -1,3 +1,5 @@
+import 'package:pixel_prompt/logger/logger.dart';
+
 import 'colors.dart';
 import 'font_style.dart';
 
@@ -46,6 +48,12 @@ class TextComponentStyle {
     return this;
   }
 
+  TextComponentStyle dim() {
+    Logger.trace("TextComponentStyle", "Dim added ${FontStyle.dim.code}");
+    styles.add(FontStyle.dim);
+    return this;
+  }
+
   TextComponentStyle paddingTop(int padding) {
     _topPadding = padding;
     return this;
@@ -88,11 +96,12 @@ class TextComponentStyle {
 
   String getStyleAnsi() {
     final codes = [
+      for (var style in styles) style.code,
       if (color != null) color!.fg,
       if (bgColor != null) bgColor!.bg,
-      for (var style in styles) style.code,
     ].join(';');
 
+    Logger.trace("TextComponentStyle", codes.split(';').join(':'));
     return codes;
   }
 
