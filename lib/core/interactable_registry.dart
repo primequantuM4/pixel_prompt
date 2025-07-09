@@ -1,5 +1,7 @@
 import 'package:pixel_prompt/core/component.dart';
 import 'package:pixel_prompt/core/interactable_component.dart';
+import 'package:pixel_prompt/core/stateful_component.dart';
+import 'package:pixel_prompt/logger/logger.dart';
 import 'package:pixel_prompt/manager/focus_manager.dart';
 import 'package:pixel_prompt/renderer/render_manager.dart';
 
@@ -25,6 +27,11 @@ class InteractableRegistry {
   ) {
     if (component is InteractableComponent) {
       focusManager.register(component);
+      component.renderManager = renderManager;
+    }
+    if (component is StatefulComponent) {
+      Logger.trace(
+          "InteractableRegistry", 'Stateful Component $component registered');
       component.renderManager = renderManager;
     }
 

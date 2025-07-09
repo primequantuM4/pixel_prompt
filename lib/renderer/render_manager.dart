@@ -26,6 +26,8 @@ class RenderManager {
     render();
   }
 
+  void recalculateScreen() {}
+
   void requestCursorMove(int x, int y) {
     _cursorX = x;
     _cursorY = y;
