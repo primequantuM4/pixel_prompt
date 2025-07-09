@@ -28,11 +28,10 @@ class TextfieldComponent extends InteractableComponent {
     this.onSubmitted,
     this.placeHolder,
     this.maxWidth = 20,
-  }) : textStyle = textStyle ?? TextComponentStyle(),
-       placeHolderStyle =
-           placeHolderStyle ??
-           TextComponentStyle().foreground(ColorRGB(128, 128, 128)),
-       hoverStyle = hoverStyle ?? TextComponentStyle();
+  })  : textStyle = textStyle ?? TextComponentStyle(),
+        placeHolderStyle = placeHolderStyle ??
+            TextComponentStyle().foreground(ColorRGB(128, 128, 128)),
+        hoverStyle = hoverStyle ?? TextComponentStyle();
 
   @override
   bool get isFocusable => true;
@@ -51,9 +50,8 @@ class TextfieldComponent extends InteractableComponent {
     final prefix = isFocused ? "|> " : "   ";
     final inputAreaWidth = maxWidth - prefix.length;
 
-    final int start = (cursorIndex > inputAreaWidth)
-        ? cursorIndex - inputAreaWidth
-        : 0;
+    final int start =
+        (cursorIndex > inputAreaWidth) ? cursorIndex - inputAreaWidth : 0;
 
     final String visibleText = value.substring(
       start,
@@ -67,8 +65,8 @@ class TextfieldComponent extends InteractableComponent {
     final style = value.isEmpty && placeHolder != null
         ? placeHolderStyle
         : (isHovered || isFocused)
-        ? hoverStyle
-        : textStyle;
+            ? hoverStyle
+            : textStyle;
 
     buffer.drawAt(bounds.x, bounds.y, textToShow.padRight(maxWidth), style);
 
@@ -106,6 +104,7 @@ class TextfieldComponent extends InteractableComponent {
     }
 
     if (input != null && input == '\n') {
+      onSubmitted?.call(value);
       blur();
     } else if (event.code == KeyCode.backspace) {
       if (cursorIndex > 0) {

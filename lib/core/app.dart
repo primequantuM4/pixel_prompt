@@ -81,6 +81,7 @@ class App extends Component with ParentComponent {
 
     for (var item in positionedItems) {
       final component = item.component;
+      Logger.trace(_tag, "Component instance of $component being rendered");
       component.render(buffer, item.rect);
     }
   }
@@ -130,10 +131,12 @@ extension AppRunner on App {
   /// 3. Initializes input handling, focus, and interactivity.
   /// 4. Measures layout and renders the component tree.
   void run() async {
-    final rawTerminalWidth =
-        TerminalFunctions.hasTerminal ? TerminalFunctions.terminalWidth : 80;
-    final rawTerminalHeight =
-        TerminalFunctions.hasTerminal ? TerminalFunctions.terminalHeight : 20;
+    final rawTerminalWidth = TerminalFunctions.hasTerminal
+        ? TerminalFunctions.terminalWidth + 80
+        : 80;
+    final rawTerminalHeight = TerminalFunctions.hasTerminal
+        ? TerminalFunctions.terminalHeight + 20
+        : 20;
 
     final LayoutEngine engine = LayoutEngine(
       children: children,
@@ -149,8 +152,8 @@ extension AppRunner on App {
     final terminalHeight = min(rawTerminalHeight, layoutHeight);
 
     final buffer = CanvasBuffer(
-      width: terminalWidth,
-      height: terminalHeight,
+      width: terminalWidth + 40,
+      height: terminalHeight + 20,
     );
     final RenderManager renderer = RenderManager(buffer: buffer);
     final Context context = Context();
