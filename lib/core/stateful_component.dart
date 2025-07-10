@@ -67,19 +67,12 @@ abstract class StatefulComponent extends Component with ParentComponent {
 
   @override
   void render(CanvasBuffer buffer, Rect bounds) {
-    final layoutEngine = LayoutEngine(
-      children: _children,
-      direction: direction,
-      bounds: bounds,
-    );
-
-    final positionedItems = layoutEngine.compute();
-    for (final item in positionedItems) {
+    for (final child in children) {
       Logger.trace(
         "StatefulComponent",
-        "Item ${item.component} is being rendered",
+        "Item ${child} is being rendered",
       );
-      item.component.render(buffer, item.rect);
+      child.render(buffer, child.bounds);
     }
   }
 }

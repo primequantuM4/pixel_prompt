@@ -72,12 +72,20 @@ class App extends Component with ParentComponent {
   @override
   void render(CanvasBuffer buffer, Rect bounds) {
     final LayoutEngine engine = LayoutEngine(
+      root: this,
       children: children,
       direction: direction,
       bounds: bounds,
     );
 
-    final positionedItems = engine.compute();
+    final maxSize = Size(
+        width: TerminalFunctions.hasTerminal
+            ? TerminalFunctions.terminalWidth
+            : 80,
+        height: TerminalFunctions.hasTerminal
+            ? TerminalFunctions.terminalHeight
+            : 20);
+    final positionedItems = engine.compute(maxSize);
 
     for (var item in positionedItems) {
       final component = item.component;
@@ -139,6 +147,7 @@ extension AppRunner on App {
         : 20;
 
     final LayoutEngine engine = LayoutEngine(
+      root: this,
       children: children,
       direction: direction,
       bounds:

@@ -6,6 +6,7 @@ import 'package:pixel_prompt/core/interactable_component.dart';
 import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/core/size.dart';
 import 'package:pixel_prompt/events/input_event.dart';
+import 'package:pixel_prompt/logger/logger.dart';
 
 class Checkbox extends InteractableComponent {
   final String label;
@@ -39,6 +40,7 @@ class Checkbox extends InteractableComponent {
 
   @override
   void render(CanvasBuffer buffer, Rect bounds) {
+    Logger.trace("Checkbox", "Checkbox is being called and drawn");
     String checkbox = (checked) ? '[X]' : '[ ]';
 
     if ((isFocused || isHovered) && checked) {
