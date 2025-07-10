@@ -1,4 +1,6 @@
+import 'package:pixel_prompt/core/axis.dart';
 import 'package:pixel_prompt/core/canvas_buffer.dart';
+import 'package:pixel_prompt/core/edge_insets.dart';
 import 'package:pixel_prompt/core/position.dart';
 import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/core/size.dart';
@@ -20,6 +22,8 @@ import 'package:pixel_prompt/core/size.dart';
 /// - [fitWidth] and [fitHeight] to determine growth behavior in layout,
 /// - [render] to draw themselves into a [CanvasBuffer].
 abstract class Component {
+  EdgeInsets padding = EdgeInsets.all(0);
+
   /// Optional position specifier.
   final Position? position;
 
@@ -67,4 +71,6 @@ abstract class Component {
 /// that nest multiple child components.
 mixin ParentComponent on Component {
   List<Component> get children;
+
+  Axis get direction => Axis.vertical;
 }

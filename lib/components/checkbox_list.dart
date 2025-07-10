@@ -2,34 +2,36 @@ import 'dart:math';
 
 import 'package:pixel_prompt/common/border.dart';
 import 'package:pixel_prompt/common/response_input.dart';
+import 'package:pixel_prompt/components/border_style.dart';
 import 'package:pixel_prompt/components/checkbox.dart';
 import 'package:pixel_prompt/components/colors.dart';
 import 'package:pixel_prompt/components/text_component_style.dart';
 import 'package:pixel_prompt/core/axis.dart';
 import 'package:pixel_prompt/core/canvas_buffer.dart';
 import 'package:pixel_prompt/core/component.dart';
+import 'package:pixel_prompt/core/edge_insets.dart';
 import 'package:pixel_prompt/core/interactable_component.dart';
 import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/core/size.dart';
 import 'package:pixel_prompt/events/input_event.dart';
-import 'package:pixel_prompt/layout_engine/layout_engine.dart';
+import 'package:pixel_prompt/logger/logger.dart';
+import 'package:pixel_prompt/renderer/border_renderer.dart';
 
 class CheckboxList extends InteractableComponent with ParentComponent {
   @override
   List<Checkbox> children;
   final List<String> items;
-  final Axis direction;
   final int spacing;
   final AnsiColorType? selectionColor;
   final AnsiColorType? hoverColor;
   final AnsiColorType? textColor;
-  final BorderType borderType;
   int focusedItem = 0;
   final Set<int> _selected = {};
 
   final int _addedBorderHeight = 2;
   final int _addedBorderWidth = 2;
 
+  final BorderRenderer _borderRenderer;
   CheckboxList({
     required this.items,
     Axis? direction,
@@ -37,8 +39,10 @@ class CheckboxList extends InteractableComponent with ParentComponent {
     this.selectionColor,
     this.hoverColor,
     this.textColor,
-    this.borderType = BorderType.border,
-  })  : direction = direction ?? Axis.vertical,
+    BorderStyle? borderStyle,
+  })  : _borderRenderer = BorderRenderer(
+            style: borderStyle ?? BorderStyle.rounded,
+            borderColor: Colors.white),
         children = items
             .map(
               (label) => Checkbox(
@@ -50,6 +54,7 @@ class CheckboxList extends InteractableComponent with ParentComponent {
             )
             .toList(),
         spacing = spacing ?? 1 {
+    padding = EdgeInsets.all(1);
     assignParent();
   }
 
@@ -69,9 +74,12 @@ class CheckboxList extends InteractableComponent with ParentComponent {
   int fitHeight() {
     switch (direction) {
       case Axis.vertical:
-        return items.length + _addedBorderHeight + (items.length - 1) * spacing;
+        return items.length +
+            _addedBorderHeight +
+            padding.vertical +
+            (items.length - 1) * spacing;
       case Axis.horizontal:
-        return 1 + _addedBorderHeight;
+        return 1 + _addedBorderHeight + padding.horizontal;
     }
   }
 
@@ -85,14 +93,17 @@ class CheckboxList extends InteractableComponent with ParentComponent {
         for (var item in items) {
           width = max(item.length, width);
         }
-        return width + checkboxWidth + _addedBorderWidth;
+        return width + checkboxWidth + _addedBorderWidth + padding.vertical;
       case Axis.horizontal:
         int width = 0;
         for (var item in items) {
           width += checkboxWidth + item.length;
         }
 
-        return width + _addedBorderWidth + (items.length - 1) * spacing;
+        return width +
+            _addedBorderWidth +
+            padding.horizontal +
+            (items.length - 1) * spacing;
     }
   }
 
@@ -101,70 +112,19 @@ class CheckboxList extends InteractableComponent with ParentComponent {
     return Size(width: fitWidth(), height: fitHeight());
   }
 
-  void drawBorder(CanvasBuffer buffer, Rect bounds) {
-    final x = bounds.x;
-    final y = bounds.y;
-
-    final width = bounds.width;
-    final height = bounds.height;
-
-    final horizontal = horizontalBorderLine(borderType);
-    final vertical = verticalBorderLine(borderType);
-    final topLeft = topLeftBorderCorner(borderType);
-    final topRight = topRightBorderCorner(borderType);
-    final bottomLeft = bottomLeftBorderCorner(borderType);
-    final bottomRight = bottomRightBorderCorner(borderType);
-
-    buffer.drawAt(x, y, topLeft, TextComponentStyle());
-    buffer.drawAt(x + width - 1, y, topRight, TextComponentStyle());
-    buffer.drawAt(x, y + height - 1, bottomLeft, TextComponentStyle());
-    buffer.drawAt(
-        x + width - 1, y + height - 1, bottomRight, TextComponentStyle());
-
-    for (int i = 1; i < width - 1; i++) {
-      buffer.drawAt(x + i, y, horizontal, TextComponentStyle());
-      buffer.drawAt(x + i, y + height - 1, horizontal, TextComponentStyle());
-    }
-
-    for (int i = 1; i < height - 1; i++) {
-      buffer.drawAt(x, y + i, vertical, TextComponentStyle());
-      buffer.drawAt(x + width - 1, y + i, vertical, TextComponentStyle());
-    }
-  }
-
   @override
   void render(CanvasBuffer buffer, Rect bounds) {
-    drawBorder(buffer, bounds);
-
-    final innerBounds = Rect(
-      x: bounds.x + 1,
-      y: bounds.y + 1,
-      width: bounds.width - 2,
-      height: bounds.height - 2,
-    );
-    final engine = LayoutEngine(
-      children: children,
-      direction: direction,
-      bounds: innerBounds,
-    );
-
-    switch (direction) {
-      case Axis.vertical:
-        _renderVertical(buffer, innerBounds, engine);
-      case Axis.horizontal:
-        _renderHorizontal(buffer, innerBounds, engine);
-    }
+    _borderRenderer.draw(buffer, bounds, (buffer, innerBounds) {
+      //[CHECKBOXLIST] children were drawn here before layout engine logic change
+    });
   }
 
-  void _renderVertical(CanvasBuffer buffer, Rect bounds, LayoutEngine engine) {
+  void _renderVertical(CanvasBuffer buffer, Rect bounds) {
     int y = bounds.y;
     int x = bounds.x;
 
-    final positionedComponent = engine.compute();
-    for (int i = 0; i < positionedComponent.length; i++) {
-      final item = positionedComponent[i];
-
-      item.component.render(
+    for (final child in children) {
+      child.render(
         buffer,
         Rect(width: bounds.width, height: bounds.height, x: x, y: y),
       );
@@ -175,21 +135,16 @@ class CheckboxList extends InteractableComponent with ParentComponent {
   void _renderHorizontal(
     CanvasBuffer buffer,
     Rect bounds,
-    LayoutEngine engine,
   ) {
     int x = bounds.x;
     int y = bounds.y;
 
-    final positionedComponent = engine.compute();
-
-    for (int i = 0; i < positionedComponent.length; i++) {
-      final item = positionedComponent[i];
-
-      item.component.render(
+    for (final child in children) {
+      child.render(
         buffer,
         Rect(width: bounds.width, height: bounds.height, x: x, y: y),
       );
-      x += (item.component as Checkbox).contentWidth + spacing;
+      x += child.contentWidth + spacing;
     }
   }
 

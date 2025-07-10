@@ -12,6 +12,9 @@ class Row extends Component with ParentComponent {
   @override
   final List<Component> children;
 
+  @override
+  Axis get direction => Axis.horizontal;
+
   final int childGap;
 
   Row({required this.children, this.childGap = 1});
@@ -35,17 +38,8 @@ class Row extends Component with ParentComponent {
 
   @override
   void render(CanvasBuffer buffer, Rect bounds) {
-    final engine = LayoutEngine(
-      children: children,
-      direction: Axis.horizontal,
-      childGap: childGap,
-      bounds: bounds,
-    );
-
-    final positionedItems = engine.compute();
-
-    for (final item in positionedItems) {
-      item.component.render(buffer, item.rect);
+    for (final child in children) {
+      child.render(buffer, child.bounds);
     }
   }
 

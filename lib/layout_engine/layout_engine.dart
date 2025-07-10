@@ -9,72 +9,78 @@ import 'package:pixel_prompt/core/position.dart';
 import 'positioned_component.dart';
 
 class LayoutEngine {
+  final Component root;
   final List<Component> children;
   final Axis direction;
   final Rect bounds;
   final int childGap;
 
+  final List<PositionedComponent> result = [];
+
   LayoutEngine({
+    required this.root,
     required this.children,
     required this.direction,
     required this.bounds,
     this.childGap = 1,
   });
 
-  List<PositionedComponent> compute() {
-    int cursorX = bounds.x;
-    int cursorY = bounds.y;
-
-    final List<PositionedComponent> result = [];
-
-    for (final child in children) {
-      final size = child.measure(
-        Size(width: bounds.width, height: bounds.height),
-      );
-
-      if (child.position?.positionType == PositionType.absolute) {
-        final bounds = Rect(
-          x: child.position!.x,
-          y: child.position!.y,
-          width: size.width,
-          height: size.height,
-        );
-        result.add(PositionedComponent(component: child, rect: bounds));
-        child.bounds = bounds;
-        continue;
-      }
-
-      final xVal = direction == Axis.vertical ? bounds.x : cursorX;
-      final yVal = direction == Axis.vertical ? cursorY : bounds.y;
-
-      final Rect childBounds;
-      if (child.position == null) {
-        childBounds = Rect(
-          x: xVal,
-          y: yVal,
-          width: size.width,
-          height: size.height,
-        );
-      } else {
-        childBounds = Rect(
-          x: xVal + child.position!.x,
-          y: yVal + child.position!.y,
-          width: size.width,
-          height: size.height,
-        );
-      }
-
-      result.add(PositionedComponent(component: child, rect: childBounds));
-      child.bounds = childBounds;
-
-      if (direction == Axis.vertical) {
-        cursorY += size.height + childGap;
-      } else {
-        cursorX += size.width + childGap;
-      }
-    }
+  List<PositionedComponent> compute(Size maxSize) {
+    final Size measured = root.measure(maxSize);
+    final Rect rootBounds =
+        Rect(x: 0, y: 0, width: measured.width, height: measured.height);
+    _layoutRecursiveCompute(root, rootBounds);
 
     return result;
+  }
+
+  void _layoutRecursiveCompute(Component component, Rect bounds) {
+    component.bounds = bounds;
+
+    if (component is! ParentComponent) return; // base case
+
+    final innerRect = Rect(
+      x: bounds.x + component.padding.left,
+      y: bounds.y + component.padding.top,
+      width: bounds.width - component.padding.horizontal,
+      height: bounds.height - component.padding.vertical,
+    );
+
+    int cursorX = innerRect.x;
+    int cursorY = innerRect.y;
+
+    for (var child in component.children) {
+      final maxSize = Size(width: bounds.width, height: bounds.height);
+      final size = child.measure(maxSize);
+
+      final pos = child.position;
+      final isAbsolute = pos?.positionType == PositionType.absolute;
+
+      final rect = isAbsolute
+          ? Rect(
+              x: innerRect.x + pos!.x,
+              y: innerRect.y + pos.y,
+              width: size.width,
+              height: size.height,
+            )
+          : Rect(
+              x: cursorX,
+              y: cursorY,
+              width: size.width,
+              height: size.height,
+            );
+      child.bounds = rect;
+      result.add(PositionedComponent(component: child, rect: rect));
+      _layoutRecursiveCompute(child, rect);
+
+      if (!isAbsolute) {
+        if (component.direction == Axis.vertical) {
+          cursorY += size.height + childGap;
+        } else {
+          cursorX += size.width + childGap;
+        }
+      }
+    }
   }
 
   int fitWidth() {
