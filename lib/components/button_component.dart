@@ -89,7 +89,7 @@ class ButtonComponent extends InteractableComponent {
     if (event is! KeyEvent) return ResponseInput.ignored();
 
     if (event.code == KeyCode.enter ||
-        (event.char != null && event.char == ' ')) {
+        (event.char == ' ')) {
       Logger.trace("ButtonComponent", "Triggering On Pressed");
       onPressed.call();
       onBlur();
