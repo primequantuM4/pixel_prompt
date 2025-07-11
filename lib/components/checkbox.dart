@@ -106,6 +106,5 @@ class Checkbox extends InteractableComponent {
   @override
   void onClick() {
     checked = !checked;
-    markDirty();
   }
 }

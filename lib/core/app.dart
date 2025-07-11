@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:pixel_prompt/handler/input_handler.dart';
@@ -10,6 +11,7 @@ import 'package:pixel_prompt/core/position.dart';
 import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/core/size.dart';
 import 'package:pixel_prompt/layout_engine/layout_engine.dart';
+import 'package:pixel_prompt/layout_engine/positioned_component.dart';
 import 'package:pixel_prompt/logger/logger.dart';
 import 'package:pixel_prompt/manager/command_mode_handler.dart';
 import 'package:pixel_prompt/manager/component_input_handler.dart';
@@ -33,15 +35,26 @@ import 'package:pixel_prompt/terminal/terminal_functions.dart';
 class App extends Component with ParentComponent {
   /// The list of components that make up the UI.
   @override
-  final List<Component> children;
+  List<Component> children;
 
   /// The layout direction for arranging [children] — vertical or horizontal.
   final Axis direction;
 
   static const String _tag = 'App';
+  static late App instance;
+  final List<Component> initialChildren;
 
   /// Constructs an [App] with the given [children] and layout [direction].
-  App({required this.children, this.direction = Axis.vertical});
+  App({required this.children, this.direction = Axis.vertical})
+      : initialChildren = children {
+    App.instance = this;
+  }
+
+  bool shouldRebuild = false;
+
+  void requestRebuild() {
+    shouldRebuild = true;
+  }
 
   /// Measures the total size needed to render the app based on [maxSize].
   ///
@@ -86,9 +99,21 @@ class App extends Component with ParentComponent {
             ? TerminalFunctions.terminalHeight
             : 20);
     final positionedItems = engine.compute(maxSize);
+    _renderPositionedComponents(buffer, positionedItems);
+  }
 
-    for (var item in positionedItems) {
+  void _renderPositionedComponents(
+      CanvasBuffer buffer, List<PositionedComponent> positionedComponents) {
+    for (var item in positionedComponents) {
       final component = item.component;
+      if (item.parentComponent != null) {
+        Logger.trace(
+          _tag,
+          "Component instance of $component is being rendered by their parent component",
+        );
+        continue;
+      }
+
       Logger.trace(_tag, "Component instance of $component being rendered");
       component.render(buffer, item.rect);
     }
@@ -139,12 +164,10 @@ extension AppRunner on App {
   /// 3. Initializes input handling, focus, and interactivity.
   /// 4. Measures layout and renders the component tree.
   void run() async {
-    final rawTerminalWidth = TerminalFunctions.hasTerminal
-        ? TerminalFunctions.terminalWidth + 80
-        : 80;
-    final rawTerminalHeight = TerminalFunctions.hasTerminal
-        ? TerminalFunctions.terminalHeight + 20
-        : 20;
+    final rawTerminalWidth =
+        TerminalFunctions.hasTerminal ? TerminalFunctions.terminalWidth : 80;
+    final rawTerminalHeight =
+        TerminalFunctions.hasTerminal ? TerminalFunctions.terminalHeight : 20;
 
     final LayoutEngine engine = LayoutEngine(
       root: this,
@@ -160,10 +183,7 @@ extension AppRunner on App {
     final terminalWidth = min(rawTerminalWidth, layoutWidth);
     final terminalHeight = min(rawTerminalHeight, layoutHeight);
 
-    final buffer = CanvasBuffer(
-      width: terminalWidth + 40,
-      height: terminalHeight + 20,
-    );
+    final buffer = CanvasBuffer(width: terminalWidth, height: terminalHeight);
     final RenderManager renderer = RenderManager(buffer: buffer);
     final Context context = Context();
 
@@ -174,13 +194,12 @@ extension AppRunner on App {
     final supportsCursor = await inputManager.isCursorSupported();
     if (supportsCursor) {
       Logger.trace(App._tag, "Supports cursor fetching cursor position");
-      inputManager.getCursorPosition((x, y) {
-        buffer.setTerminalOffset(x + 1, y + 1);
-        context.setInitialCursorPosition(x, y);
+      final point = await inputManager.fetchCursorPosition();
+      buffer.setTerminalOffset(point.x + 1, point.y + 1);
+      context.setInitialCursorPosition(point.x, point.y);
 
-        inputManager.returnedCursorPositionX = x + 1;
-        inputManager.returnedCursorPositionY = y + terminalHeight + 2;
-      });
+      inputManager.returnedCursorPositionX = point.x + 1;
+      inputManager.returnedCursorPositionY = point.y + terminalHeight + 2;
     } else {
       Logger.warn(
         App._tag,
@@ -225,5 +244,43 @@ extension AppRunner on App {
       'READY',
     );
     buffer.render();
+
+    Timer.periodic(Duration(milliseconds: 16), (timer) {
+      if (shouldRebuild || renderer.needsRecompute) {
+        shouldRebuild = false;
+        children = initialChildren; // reassign to reset any tree state
+
+        buffer.clear();
+        buffer.render();
+
+        focusManager.reset();
+        registry.registerInteractables(this, focusManager, renderer);
+
+        final engine = LayoutEngine(
+          root: this,
+          children: children,
+          direction: direction,
+          bounds: Rect(x: 0, y: 0, width: bounds.width, height: bounds.height),
+        );
+
+        final int termWidth = min(engine.fitWidth(), rawTerminalWidth);
+        final int termHeight = min(engine.fitHeight(), rawTerminalHeight);
+
+        var (x, y) = buffer.getTerminalOffset();
+
+        inputManager.returnedCursorPositionX = x + 1;
+        inputManager.returnedCursorPositionY = y + termWidth + 2;
+
+        buffer.updateDimensions(termWidth, termHeight);
+
+        final items =
+            engine.compute(Size(width: bounds.width, height: bounds.height));
+
+        renderer.requestRecompute(bounds);
+        renderer.needsRecompute = false;
+        _renderPositionedComponents(buffer, items);
+        buffer.render();
+      }
+    });
   }
 }

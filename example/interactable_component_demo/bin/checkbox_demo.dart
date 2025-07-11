@@ -1,3 +1,4 @@
+import 'package:pixel_prompt/common/border.dart';
 import 'package:pixel_prompt/components/border_style.dart';
 import 'package:pixel_prompt/core/axis.dart';
 import 'package:pixel_prompt/pixel_prompt.dart';
@@ -10,22 +11,10 @@ void main() {
           TextComponent(
             "Choose your Settings",
             style: TextComponentStyle()
-                .foreground(ColorRGB(0, 0, 0))
-                .background(ColorRGB(46, 52, 64))
-                .paddingTop(1)
-                .paddingBottom(1)
-                .paddingLeft(12)
-                .paddingRight(12)
-                .marginLeft(4),
-          ),
-          TextComponent(
-            "Choose your Settings(dimmer)",
-            style: TextComponentStyle()
                 .foreground(ColorRGB(143, 188, 187))
                 .background(ColorRGB(46, 52, 64))
                 .paddingTop(1)
                 .paddingBottom(1)
-                .dim()
                 .paddingLeft(12)
                 .paddingRight(12)
                 .marginLeft(4),

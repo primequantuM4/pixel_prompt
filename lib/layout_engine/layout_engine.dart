@@ -5,6 +5,8 @@ import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/core/axis.dart';
 import 'package:pixel_prompt/core/size.dart';
 import 'package:pixel_prompt/core/position.dart';
+import 'package:pixel_prompt/core/stateful_component.dart';
+import 'package:pixel_prompt/logger/logger.dart';
 
 import 'positioned_component.dart';
 
@@ -37,7 +39,22 @@ class LayoutEngine {
   void _layoutRecursiveCompute(Component component, Rect bounds) {
     component.bounds = bounds;
 
+    Logger.trace(
+      "LayoutEngine",
+      "Component $component with bounds ${component.bounds.toString()}",
+    );
+
     if (component is! ParentComponent) return; // base case
+
+    if (component is StatefulComponent) {
+      Logger.trace(
+        "LayoutEngine",
+        "Component $component is trying to assign children with bounds ${component.bounds.toString()}",
+      );
+      for (var child in component.children) {
+        Logger.trace("LayoutEngine", "Child is $child");
+      }
+    }
 
     final innerRect = Rect(
       x: bounds.x + component.padding.left,
@@ -70,7 +87,12 @@ class LayoutEngine {
               height: size.height,
             );
       child.bounds = rect;
-      result.add(PositionedComponent(component: child, rect: rect));
+      bool isRenderedByParent = component.shouldRenderChild(child);
+      result.add(PositionedComponent(
+        component: child,
+        rect: rect,
+        parentComponent: isRenderedByParent ? component : null,
+      ));
       _layoutRecursiveCompute(child, rect);
 
       if (!isAbsolute) {

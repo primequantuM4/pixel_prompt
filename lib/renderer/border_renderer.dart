@@ -3,10 +3,10 @@ import 'package:pixel_prompt/pixel_prompt.dart';
 
 class BorderRenderer {
   final BorderStyle style;
-  AnsiColorType borderColor;
+  AnsiColorType? borderColor;
   bool isDimmed = false;
 
-  BorderRenderer({required this.style, required this.borderColor});
+  BorderRenderer({required this.style, this.borderColor});
 
   void draw(CanvasBuffer buffer, Rect bounds,
       void Function(CanvasBuffer buffer, Rect bounds) drawChild) {
@@ -14,17 +14,19 @@ class BorderRenderer {
     final y = bounds.y;
     final width = bounds.width;
     final height = bounds.height;
-    final TextComponentStyle borderStyle;
+    TextComponentStyle borderStyle;
 
-    if (style == BorderStyle.empty) {
-      borderStyle =
-          TextComponentStyle().foreground(borderColor).background(borderColor);
-    } else {
-      borderStyle = TextComponentStyle().foreground(borderColor);
-    }
+    borderStyle = TextComponentStyle();
 
     if (isDimmed) {
-      borderStyle.dim();
+      borderStyle = borderStyle.dim();
+    }
+
+    if (borderColor != null) {
+      borderStyle = borderStyle.foreground(borderColor!);
+      if (style == BorderStyle.empty) {
+        borderStyle = borderStyle.background(borderColor!);
+      }
     }
 
     // Top border

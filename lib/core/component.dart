@@ -35,7 +35,9 @@ abstract class Component {
   /// before rendering. Accessing [bounds] before it is set will throw
   /// an [Exception]
   Rect get bounds {
-    if (_bounds == null) throw Exception("Component bounds not set yet");
+    if (_bounds == null) {
+      throw Exception("Component $this bounds not set yet");
+    }
     return _bounds!;
   }
 
@@ -73,4 +75,6 @@ mixin ParentComponent on Component {
   List<Component> get children;
 
   Axis get direction => Axis.vertical;
+
+  bool shouldRenderChild(Component child) => false;
 }

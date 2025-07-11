@@ -1,9 +1,12 @@
 import 'dart:io';
 
+import 'package:pixel_prompt/components/button_component.dart';
 import 'package:pixel_prompt/components/colors.dart';
 import 'package:pixel_prompt/components/font_style.dart';
+import 'package:pixel_prompt/components/text_component.dart';
 import 'package:pixel_prompt/components/text_component_style.dart';
 import 'package:pixel_prompt/core/buffer_cell.dart';
+import 'package:pixel_prompt/core/component.dart';
 import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/logger/logger.dart';
 
@@ -27,10 +30,10 @@ import 'package:pixel_prompt/logger/logger.dart';
 /// 4. Use [clear] or [clearBufferArea] to reset contents.
 class CanvasBuffer {
   /// The width of the canvas in characters.
-  final int width;
+  int width;
 
   /// The height of the canvas in characters.
-  final int height;
+  int height;
 
   /// The original horizontal cursor offset in the terminal.
   int cursorOriginalX = -1;
@@ -46,7 +49,7 @@ class CanvasBuffer {
   bool isFullscreen = false;
 
   /// Internal 2D grid storing the screen cells.
-  final List<List<BufferCell>> _screenBuffer;
+  List<List<BufferCell>> _screenBuffer;
 
   /// Creates a [CanvasBuffer] with the specified [width] and [height].
   ///
@@ -63,6 +66,23 @@ class CanvasBuffer {
   setTerminalOffset(int x, int y) {
     cursorOriginalX = x;
     cursorOriginalY = y;
+  }
+
+  (int, int) getTerminalOffset() {
+    return (cursorOriginalX, cursorOriginalY);
+  }
+
+  void updateDimensions(int width, int height) {
+    this.width = width;
+    this.height = height;
+
+    _screenBuffer = List.generate(
+      height,
+      (_) => List.filled(
+        width,
+        BufferCell(char: ' '),
+      ),
+    );
   }
 
   /// Draws a single character at position ([x], [y]) with optional style.
@@ -112,11 +132,9 @@ class CanvasBuffer {
     for (var row in _screenBuffer) {
       for (final cell in row) {
         cell.clear();
+        stdout.write(' ');
       }
     }
-
-    stdout.write('\x1B[2J');
-    stdout.write('\x1B[H');
   }
 
   /// Clears a rectangular [area] within the buffer.
@@ -140,20 +158,30 @@ class CanvasBuffer {
   /// Note: This implementation currently clears the area visually without
   /// redrawing the buffer content.
   void flushArea(Rect area) {
-    final int renderX = isFullscreen ? 1 : cursorOriginalX;
-    final int renderY = isFullscreen ? 1 : cursorOriginalY;
-
-    if (renderX != -1 && renderX != -1) {
-      String cursorPosition = '\x1B[$renderY;${renderX}H';
-      stdout.write(cursorPosition);
-    }
-
     for (int y = area.y; y < area.y + area.height; y++) {
-      if (y > _screenBuffer.length) break;
-      for (int x = area.x; x < area.x + area.width; x++) {
-        if (x > _screenBuffer[0].length) break;
+      if (y >= _screenBuffer.length) break;
 
+      if (cursorOriginalX != -1 && cursorOriginalY != -1) {
+        final cursorY = isFullscreen ? y + 1 : cursorOriginalY + y;
+        final cursorX = isFullscreen ? 1 : cursorOriginalX;
+
+        String cursorMove = '\x1B[$cursorY;${cursorX}H';
+        stdout.write(cursorMove);
+      }
+
+      for (int x = area.x; x < area.x + area.width; x++) {
+        if (x >= _screenBuffer[0].length) break;
         stdout.write(' ');
+      }
+    }
+  }
+
+  void printComponentTree(Component comp, [int level = 0]) {
+    print(
+        '${' ' * level * 2}${comp.runtimeType} ${comp is TextComponent ? comp.text : comp is ButtonComponent ? comp.label : ''}');
+    if (comp is ParentComponent) {
+      for (var child in comp.children) {
+        printComponentTree(child, level + 1);
       }
     }
   }

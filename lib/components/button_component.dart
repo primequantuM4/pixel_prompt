@@ -14,6 +14,7 @@ import 'package:pixel_prompt/renderer/border_renderer.dart';
 class ButtonComponent extends InteractableComponent {
   final String label;
   AnsiColorType buttonColor;
+  AnsiColorType outerBorderColor;
   AnsiColorType textColor;
   final void Function() onPressed;
   final EdgeInsets padding;
@@ -29,12 +30,14 @@ class ButtonComponent extends InteractableComponent {
     required this.label,
     AnsiColorType? buttonColor,
     AnsiColorType? textColor,
+    AnsiColorType? outerBorderColor,
     required this.onPressed,
     BorderStyle? borderStyle,
     EdgeInsets? padding,
   })  : padding = padding ?? EdgeInsets.symmetric(horizontal: 3),
         buttonColor = buttonColor ?? ColorRGB(0, 0, 0),
         textColor = textColor ?? ColorRGB(255, 255, 255),
+        outerBorderColor = outerBorderColor ?? ColorRGB(50, 50, 50),
         _borderRenderer = BorderRenderer(
           style: borderStyle ?? BorderStyle.empty,
           borderColor: buttonColor ?? ColorRGB(0, 0, 0),
@@ -106,15 +109,14 @@ class ButtonComponent extends InteractableComponent {
 
   @override
   void render(CanvasBuffer buffer, Rect bounds) {
-    AnsiColorType color = ColorRGB(50, 50, 50);
     if (isHovered || isFocused) {
       if (buttonColor is ColorRGB) {
-        _borderRenderer.borderColor = (color as ColorRGB).dimmed();
+        _borderRenderer.borderColor = (outerBorderColor as ColorRGB).dimmed();
       } else {
         _borderRenderer.isDimmed = true;
       }
     } else {
-      _borderRenderer.borderColor = color;
+      _borderRenderer.borderColor = outerBorderColor;
     }
     _borderRenderer.draw(buffer, bounds, (buffer, innerBounds) {
       Logger.trace("ButtonComponent", bounds.toString());
@@ -156,10 +158,9 @@ class ButtonComponent extends InteractableComponent {
 
   @override
   void onClick() {
-    onPressed.call();
     isFocused = false;
     isHovered = false;
-    markDirty();
+    onPressed.call();
   }
 
   @override

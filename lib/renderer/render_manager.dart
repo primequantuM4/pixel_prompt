@@ -1,6 +1,8 @@
 import 'package:pixel_prompt/core/canvas_buffer.dart';
 import 'package:pixel_prompt/core/component.dart';
+import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/logger/logger.dart';
+import 'package:pixel_prompt/pixel_prompt.dart';
 
 class RenderManager {
   final CanvasBuffer buffer;
@@ -12,10 +14,17 @@ class RenderManager {
   static const String _tag = 'RenderManager';
 
   RenderManager({required this.buffer});
+  bool needsRecompute = false;
+  bool get hasDirtyComponents => _dirtyComponents.isNotEmpty;
 
   void markDirty(Component comp) => _dirtyComponents.add(comp);
 
+  void clear() {
+    _dirtyComponents.clear();
+  }
+
   void requestRedraw() {
+    if (needsRecompute || App.instance.shouldRebuild) return;
     for (var component in _dirtyComponents) {
       buffer.clearBufferArea(component.bounds);
       buffer.flushArea(component.bounds);
@@ -24,6 +33,15 @@ class RenderManager {
 
     _dirtyComponents.clear();
     render();
+  }
+
+  void markDirtyAll(List<Component> components) {
+    _dirtyComponents.addAll(components);
+  }
+
+  void requestRecompute(Rect bounds) {
+    buffer.clear();
+    _dirtyComponents.clear();
   }
 
   void recalculateScreen() {}

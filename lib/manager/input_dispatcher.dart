@@ -8,7 +8,7 @@ class InputDispatcher {
   final List<InputHandler> _handlers = [];
 
   InputDispatcher({required RenderManager renderer})
-    : _renderManager = renderer;
+      : _renderManager = renderer;
 
   void registerHandler(InputHandler handler) {
     if (!_handlers.contains(handler)) {
@@ -24,11 +24,13 @@ class InputDispatcher {
     for (var handler in _handlers) {
       final response = handler.handleInput(event);
       if (response.handled) {
-        for (final component in response.dirty ?? []) {
-          _renderManager.markDirty(component);
-        }
+        if (!_renderManager.needsRecompute) {
+          for (final component in response.dirty ?? []) {
+            _renderManager.markDirty(component);
+          }
 
-        if ((response.dirty ?? []).isNotEmpty) _renderManager.requestRedraw();
+          if ((response.dirty ?? []).isNotEmpty) _renderManager.requestRedraw();
+        }
         if (response.commands == ResponseCommands.exit) return true;
       }
     }
