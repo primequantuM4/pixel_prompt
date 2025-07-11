@@ -120,9 +120,10 @@ class TextfieldComponent extends InteractableComponent {
       value =
           value.substring(0, cursorIndex) + val + value.substring(cursorIndex);
 
-      onChanged?.call(value);
       cursorIndex += len;
     }
+
+    onChanged?.call(value);
 
     return ResponseInput(
       commands: ResponseCommands.none,
@@ -156,6 +157,5 @@ class TextfieldComponent extends InteractableComponent {
   @override
   void onClick() {
     isFocused = true;
-    markDirty();
   }
 }
