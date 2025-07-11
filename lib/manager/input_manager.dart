@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
+import 'dart:math';
 import 'package:pixel_prompt/events/input_event.dart';
 import 'package:pixel_prompt/logger/logger.dart';
 import 'package:pixel_prompt/manager/input_dispatcher.dart';
@@ -272,6 +273,16 @@ class InputManager {
     stdout.write('\x1B[6n');
     _expectingCursorResponse = true;
     _cursorCallback = callback;
+  }
+
+  Future<Point<int>> fetchCursorPosition() {
+    final completer = Completer<Point<int>>();
+
+    getCursorPosition((x, y) {
+      completer.complete(Point(x, y));
+    });
+
+    return completer.future;
   }
 
   MouseEvent? _parseMouseEvent(String sequence) {

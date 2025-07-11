@@ -1,11 +1,9 @@
 import 'dart:math';
 
-import 'package:pixel_prompt/common/border.dart';
 import 'package:pixel_prompt/common/response_input.dart';
 import 'package:pixel_prompt/components/border_style.dart';
 import 'package:pixel_prompt/components/checkbox.dart';
 import 'package:pixel_prompt/components/colors.dart';
-import 'package:pixel_prompt/components/text_component_style.dart';
 import 'package:pixel_prompt/core/axis.dart';
 import 'package:pixel_prompt/core/canvas_buffer.dart';
 import 'package:pixel_prompt/core/component.dart';
@@ -14,7 +12,6 @@ import 'package:pixel_prompt/core/interactable_component.dart';
 import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/core/size.dart';
 import 'package:pixel_prompt/events/input_event.dart';
-import 'package:pixel_prompt/logger/logger.dart';
 import 'package:pixel_prompt/renderer/border_renderer.dart';
 
 class CheckboxList extends InteractableComponent with ParentComponent {
@@ -28,8 +25,7 @@ class CheckboxList extends InteractableComponent with ParentComponent {
   int focusedItem = 0;
   final Set<int> _selected = {};
 
-  final int _addedBorderHeight = 2;
-  final int _addedBorderWidth = 2;
+  final Axis _direction;
 
   final BorderRenderer _borderRenderer;
   CheckboxList({
@@ -41,8 +37,9 @@ class CheckboxList extends InteractableComponent with ParentComponent {
     this.textColor,
     BorderStyle? borderStyle,
   })  : _borderRenderer = BorderRenderer(
-            style: borderStyle ?? BorderStyle.rounded,
-            borderColor: Colors.white),
+          style: borderStyle ?? BorderStyle.rounded,
+        ),
+        _direction = direction ?? Axis.vertical,
         children = items
             .map(
               (label) => Checkbox(
@@ -58,10 +55,18 @@ class CheckboxList extends InteractableComponent with ParentComponent {
     assignParent();
   }
 
+  @override
+  Axis get direction => _direction;
+
   void assignParent() {
     for (var checkbox in children) {
       checkbox.focusable = false;
     }
+  }
+
+  @override
+  bool shouldRenderChild(Component child) {
+    return child is Checkbox;
   }
 
   @override
@@ -74,12 +79,9 @@ class CheckboxList extends InteractableComponent with ParentComponent {
   int fitHeight() {
     switch (direction) {
       case Axis.vertical:
-        return items.length +
-            _addedBorderHeight +
-            padding.vertical +
-            (items.length - 1) * spacing;
+        return items.length + padding.vertical + (items.length - 1) * spacing;
       case Axis.horizontal:
-        return 1 + _addedBorderHeight + padding.horizontal;
+        return 1 + padding.horizontal;
     }
   }
 
@@ -93,17 +95,14 @@ class CheckboxList extends InteractableComponent with ParentComponent {
         for (var item in items) {
           width = max(item.length, width);
         }
-        return width + checkboxWidth + _addedBorderWidth + padding.vertical;
+        return width + checkboxWidth + padding.vertical;
       case Axis.horizontal:
         int width = 0;
         for (var item in items) {
           width += checkboxWidth + item.length;
         }
 
-        return width +
-            _addedBorderWidth +
-            padding.horizontal +
-            (items.length - 1) * spacing;
+        return width + padding.horizontal + (items.length - 1) * spacing;
     }
   }
 
@@ -115,37 +114,10 @@ class CheckboxList extends InteractableComponent with ParentComponent {
   @override
   void render(CanvasBuffer buffer, Rect bounds) {
     _borderRenderer.draw(buffer, bounds, (buffer, innerBounds) {
-      //[CHECKBOXLIST] children were drawn here before layout engine logic change
+      for (final child in children) {
+        child.render(buffer, child.bounds);
+      }
     });
-  }
-
-  void _renderVertical(CanvasBuffer buffer, Rect bounds) {
-    int y = bounds.y;
-    int x = bounds.x;
-
-    for (final child in children) {
-      child.render(
-        buffer,
-        Rect(width: bounds.width, height: bounds.height, x: x, y: y),
-      );
-      y += spacing + 1;
-    }
-  }
-
-  void _renderHorizontal(
-    CanvasBuffer buffer,
-    Rect bounds,
-  ) {
-    int x = bounds.x;
-    int y = bounds.y;
-
-    for (final child in children) {
-      child.render(
-        buffer,
-        Rect(width: bounds.width, height: bounds.height, x: x, y: y),
-      );
-      x += child.contentWidth + spacing;
-    }
   }
 
   @override

@@ -1,22 +1,18 @@
 import 'dart:math';
 
-import 'package:pixel_prompt/core/axis.dart';
-import 'package:pixel_prompt/core/canvas_buffer.dart';
 import 'package:pixel_prompt/core/component.dart';
-import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/core/size.dart';
-import 'package:pixel_prompt/layout_engine/layout_engine.dart';
 import 'package:pixel_prompt/logger/logger.dart';
+import 'package:pixel_prompt/pixel_prompt.dart';
 import 'package:pixel_prompt/renderer/render_manager.dart';
 
 typedef VoidCallback = void Function();
 
 abstract class StatefulComponent extends Component with ParentComponent {
   List<Component> _children = [];
+  final int childGap = 1;
 
   RenderManager? renderManager;
-
-  final Axis direction = Axis.vertical;
 
   StatefulComponent({this.renderManager}) {
     _children = build();
@@ -24,18 +20,23 @@ abstract class StatefulComponent extends Component with ParentComponent {
   @override
   List<Component> get children => _children;
 
+  set children(List<Component> childrens) => _children = childrens;
+
   void setState(VoidCallback fn) {
     fn();
-    _children = build();
-    markDirty();
+    rebuild();
+    App.instance.requestRebuild();
+  }
+
+  void rebuild() {
+    children = build();
   }
 
   List<Component> build();
 
   void markDirty() {
     if (renderManager != null) {
-      renderManager!.markDirty(this);
-      renderManager!.requestRedraw();
+      renderManager!.needsRecompute = true;
     }
   }
 
@@ -46,6 +47,8 @@ abstract class StatefulComponent extends Component with ParentComponent {
     for (final child in _children) {
       height += child.fitHeight();
     }
+
+    height += max(0, children.length - 1) * childGap;
     return height;
   }
 
@@ -70,7 +73,7 @@ abstract class StatefulComponent extends Component with ParentComponent {
     for (final child in children) {
       Logger.trace(
         "StatefulComponent",
-        "Item ${child} is being rendered",
+        "Item $child is being rendered",
       );
       child.render(buffer, child.bounds);
     }

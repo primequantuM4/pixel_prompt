@@ -3,6 +3,7 @@ import 'package:pixel_prompt/core/context.dart';
 import 'package:pixel_prompt/core/interactable_component.dart';
 import 'package:pixel_prompt/events/input_event.dart';
 import 'package:pixel_prompt/common/response_input.dart';
+import 'package:pixel_prompt/pixel_prompt.dart';
 
 class FocusManager implements InputHandler {
   final Context context;
@@ -16,6 +17,13 @@ class FocusManager implements InputHandler {
 
   void register(InteractableComponent c) {
     components.add(c);
+  }
+
+  void reset() {
+    currentComponent = null;
+    _hoveredComponent = null;
+    currentIndex = -1;
+    components.clear();
   }
 
   ResponseInput _handleTab(bool shiftPressed) {

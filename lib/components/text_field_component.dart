@@ -14,6 +14,7 @@ class TextfieldComponent extends InteractableComponent {
   String value = "";
   TextComponentStyle textStyle;
   final Function(String)? onSubmitted;
+  final Function(String)? onChanged;
   final String? placeHolder;
   final TextComponentStyle placeHolderStyle;
   final int maxWidth;
@@ -26,6 +27,7 @@ class TextfieldComponent extends InteractableComponent {
     TextComponentStyle? placeHolderStyle,
     TextComponentStyle? hoverStyle,
     this.onSubmitted,
+    this.onChanged,
     this.placeHolder,
     this.maxWidth = 20,
   })  : textStyle = textStyle ?? TextComponentStyle(),
@@ -118,6 +120,7 @@ class TextfieldComponent extends InteractableComponent {
       value =
           value.substring(0, cursorIndex) + val + value.substring(cursorIndex);
 
+      onChanged?.call(value);
       cursorIndex += len;
     }
 

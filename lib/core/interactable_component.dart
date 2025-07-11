@@ -52,17 +52,6 @@ abstract class InteractableComponent extends Component {
   /// Override to return `true` if the component handles input directly.
   bool get wantsInput => false;
 
-  /// Marks this component as dirty and schedules a redraw.
-  ///
-  /// This should be called when internal state changes and the component
-  /// needs to be re-rendered.
-  void markDirty() {
-    if (renderManager != null) {
-      renderManager!.markDirty(this);
-      renderManager!.requestRedraw();
-    }
-  }
-
   /// Removes focus and hover state from this component.
   ///
   /// Triggers the [onBlur] lifecycle method.
