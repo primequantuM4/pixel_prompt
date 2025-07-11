@@ -1,6 +1,4 @@
-import 'package:pixel_prompt/core/canvas_buffer.dart';
 import 'package:pixel_prompt/core/component.dart';
-import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/logger/logger.dart';
 import 'package:pixel_prompt/pixel_prompt.dart';
 
@@ -33,10 +31,6 @@ class RenderManager {
 
     _dirtyComponents.clear();
     render();
-  }
-
-  void markDirtyAll(List<Component> components) {
-    _dirtyComponents.addAll(components);
   }
 
   void requestRecompute(Rect bounds) {
