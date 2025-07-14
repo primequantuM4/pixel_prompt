@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:pixel_prompt/core/component.dart';
+import 'package:pixel_prompt/core/component_state.dart';
 import 'package:pixel_prompt/core/size.dart';
 import 'package:pixel_prompt/logger/logger.dart';
 import 'package:pixel_prompt/pixel_prompt.dart';
@@ -9,42 +10,50 @@ import 'package:pixel_prompt/renderer/render_manager.dart';
 typedef VoidCallback = void Function();
 
 abstract class StatefulComponent extends Component with ParentComponent {
-  List<Component> _children = [];
   final int childGap = 1;
-
   RenderManager? renderManager;
 
-  StatefulComponent({this.renderManager}) {
-    _children = build();
+  StatefulComponent({this.renderManager});
+  ComponentState? _state;
+  List<Component>? _children;
+
+  ComponentState get state {
+    _state ??= _initializeState();
+    return _state!;
   }
+
+  List<Component> get _builtChildren {
+    _children ??= state.build();
+    return _children!;
+  }
+
+  ComponentState _initializeState() {
+    final newState = createState();
+    newState.component = this;
+    newState.initState();
+    return newState;
+  }
+
+  /// Must be implemented by each component class to provide its state
+  ComponentState createState();
+
+  /// Used by layout and rendering engines
   @override
-  List<Component> get children => _children;
+  List<Component> get children => _builtChildren;
 
-  set children(List<Component> childrens) => _children = childrens;
+  /// Allows testing override or advanced cases
+  set children(List<Component> newChildren) => _children = newChildren;
 
-  void setState(VoidCallback fn) {
-    fn();
-    rebuild();
-    App.instance.requestRebuild();
-  }
-
+  /// Rebuilds children from state
   void rebuild() {
-    children = build();
-  }
-
-  List<Component> build();
-
-  void markDirty() {
-    if (renderManager != null) {
-      renderManager!.needsRecompute = true;
-    }
+    _children = state.build();
   }
 
   @override
   int fitHeight() {
     int height = 0;
 
-    for (final child in _children) {
+    for (final child in children) {
       height += child.fitHeight();
     }
 
@@ -56,7 +65,7 @@ abstract class StatefulComponent extends Component with ParentComponent {
   int fitWidth() {
     int width = 0;
 
-    for (final child in _children) {
+    for (final child in children) {
       width = max(child.fitWidth(), width);
     }
 
@@ -71,10 +80,7 @@ abstract class StatefulComponent extends Component with ParentComponent {
   @override
   void render(CanvasBuffer buffer, Rect bounds) {
     for (final child in children) {
-      Logger.trace(
-        "StatefulComponent",
-        "Item $child is being rendered",
-      );
+      Logger.trace("StatefulComponent", "Item $child is being rendered");
       child.render(buffer, child.bounds);
     }
   }
