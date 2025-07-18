@@ -28,35 +28,29 @@ class ButtonComponent extends InteractableComponent {
 
   ButtonComponent({
     required this.label,
-    AnsiColorType? buttonColor,
-    AnsiColorType? textColor,
-    AnsiColorType? outerBorderColor,
+    this.buttonColor = const ColorRGB(0, 0, 0),
+    this.textColor = const ColorRGB(255, 255, 25),
+    this.outerBorderColor = const ColorRGB(50, 50, 50),
     required this.onPressed,
     BorderStyle? borderStyle,
-    EdgeInsets? padding,
-  })  : padding = padding ?? EdgeInsets.symmetric(horizontal: 3),
-        buttonColor = buttonColor ?? ColorRGB(0, 0, 0),
-        textColor = textColor ?? ColorRGB(255, 255, 255),
-        outerBorderColor = outerBorderColor ?? ColorRGB(50, 50, 50),
-        _borderRenderer = BorderRenderer(
+    this.padding = const EdgeInsets.symmetric(horizontal: 1),
+  }) : _borderRenderer = BorderRenderer(
           style: borderStyle ?? BorderStyle.empty,
-          borderColor: buttonColor ?? ColorRGB(0, 0, 0),
+          borderColor: buttonColor,
         ) {
-    _undimmedButtonStyle = TextComponentStyle()
-        .foreground(this.textColor)
-        .background(this.buttonColor);
+    _undimmedButtonStyle =
+        TextComponentStyle().foreground(textColor).background(buttonColor);
     if (buttonColor is ColorRGB) {
       _dimmedButtonStyle =
-          TextComponentStyle().background((buttonColor).dimmed());
+          TextComponentStyle().background((buttonColor as ColorRGB).dimmed());
     } else {
-      _dimmedButtonStyle =
-          TextComponentStyle().background((buttonColor ?? Colors.black)).dim();
+      _dimmedButtonStyle = TextComponentStyle().background((buttonColor)).dim();
     }
 
     if (textColor is ColorRGB) {
-      _dimmedButtonStyle.foreground((textColor).dimmed());
+      _dimmedButtonStyle.foreground((textColor as ColorRGB).dimmed());
     } else {
-      _dimmedButtonStyle.foreground(textColor ?? Colors.white).dim();
+      _dimmedButtonStyle.foreground(textColor).dim();
     }
   }
 
