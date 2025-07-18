@@ -31,7 +31,7 @@ class _TodoListState extends ComponentState<TodoListApp> {
           ),
           Row(
             children: [
-              TextfieldComponent(
+              TextFieldComponent(
                 placeHolder: 'Add Task',
                 hoverStyle: TextComponentStyle().background(
                   ColorRGB(20, 20, 20),

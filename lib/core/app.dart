@@ -51,17 +51,20 @@ class App extends Component {
 class AppInstance extends ParentComponentInstance {
   final App component;
   List<ComponentInstance> _childrenInstance;
-  final List<ComponentInstance> initialChildren;
+  List<ComponentInstance> initialChildren;
 
   AppInstance(this.component)
-      : _childrenInstance = component.children
-            .map((Component comp) => comp.createInstance())
-            .toList(),
-        initialChildren = component.children
-            .map((Component comp) => comp.createInstance())
-            .toList(),
+      : _childrenInstance = [],
+        initialChildren = [],
         super(component) {
     AppInstance.instance = this;
+
+    final created = component.children
+        .map((Component comp) => comp.createInstance())
+        .toList();
+
+    _childrenInstance = created;
+    initialChildren = List.from(created);
   }
   @override
   List<ComponentInstance> get childrenInstance => _childrenInstance;
