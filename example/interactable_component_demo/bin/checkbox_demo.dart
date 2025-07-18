@@ -12,18 +12,18 @@ import 'package:pixel_prompt/core/axis.dart';
 void main() {
   App(
     children: [
-      Column(
+      const Column(
         children: [
           TextComponent(
             "Choose your Settings",
-            style: TextComponentStyle()
-                .foreground(ColorRGB(143, 188, 187))
-                .background(ColorRGB(46, 52, 64))
-                .paddingTop(1)
-                .paddingBottom(1)
-                .paddingLeft(12)
-                .paddingRight(12)
-                .marginLeft(4),
+            style: TextComponentStyle(
+                color: ColorRGB(143, 188, 187),
+                bgColor: ColorRGB(46, 52, 64),
+                topPadding: 1,
+                bottomPadding: 1,
+                leftPadding: 12,
+                rightPadding: 12,
+                leftMargin: 4),
           ),
           CheckboxList(
             direction: Axis.vertical,
