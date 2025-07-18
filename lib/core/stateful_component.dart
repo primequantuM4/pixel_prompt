@@ -30,7 +30,6 @@ class StatefulComponentInstance extends ParentComponentInstance {
   RenderManager? renderManager;
 
   StatefulComponentInstance(this.component) : super(component) {
-    print("Do you get called twice?? ${this.component}");
     _children ??= state.build();
   }
 
