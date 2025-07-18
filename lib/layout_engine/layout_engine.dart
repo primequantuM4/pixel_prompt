@@ -6,6 +6,7 @@ import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/core/axis.dart';
 import 'package:pixel_prompt/core/size.dart';
 import 'package:pixel_prompt/core/position.dart';
+import 'package:pixel_prompt/core/stateful_component.dart';
 import 'package:pixel_prompt/logger/logger.dart';
 
 import 'positioned_component.dart';
@@ -47,7 +48,7 @@ class LayoutEngine {
 
     if (componentInstance is! ParentComponentInstance) return; // base case
 
-    /* if (componentInstance is StatefulComponent) {
+    if (componentInstance is StatefulComponentInstance) {
       Logger.trace(
         "LayoutEngine",
         "Component $componentInstance is trying to assign children with bounds ${componentInstance.bounds.toString()}",
@@ -55,7 +56,7 @@ class LayoutEngine {
       for (var child in componentInstance.childrenInstance) {
         Logger.trace("LayoutEngine", "Child is $child");
       }
-    } */
+    }
 
     final innerRect = Rect(
       x: bounds.x + componentInstance.padding.left,
