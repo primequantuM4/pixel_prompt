@@ -6,6 +6,7 @@ typedef VoidCallback = void Function();
 
 abstract class ComponentState<T extends StatefulComponent> {
   late T component;
+  late StatefulComponentInstance instance;
 
   void initState() {}
 
@@ -13,7 +14,7 @@ abstract class ComponentState<T extends StatefulComponent> {
 
   void setState(VoidCallback fn) {
     fn();
-    component.rebuild();
+    instance.rebuild();
     AppInstance.instance.requestRebuild();
   }
 }
