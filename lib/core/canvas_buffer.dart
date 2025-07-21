@@ -260,10 +260,11 @@ class CanvasBuffer {
 
   /// Builds ANSI escape code sequence for the given [BufferCell]'s styles.
   String _ansiCode(BufferCell cell) {
-    final style = TextComponentStyle();
-    style.color = cell.fg;
-    style.bgColor = cell.bg;
-    style.styles = cell.styles;
+    final style = TextComponentStyle(
+      color: cell.fg,
+      bgColor: cell.bg,
+      styles: cell.styles,
+    );
 
     final String ansiCode = style.getStyleAnsi();
     if (ansiCode.isEmpty) return 'm';
