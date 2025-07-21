@@ -2,6 +2,7 @@ import 'package:pixel_prompt/components/button_component.dart';
 import 'package:pixel_prompt/components/text_field_component.dart';
 import 'package:pixel_prompt/core/component.dart';
 import 'package:pixel_prompt/core/component_state.dart';
+import 'package:pixel_prompt/core/edge_insets.dart';
 import 'package:pixel_prompt/core/stateful_component.dart';
 import 'package:pixel_prompt/pixel_prompt.dart';
 
@@ -21,13 +22,10 @@ class _TodoListState extends ComponentState<TodoListApp> {
         children: [
           TextComponent(
             "Todo List",
-            style: TextComponentStyle()
-                .bold()
-                .background(ColorRGB(30, 60, 180))
-                .paddingLeft(8)
-                .paddingRight(8)
-                .paddingTop(1)
-                .paddingBottom(1),
+            style: TextComponentStyle(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+              bgColor: ColorRGB(30, 60, 180),
+            ).bold(),
           ),
           Row(
             children: [
@@ -58,16 +56,12 @@ class _TodoListState extends ComponentState<TodoListApp> {
             final task = entry.value;
             return Row(
               children: [
-                TextComponent(
-                  task,
-                  style: TextComponentStyle()
-                      .paddingTop(1)
-                      .foreground(ColorRGB(20, 20, 20))
-                      .background(ColorRGB(255, 255, 200))
-                      .paddingBottom(1)
-                      .paddingLeft(2)
-                      .paddingRight(2),
-                ),
+                TextComponent(task,
+                    style: TextComponentStyle(
+                      padding: EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+                    )
+                        .foreground(ColorRGB(20, 20, 20))
+                        .background(ColorRGB(255, 255, 200))),
                 TextComponent(' ', style: TextComponentStyle()),
                 ButtonComponent(
                   label: "Remove",
