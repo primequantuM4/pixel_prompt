@@ -16,7 +16,7 @@ void main() {
         Row(
           children: [
             TextComponent(
-              'Status: [Ok]', //12
+              'Status: [Ok]',
               style: TextComponentStyle(
                 color: ColorRGB(100, 255, 100),
                 bgColor: ColorRGB(30, 33, 41),
@@ -25,7 +25,7 @@ void main() {
               ),
             ),
             TextComponent(
-              'Uptime: [03:42:12]', // 18
+              'Uptime: [03:42:12]',
               style: TextComponentStyle(
                 color: ColorRGB(255, 100, 100),
                 bgColor: ColorRGB(30, 33, 41),
