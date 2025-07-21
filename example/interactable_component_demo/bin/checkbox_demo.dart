@@ -8,6 +8,7 @@ import 'package:pixel_prompt/components/text_component.dart';
 import 'package:pixel_prompt/components/text_component_style.dart';
 import 'package:pixel_prompt/core/app.dart';
 import 'package:pixel_prompt/core/axis.dart';
+import 'package:pixel_prompt/core/edge_insets.dart';
 
 void main() {
   App(
@@ -17,13 +18,10 @@ void main() {
           TextComponent(
             "Choose your Settings",
             style: TextComponentStyle(
-                color: ColorRGB(143, 188, 187),
-                bgColor: ColorRGB(46, 52, 64),
-                topPadding: 1,
-                bottomPadding: 1,
-                leftPadding: 12,
-                rightPadding: 12,
-                leftMargin: 4),
+              color: ColorRGB(143, 188, 187),
+              bgColor: ColorRGB(46, 52, 64),
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 1),
+            ),
           ),
           CheckboxList(
             direction: Axis.vertical,

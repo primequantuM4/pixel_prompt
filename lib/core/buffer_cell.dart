@@ -34,7 +34,9 @@ class BufferCell {
     this.fg,
     this.bg,
     Set<FontStyle>? styles,
-  }) : styles = styles ?? {};
+  }) : styles = {
+          ...(styles ?? {})
+        }; // copying since TextComponentStyle is not modifiable
 
   /// Clears the contents of this cell.
   ///

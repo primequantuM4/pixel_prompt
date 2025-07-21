@@ -106,47 +106,34 @@ void main() {
     expect(canvasBuffer.getRenderedString(), expectedStringBuffer);
   });
 
-  test('Two text components with full padding can render next to each other', () {
+  test('Two text components with full padding can render next to each other',
+      () {
     final CanvasBuffer canvasBuffer = CanvasBuffer(width: 20, height: 20);
-    final TextComponent firstText = TextComponent(
-      "Fire",
-      style: TextComponentStyle()
-          .foreground(ColorRGB(255, 255, 255))
-          .background(ColorRGB(255, 68, 34))
-          .paddingTop(2)
-          .paddingBottom(2)
-          .paddingLeft(2)
-          .paddingRight(2),
-    );
+    final TextComponent firstText = TextComponent("Fire",
+        style: TextComponentStyle()
+            .foreground(ColorRGB(255, 255, 255))
+            .background(ColorRGB(255, 68, 34))
+            .paddingOnly(left: 2, right: 2, top: 2, bottom: 2));
 
-    final TextComponent secondText = TextComponent(
-      "Water",
-      style: TextComponentStyle()
-          .foreground(ColorRGB(255, 255, 255))
-          .background(ColorRGB(51, 153, 255))
-          .paddingTop(3)
-          .paddingBottom(3)
-          .paddingLeft(3)
-          .paddingRight(3),
-    );
+    final TextComponent secondText = TextComponent("Water",
+        style: TextComponentStyle()
+            .foreground(ColorRGB(255, 255, 255))
+            .background(ColorRGB(51, 153, 255))
+            .paddingOnly(left: 3, right: 3, top: 3, bottom: 3));
 
-    final TextComponent thirdText = TextComponent(
-      "Ice",
-      style: TextComponentStyle()
-          .foreground(ColorRGB(255, 255, 255))
-          .background(ColorRGB(102, 204, 255))
-          .paddingTop(1)
-          .paddingBottom(1)
-          .paddingLeft(1)
-          .paddingRight(1),
-    );
-    final firstSize = firstText.measure(Size(width: 20, height: 20));
-    final secondSize = secondText.measure(
-      Size(width: 20 - firstSize.width, height: 20),
-    );
-    final thirdSize = firstText.measure(
-      Size(width: 20, height: 20 - secondSize.height),
-    );
+    final TextComponent thirdText = TextComponent("Ice",
+        style: TextComponentStyle()
+            .foreground(ColorRGB(255, 255, 255))
+            .background(ColorRGB(102, 204, 255))
+            .paddingOnly(left: 1, right: 1, top: 1, bottom: 1));
+    final firstSize =
+        firstText.createInstance().measure(Size(width: 20, height: 20));
+    final secondSize = secondText.createInstance().measure(
+          Size(width: 20 - firstSize.width, height: 20),
+        );
+    final thirdSize = firstText.createInstance().measure(
+          Size(width: 20, height: 20 - secondSize.height),
+        );
 
     final firstBounds = Rect(
       x: 0,
@@ -167,9 +154,9 @@ void main() {
       height: thirdSize.height,
     );
 
-    firstText.render(canvasBuffer, firstBounds);
-    secondText.render(canvasBuffer, secondBounds);
-    thirdText.render(canvasBuffer, thirdBound);
+    firstText.createInstance().render(canvasBuffer, firstBounds);
+    secondText.createInstance().render(canvasBuffer, secondBounds);
+    thirdText.createInstance().render(canvasBuffer, thirdBound);
     final emptySpace = " " * 20;
     final emptyStyle = "\x1B[0m$emptySpace\x1B[0m";
 

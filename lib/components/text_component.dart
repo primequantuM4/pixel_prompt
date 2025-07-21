@@ -18,7 +18,7 @@ class _TextComponentInstance extends ComponentInstance {
   final String text;
   final TextComponentStyle style;
 
-  _TextComponentInstance(this.text, {required this.style, super.position});
+  _TextComponentInstance(this.text, {required this.style});
 
   @override
   Size measure(Size maxSize) {
@@ -37,12 +37,12 @@ class _TextComponentInstance extends ComponentInstance {
   @override
   void render(CanvasBuffer buffer, Rect bounds) {
     final lines = text.split('\n');
-    int y = bounds.y + style.topPadding + style.topMargin;
+    int y = bounds.y + style.padding.top + style.margin.top;
 
     for (var line in lines) {
-      int x = bounds.x + style.leftMargin + style.leftPadding;
+      int x = bounds.x + style.padding.left + style.margin.left;
 
-      for (int i = 0; i < style.leftPadding; i++) {
+      for (int i = 0; i < style.padding.left; i++) {
         buffer.drawChar(
           x - i - 1,
           y,
@@ -55,7 +55,7 @@ class _TextComponentInstance extends ComponentInstance {
 
       buffer.drawAt(x, y, line, style);
 
-      for (int i = 0; i < style.rightPadding; i++) {
+      for (int i = 0; i < style.padding.right; i++) {
         buffer.drawChar(
           x + line.length + i,
           y,
@@ -70,18 +70,18 @@ class _TextComponentInstance extends ComponentInstance {
     final totalWidth =
         lines.fold(0, (max, line) => line.length > max ? line.length : max) +
             style.horizontalPadding;
-    final leftX = bounds.x + style.leftMargin;
+    final leftX = bounds.x + style.margin.left;
 
-    for (int i = 0; i < style.topPadding; i++) {
+    for (int i = 0; i < style.padding.top; i++) {
       buffer.drawAt(
         leftX,
-        bounds.y + style.topMargin + i,
+        bounds.y + style.margin.top + i,
         ' ' * totalWidth,
         style,
       );
     }
 
-    for (int i = 0; i < style.bottomPadding; i++) {
+    for (int i = 0; i < style.padding.bottom; i++) {
       buffer.drawAt(leftX, y + i, ' ' * totalWidth, style);
     }
   }
@@ -89,11 +89,11 @@ class _TextComponentInstance extends ComponentInstance {
   @override
   int fitHeight() {
     final totalLines = text.split('\n').length;
-    return style.topPadding + style.bottomPadding + totalLines;
+    return style.verticalMargin + style.verticalPadding + totalLines;
   }
 
   @override
   int fitWidth() {
-    return style.leftPadding + style.rightPadding + text.length;
+    return style.horizontalPadding + style.horizontalMargin + text.length;
   }
 }

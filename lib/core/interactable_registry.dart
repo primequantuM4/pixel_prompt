@@ -1,14 +1,15 @@
 import 'package:pixel_prompt/core/component_instance.dart';
-import 'package:pixel_prompt/core/interactable_component.dart';
 import 'package:pixel_prompt/core/interactable_component_instance.dart';
 import 'package:pixel_prompt/core/parent_component_instance.dart';
+import 'package:pixel_prompt/core/stateful_component.dart';
+import 'package:pixel_prompt/logger/logger.dart';
 import 'package:pixel_prompt/manager/focus_manager.dart';
 import 'package:pixel_prompt/renderer/render_manager.dart';
 
 /// A utility class for recursively registering interactable components.
 ///
 /// [InteractableRegistry] walks the component tree and registers any
-/// [InteractableComponent] instances with the provided [FocusManager],
+/// [InteractableComponentInstance] instances with the provided [FocusManager],
 /// and assigns the given [RenderManager] to them.
 ///
 /// This is typically called once during the initialization of a UI scene
@@ -29,12 +30,11 @@ class InteractableRegistry {
       focusManager.register(componentInstance);
       componentInstance.renderManager = renderManager;
     }
-    // until resolved
-    /* if (componentInstance is StatefulComponent) {
+    if (componentInstance is StatefulComponentInstance) {
       Logger.trace("InteractableRegistry",
           'Stateful Component $componentInstance registered');
       componentInstance.renderManager = renderManager;
-    } */
+    }
 
     if (componentInstance is ParentComponentInstance) {
       for (var child in componentInstance.childrenInstance) {

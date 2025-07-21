@@ -1,3 +1,4 @@
+import 'package:pixel_prompt/core/edge_insets.dart';
 import 'package:pixel_prompt/logger/logger.dart';
 import 'colors.dart';
 import 'font_style.dart';
@@ -7,55 +8,22 @@ class TextComponentStyle {
   final AnsiColorType? bgColor;
   final Set<FontStyle> styles;
 
-  final int _leftPadding;
-  final int _rightPadding;
-  final int _topPadding;
-  final int _bottomPadding;
-
-  final int _leftMargin;
-  final int _rightMargin;
-  final int _topMargin;
-  final int _bottomMargin;
+  final EdgeInsets padding;
+  final EdgeInsets margin;
 
   const TextComponentStyle({
     this.color,
     this.bgColor,
     Set<FontStyle>? styles,
-    int leftPadding = 0,
-    int rightPadding = 0,
-    int topPadding = 0,
-    int bottomPadding = 0,
-    int leftMargin = 0,
-    int rightMargin = 0,
-    int topMargin = 0,
-    int bottomMargin = 0,
-  })  : styles = styles ?? const <FontStyle>{},
-        _leftPadding = leftPadding,
-        _rightPadding = rightPadding,
-        _topPadding = topPadding,
-        _bottomPadding = bottomPadding,
-        _leftMargin = leftMargin,
-        _rightMargin = rightMargin,
-        _topMargin = topMargin,
-        _bottomMargin = bottomMargin;
+    this.padding = const EdgeInsets.all(0),
+    this.margin = const EdgeInsets.all(0),
+  }) : styles = styles ?? const <FontStyle>{};
 
-  // Getter methods (unchanged)
-  int get horizontalPadding => _leftPadding + _rightPadding;
-  int get verticalPadding => _topPadding + _bottomPadding;
-  int get horizontalMargin => _leftMargin + _rightMargin;
-  int get verticalMargin => _topMargin + _bottomMargin;
+  int get horizontalPadding => padding.horizontal;
+  int get verticalPadding => padding.vertical;
+  int get horizontalMargin => margin.horizontal;
+  int get verticalMargin => margin.vertical;
 
-  int get leftPadding => _leftPadding;
-  int get rightPadding => _rightPadding;
-  int get topPadding => _topPadding;
-  int get bottomPadding => _bottomPadding;
-
-  int get leftMargin => _leftMargin;
-  int get rightMargin => _rightMargin;
-  int get topMargin => _topMargin;
-  int get bottomMargin => _bottomMargin;
-
-  // Style modification methods (return new instances)
   TextComponentStyle foreground(AnsiColorType color) => copyWith(color: color);
 
   TextComponentStyle background(AnsiColorType color) =>
@@ -77,20 +45,28 @@ class TextComponentStyle {
     return copyWith(styles: {...styles, FontStyle.dim});
   }
 
-  // Padding/margin modification methods
-  TextComponentStyle paddingTop(int padding) => copyWith(topPadding: padding);
-  TextComponentStyle paddingLeft(int padding) => copyWith(leftPadding: padding);
-  TextComponentStyle paddingRight(int padding) =>
-      copyWith(rightPadding: padding);
-  TextComponentStyle paddingBottom(int padding) =>
-      copyWith(bottomPadding: padding);
+  TextComponentStyle paddingOnly(
+          {int top = 0, int right = 0, int bottom = 0, int left = 0}) =>
+      copyWith(
+        padding: EdgeInsets.only(
+          top: top,
+          right: right,
+          bottom: bottom,
+          left: left,
+        ),
+      );
 
-  TextComponentStyle marginTop(int margin) => copyWith(topMargin: margin);
-  TextComponentStyle marginBottom(int margin) => copyWith(bottomMargin: margin);
-  TextComponentStyle marginLeft(int margin) => copyWith(leftMargin: margin);
-  TextComponentStyle marginRight(int margin) => copyWith(rightMargin: margin);
+  TextComponentStyle marginOnly(
+          {int top = 0, int right = 0, int bottom = 0, int left = 0}) =>
+      copyWith(
+        margin: EdgeInsets.only(
+          top: top,
+          right: right,
+          bottom: bottom,
+          left: left,
+        ),
+      );
 
-  // ANSI style generator (unchanged)
   String getStyleAnsi() {
     final codes = [
       for (var style in styles) style.code,
@@ -102,32 +78,18 @@ class TextComponentStyle {
     return codes;
   }
 
-  // CopyWith helper
   TextComponentStyle copyWith({
     AnsiColorType? color,
     AnsiColorType? bgColor,
     Set<FontStyle>? styles,
-    int? leftPadding,
-    int? rightPadding,
-    int? topPadding,
-    int? bottomPadding,
-    int? leftMargin,
-    int? rightMargin,
-    int? topMargin,
-    int? bottomMargin,
+    EdgeInsets? padding,
+    EdgeInsets? margin,
   }) {
     return TextComponentStyle(
       color: color ?? this.color,
       bgColor: bgColor ?? this.bgColor,
       styles: styles ?? this.styles,
-      leftPadding: leftPadding ?? _leftPadding,
-      rightPadding: rightPadding ?? _rightPadding,
-      topPadding: topPadding ?? _topPadding,
-      bottomPadding: bottomPadding ?? _bottomPadding,
-      leftMargin: leftMargin ?? _leftMargin,
-      rightMargin: rightMargin ?? _rightMargin,
-      topMargin: topMargin ?? _topMargin,
-      bottomMargin: bottomMargin ?? _bottomMargin,
+      padding: padding ?? this.padding,
     );
   }
 }

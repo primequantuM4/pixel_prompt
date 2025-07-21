@@ -5,22 +5,38 @@ import 'package:pixel_prompt/components/text_component_style.dart';
 import 'package:pixel_prompt/core/axis.dart';
 import 'package:pixel_prompt/core/canvas_buffer.dart';
 import 'package:pixel_prompt/core/component.dart';
+import 'package:pixel_prompt/core/component_instance.dart';
+import 'package:pixel_prompt/core/parent_component_instance.dart';
 import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/core/size.dart';
 import 'package:pixel_prompt/layout_engine/layout_engine.dart';
 import 'package:test/test.dart';
 
-class DummyComponent extends Component with ParentComponent {
-  final List<Component> _children;
-  DummyComponent({required List<Component> children}) : _children = children;
+class DummyComponent extends Component {
+  final List<Component> children;
+
+  const DummyComponent({required this.children});
+  @override
+  ComponentInstance createInstance() => _DummyComponentInstance(this);
+}
+
+class _DummyComponentInstance extends ParentComponentInstance {
+  final DummyComponent component;
+  final List<ComponentInstance> _childrenInstance;
+
+  _DummyComponentInstance(this.component)
+      : _childrenInstance = component.children
+            .map((Component comp) => comp.createInstance())
+            .toList(),
+        super(component);
 
   @override
-  List<Component> get children => _children;
+  List<ComponentInstance> get childrenInstance => _childrenInstance;
 
   @override
   int fitHeight() {
     int total = 0;
-    for (final child in children) {
+    for (final child in childrenInstance) {
       total += child.fitHeight();
     }
     return total;
@@ -30,7 +46,7 @@ class DummyComponent extends Component with ParentComponent {
   int fitWidth() {
     int maxWidth = 0;
 
-    for (final child in children) {
+    for (final child in childrenInstance) {
       maxWidth = max(child.fitWidth(), maxWidth);
     }
 
@@ -44,7 +60,7 @@ class DummyComponent extends Component with ParentComponent {
 
   @override
   void render(CanvasBuffer buffer, Rect bounds) {
-    for (var child in _children) {
+    for (var child in childrenInstance) {
       child.render(buffer, bounds);
     }
   }
@@ -68,12 +84,16 @@ void main() {
         height: 24,
       ); // arbitrary number of width and height;
       final DummyComponent dummyComponent = DummyComponent(children: children);
+      final _DummyComponentInstance dummyComponentInstance =
+          dummyComponent.createInstance() as _DummyComponentInstance;
+
       final engine = LayoutEngine(
-        rootInstance: dummyComponent,
-        children: children,
+        rootInstance: dummyComponentInstance,
+        children: dummyComponentInstance.childrenInstance,
         direction: direction,
         bounds: bounds,
       );
+
       final expectedWidth = firstText.length + secondText.length + 1;
       final actualWidth = engine.fitWidth();
 

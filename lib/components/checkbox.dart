@@ -4,6 +4,7 @@ import 'package:pixel_prompt/components/text_component_style.dart';
 import 'package:pixel_prompt/core/canvas_buffer.dart';
 import 'package:pixel_prompt/core/component.dart';
 import 'package:pixel_prompt/core/component_instance.dart';
+import 'package:pixel_prompt/core/edge_insets.dart';
 import 'package:pixel_prompt/core/interactable_component_instance.dart';
 import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/core/size.dart';
@@ -68,17 +69,20 @@ class CheckboxInstance extends InteractableComponentInstance {
 
     final padded = '$renderedComponent${' ' * component.width}';
 
-    TextComponentStyle style = TextComponentStyle()
-        .foreground(
-          component.textColor ?? Colors.white,
-        )
-        .paddingLeft(component.width)
-        .paddingRight(component.width);
-
+    TextComponentStyle style =
+        TextComponentStyle(color: component.textColor ?? Colors.white);
     if (checked) {
-      style.background(component.selectionColor ?? Colors.black);
+      style = TextComponentStyle(
+        color: component.textColor ?? Colors.white,
+        bgColor: component.selectionColor ?? Colors.black,
+        padding: EdgeInsets.symmetric(horizontal: component.width),
+      );
     } else if (isHovered || isFocused) {
-      style.background(component.hoverColor ?? Colors.black);
+      style = TextComponentStyle(
+        color: component.textColor ?? Colors.white,
+        bgColor: component.hoverColor ?? Colors.black,
+        padding: EdgeInsets.symmetric(horizontal: component.width),
+      );
     }
 
     buffer.drawAt(bounds.x, bounds.y, padded, style);

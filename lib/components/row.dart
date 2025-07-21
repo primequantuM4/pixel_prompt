@@ -46,6 +46,10 @@ class _RowInstance extends ParentComponentInstance {
       maxHeight = max(childSize.height, maxHeight);
     }
 
+    if (childrenInstance.length > 1) {
+      totalWidth += (childrenInstance.length - 1) * component.childGap;
+    }
+
     return Size(width: totalWidth, height: maxHeight);
   }
 
@@ -80,63 +84,3 @@ class _RowInstance extends ParentComponentInstance {
     return total;
   }
 }
-/*
-class Row extends Component with ParentComponent {
-  @override
-  final List<Component> children;
-
-  @override
-  Axis get direction => Axis.horizontal;
-
-  final int childGap;
-
-  Row({required this.children, this.childGap = 1});
-
-  @override
-  Size measure(Size maxSize) {
-    int maxHeight = 0;
-    int totalWidth = 0;
-
-    for (final child in children) {
-      if (child.position?.positionType == PositionType.absolute) continue;
-
-      final childSize = child.measure(maxSize);
-      totalWidth += childSize.width;
-
-      maxHeight = max(childSize.height, maxHeight);
-    }
-
-    return Size(width: totalWidth, height: maxHeight);
-  }
-
-  @override
-  void render(CanvasBuffer buffer, Rect bounds) {
-    for (final child in children) {
-      child.render(buffer, child.bounds);
-    }
-  }
-
-  @override
-  int fitHeight() {
-    int maxHeight = 0;
-
-    for (final child in children) {
-      maxHeight = max(maxHeight, child.fitHeight());
-    }
-
-    return maxHeight;
-  }
-
-  @override
-  int fitWidth() {
-    int total = 0;
-
-    for (final child in children) {
-      total += child.fitWidth();
-    }
-
-    total += max(0, children.length - 1) * childGap;
-
-    return total;
-  }
-} */
