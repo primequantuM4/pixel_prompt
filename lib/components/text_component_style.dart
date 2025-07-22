@@ -40,10 +40,6 @@ class TextComponentStyle {
   TextComponentStyle strikethrough() =>
       copyWith(styles: {...styles, FontStyle.strikethrough});
 
-  TextComponentStyle dim() {
-    Logger.trace("TextComponentStyle", "Dim added ${FontStyle.dim.code}");
-    return copyWith(styles: {...styles, FontStyle.dim});
-  }
 
   TextComponentStyle paddingOnly(
           {int top = 0, int right = 0, int bottom = 0, int left = 0}) =>
