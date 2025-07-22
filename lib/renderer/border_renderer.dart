@@ -4,7 +4,6 @@ import 'package:pixel_prompt/pixel_prompt.dart';
 class BorderRenderer {
   final BorderStyle style;
   AnsiColorType? borderColor;
-  bool isDimmed = false;
 
   BorderRenderer({required this.style, this.borderColor});
 
@@ -17,10 +16,6 @@ class BorderRenderer {
     TextComponentStyle borderStyle;
 
     borderStyle = TextComponentStyle();
-
-    if (isDimmed) {
-      borderStyle = borderStyle.dim();
-    }
 
     if (borderColor != null) {
       borderStyle = borderStyle.foreground(borderColor!);
