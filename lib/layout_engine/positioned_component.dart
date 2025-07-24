@@ -1,14 +1,14 @@
-import 'package:pixel_prompt/core/component.dart';
+import 'package:pixel_prompt/core/component_instance.dart';
 import 'package:pixel_prompt/core/rect.dart';
 
-class PositionedComponent {
-  Component component;
+class PositionedComponentInstance {
+  ComponentInstance componentInstance;
   final Rect rect;
-  Component? parentComponent;
+  ComponentInstance? parentComponentInstance;
 
-  PositionedComponent({
-    required this.component,
+  PositionedComponentInstance({
+    required this.componentInstance,
     required this.rect,
-    this.parentComponent,
+    this.parentComponentInstance,
   });
 }

@@ -1,11 +1,11 @@
-import 'package:pixel_prompt/core/component.dart';
+import 'package:pixel_prompt/core/component_instance.dart';
 
 enum ResponseCommands { none, exit }
 
 class ResponseInput {
   final ResponseCommands commands;
   final bool handled;
-  final List<Component>? dirty;
+  final List<ComponentInstance>? dirty;
 
   const ResponseInput({
     required this.commands,

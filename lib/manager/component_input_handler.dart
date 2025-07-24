@@ -1,5 +1,5 @@
 import 'package:pixel_prompt/common/response_input.dart';
-import 'package:pixel_prompt/core/interactable_component.dart';
+import 'package:pixel_prompt/core/interactable_component_instance.dart';
 import 'package:pixel_prompt/events/input_event.dart';
 import 'package:pixel_prompt/handler/input_handler.dart';
 import 'package:pixel_prompt/manager/focus_manager.dart';
@@ -16,7 +16,7 @@ class ComponentInputHandler implements InputHandler {
       return ResponseInput.ignored();
     }
 
-    InteractableComponent handler = focused;
+    InteractableComponentInstance handler = focused;
 
     final result = handler.handleInput(event);
     if (result.handled) return result;

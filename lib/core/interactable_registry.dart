@@ -1,7 +1,7 @@
-import 'package:pixel_prompt/core/component.dart';
+import 'package:pixel_prompt/core/component_instance.dart';
 import 'package:pixel_prompt/core/interactable_component.dart';
-import 'package:pixel_prompt/core/stateful_component.dart';
-import 'package:pixel_prompt/logger/logger.dart';
+import 'package:pixel_prompt/core/interactable_component_instance.dart';
+import 'package:pixel_prompt/core/parent_component_instance.dart';
 import 'package:pixel_prompt/manager/focus_manager.dart';
 import 'package:pixel_prompt/renderer/render_manager.dart';
 
@@ -21,22 +21,23 @@ import 'package:pixel_prompt/renderer/render_manager.dart';
 /// ```
 class InteractableRegistry {
   void registerInteractables(
-    Component component,
+    ComponentInstance componentInstance,
     FocusManager focusManager,
     RenderManager renderManager,
   ) {
-    if (component is InteractableComponent) {
-      focusManager.register(component);
-      component.renderManager = renderManager;
+    if (componentInstance is InteractableComponentInstance) {
+      focusManager.register(componentInstance);
+      componentInstance.renderManager = renderManager;
     }
-    if (component is StatefulComponent) {
-      Logger.trace(
-          "InteractableRegistry", 'Stateful Component $component registered');
-      component.renderManager = renderManager;
-    }
+    // until resolved
+    /* if (componentInstance is StatefulComponent) {
+      Logger.trace("InteractableRegistry",
+          'Stateful Component $componentInstance registered');
+      componentInstance.renderManager = renderManager;
+    } */
 
-    if (component is ParentComponent) {
-      for (var child in component.children) {
+    if (componentInstance is ParentComponentInstance) {
+      for (var child in componentInstance.childrenInstance) {
         registerInteractables(child, focusManager, renderManager);
       }
     }

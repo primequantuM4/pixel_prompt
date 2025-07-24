@@ -1,13 +1,15 @@
-import 'package:pixel_prompt/core/component.dart';
+import 'package:pixel_prompt/core/app.dart';
+import 'package:pixel_prompt/core/canvas_buffer.dart';
+import 'package:pixel_prompt/core/component_instance.dart';
+import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/logger/logger.dart';
-import 'package:pixel_prompt/pixel_prompt.dart';
 
 class RenderManager {
   final CanvasBuffer buffer;
   int? _cursorX;
   int? _cursorY;
 
-  final List<Component> _dirtyComponents = [];
+  final List<ComponentInstance> _dirtyComponents = [];
 
   static const String _tag = 'RenderManager';
 
@@ -15,14 +17,14 @@ class RenderManager {
   bool needsRecompute = false;
   bool get hasDirtyComponents => _dirtyComponents.isNotEmpty;
 
-  void markDirty(Component comp) => _dirtyComponents.add(comp);
+  void markDirty(ComponentInstance comp) => _dirtyComponents.add(comp);
 
   void clear() {
     _dirtyComponents.clear();
   }
 
   void requestRedraw() {
-    if (needsRecompute || App.instance.shouldRebuild) return;
+    if (needsRecompute || AppInstance.instance.shouldRebuild) return;
     for (var component in _dirtyComponents) {
       buffer.clearBufferArea(component.bounds);
       buffer.flushArea(component.bounds);
