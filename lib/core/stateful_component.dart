@@ -1,53 +1,26 @@
-import 'dart:math';
-
+import 'package:pixel_prompt/core/canvas_buffer.dart';
 import 'package:pixel_prompt/core/component.dart';
+import 'package:pixel_prompt/core/component_instance.dart';
 import 'package:pixel_prompt/core/component_state.dart';
+import 'package:pixel_prompt/core/parent_component_instance.dart';
+import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/core/size.dart';
 import 'package:pixel_prompt/logger/logger.dart';
-import 'package:pixel_prompt/pixel_prompt.dart';
-import 'package:pixel_prompt/renderer/render_manager.dart';
 
-typedef VoidCallback = void Function();
+abstract class StatefulComponent extends Component {
+  const StatefulComponent();
 
-abstract class StatefulComponent extends Component with ParentComponent {
-  final int childGap = 1;
-  RenderManager? renderManager;
-
-  StatefulComponent({this.renderManager});
-  ComponentState? _state;
-  List<Component>? _children;
-
-  ComponentState get state {
-    _state ??= _initializeState();
-    return _state!;
-  }
-
-  List<Component> get _builtChildren {
-    _children ??= state.build();
-    return _children!;
-  }
-
-  ComponentState _initializeState() {
-    final newState = createState();
-    newState.component = this;
-    newState.initState();
-    return newState;
-  }
-
-  /// Must be implemented by each component class to provide its state
-  ComponentState createState();
-
-  /// Used by layout and rendering engines
   @override
-  List<Component> get children => _builtChildren;
+  ComponentInstance createInstance() => StatefulComponentInstance(this);
 
-  /// Allows testing override or advanced cases
-  set children(List<Component> newChildren) => _children = newChildren;
+  ComponentState createState();
+}
 
-  /// Rebuilds children from state
-  void rebuild() {
-    _children = state.build();
-  }
+class StatefulComponentInstance extends ParentComponentInstance {
+  final StatefulComponent component;
+  final List<ComponentInstance> children;
+
+  StatefulComponentInstance(this.component);
 
   @override
   int fitHeight() {

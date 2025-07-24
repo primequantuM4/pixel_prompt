@@ -2,30 +2,45 @@ import 'package:pixel_prompt/common/response_input.dart';
 import 'package:pixel_prompt/components/colors.dart';
 import 'package:pixel_prompt/components/text_component_style.dart';
 import 'package:pixel_prompt/core/canvas_buffer.dart';
-import 'package:pixel_prompt/core/interactable_component.dart';
+import 'package:pixel_prompt/core/component.dart';
+import 'package:pixel_prompt/core/component_instance.dart';
+import 'package:pixel_prompt/core/interactable_component_instance.dart';
 import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/core/size.dart';
 import 'package:pixel_prompt/events/input_event.dart';
 import 'package:pixel_prompt/logger/logger.dart';
 
-class Checkbox extends InteractableComponent {
+class Checkbox extends Component {
   final String label;
-  bool checked = false;
-  bool focusable = true;
 
   final AnsiColorType? selectionColor;
   final AnsiColorType? hoverColor;
   final AnsiColorType? textColor;
+  final int width;
 
-  Checkbox({
+  const Checkbox({
     required this.label,
-    int? padding,
     this.selectionColor,
     this.hoverColor,
     this.textColor,
+    this.width = 0,
   });
 
-  int get contentWidth => 4 + label.length;
+  @override
+  ComponentInstance createInstance() => CheckboxInstance(this);
+}
+
+class CheckboxInstance extends InteractableComponentInstance {
+  bool checked = false;
+  bool focusable = true;
+
+  static const int prefixCheckboxLength = 4;
+
+  final Checkbox component;
+
+  CheckboxInstance(this.component);
+
+  int get contentWidth => prefixCheckboxLength + component.label.length;
 
   @override
   bool get isHoverable => true;
@@ -36,7 +51,7 @@ class Checkbox extends InteractableComponent {
   int fitHeight() => 1;
 
   @override
-  int fitWidth() => 4 + label.length;
+  int fitWidth() => prefixCheckboxLength + component.label.length;
 
   @override
   void render(CanvasBuffer buffer, Rect bounds) {
@@ -49,19 +64,24 @@ class Checkbox extends InteractableComponent {
       checkbox = '[.]';
     }
 
-    final component = '$checkbox $label';
+    final renderedComponent = '$checkbox ${component.label}';
 
-    TextComponentStyle style = TextComponentStyle().foreground(
-      textColor ?? Colors.white,
-    );
+    final padded = '$renderedComponent${' ' * component.width}';
+
+    TextComponentStyle style = TextComponentStyle()
+        .foreground(
+          component.textColor ?? Colors.white,
+        )
+        .paddingLeft(component.width)
+        .paddingRight(component.width);
 
     if (checked) {
-      style.background(selectionColor ?? Colors.black);
+      style.background(component.selectionColor ?? Colors.black);
     } else if (isHovered || isFocused) {
-      style.background(hoverColor ?? Colors.black);
+      style.background(component.hoverColor ?? Colors.black);
     }
 
-    buffer.drawAt(bounds.x, bounds.y, component, style);
+    buffer.drawAt(bounds.x, bounds.y, padded, style);
   }
 
   @override

@@ -3,55 +3,63 @@ import 'package:pixel_prompt/components/border_style.dart';
 import 'package:pixel_prompt/components/colors.dart';
 import 'package:pixel_prompt/components/text_component_style.dart';
 import 'package:pixel_prompt/core/canvas_buffer.dart';
+import 'package:pixel_prompt/core/component.dart';
+import 'package:pixel_prompt/core/component_instance.dart';
 import 'package:pixel_prompt/core/edge_insets.dart';
-import 'package:pixel_prompt/core/interactable_component.dart';
+import 'package:pixel_prompt/core/interactable_component_instance.dart';
 import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/core/size.dart';
 import 'package:pixel_prompt/events/input_event.dart';
 import 'package:pixel_prompt/logger/logger.dart';
 import 'package:pixel_prompt/renderer/border_renderer.dart';
 
-class ButtonComponent extends InteractableComponent {
+class ButtonComponent extends Component {
   final String label;
-  AnsiColorType buttonColor;
-  AnsiColorType outerBorderColor;
-  AnsiColorType textColor;
-  final void Function() onPressed;
+  final AnsiColorType buttonColor;
+  final AnsiColorType outerBorderColor;
+  final AnsiColorType textColor;
+  final BorderStyle borderStyle;
   final EdgeInsets padding;
 
-  static const int _borderWidth = 2;
-  static const int _borderHeight = 2;
+  final void Function() onPressed;
+
+  const ButtonComponent({
+    required this.label,
+    required this.onPressed,
+    this.padding = const EdgeInsets.symmetric(horizontal: 3),
+    this.buttonColor = const ColorRGB(0, 0, 0),
+    this.outerBorderColor = const ColorRGB(50, 50, 50),
+    this.textColor = const ColorRGB(255, 255, 255),
+    this.borderStyle = BorderStyle.empty,
+  }) : super(padding: padding);
+
+  @override
+  ComponentInstance createInstance() => _ButtonComponentInstance(this);
+}
+
+class _ButtonComponentInstance extends InteractableComponentInstance {
+  final ButtonComponent component;
 
   final BorderRenderer _borderRenderer;
   late TextComponentStyle _undimmedButtonStyle;
   late TextComponentStyle _dimmedButtonStyle;
 
-  ButtonComponent({
-    required this.label,
-    this.buttonColor = const ColorRGB(0, 0, 0),
-    this.textColor = const ColorRGB(255, 255, 25),
-    this.outerBorderColor = const ColorRGB(50, 50, 50),
-    required this.onPressed,
-    BorderStyle? borderStyle,
-    this.padding = const EdgeInsets.symmetric(horizontal: 1),
-  }) : _borderRenderer = BorderRenderer(
-          style: borderStyle ?? BorderStyle.empty,
-          borderColor: buttonColor,
-        ) {
-    _undimmedButtonStyle =
-        TextComponentStyle().foreground(textColor).background(buttonColor);
-    if (buttonColor is ColorRGB) {
-      _dimmedButtonStyle =
-          TextComponentStyle().background((buttonColor as ColorRGB).dimmed());
-    } else {
-      _dimmedButtonStyle = TextComponentStyle().background((buttonColor)).dim();
-    }
+  static const int _borderHeight = 2;
+  static const int _borderWidth = 2;
 
-    if (textColor is ColorRGB) {
-      _dimmedButtonStyle.foreground((textColor as ColorRGB).dimmed());
-    } else {
-      _dimmedButtonStyle.foreground(textColor).dim();
-    }
+  _ButtonComponentInstance(this.component)
+    : _borderRenderer = BorderRenderer(
+        style: component.borderStyle,
+        borderColor: component.buttonColor,
+      ),
+      super(padding: component.padding) {
+    _undimmedButtonStyle = TextComponentStyle()
+        .foreground(component.textColor)
+        .background(component.buttonColor);
+
+    _dimmedButtonStyle = TextComponentStyle()
+        .foreground(component.textColor.dimmed())
+        .background(component.buttonColor.dimmed());
   }
 
   @override
@@ -65,14 +73,14 @@ class ButtonComponent extends InteractableComponent {
 
   @override
   int fitHeight() {
-    final lines = label.split('\n');
+    final lines = component.label.split('\n');
 
     return lines.length + _borderHeight + padding.top + padding.bottom;
   }
 
   @override
   int fitWidth() {
-    final lines = label.split('\n');
+    final lines = component.label.split('\n');
 
     final contentWidth = lines.fold(
       0,
@@ -88,10 +96,13 @@ class ButtonComponent extends InteractableComponent {
     if (event.code == KeyCode.enter ||
         (event.char == ' ')) {
       Logger.trace("ButtonComponent", "Triggering On Pressed");
-      onPressed.call();
+      component.onPressed.call();
       onBlur();
       return ResponseInput(
-          handled: true, commands: ResponseCommands.none, dirty: [this]);
+        handled: true,
+        commands: ResponseCommands.none,
+        dirty: [this],
+      );
     }
     return ResponseInput.ignored();
   }
@@ -104,13 +115,9 @@ class ButtonComponent extends InteractableComponent {
   @override
   void render(CanvasBuffer buffer, Rect bounds) {
     if (isHovered || isFocused) {
-      if (buttonColor is ColorRGB) {
-        _borderRenderer.borderColor = (outerBorderColor as ColorRGB).dimmed();
-      } else {
-        _borderRenderer.isDimmed = true;
-      }
+      _borderRenderer.borderColor = component.outerBorderColor.dimmed();
     } else {
-      _borderRenderer.borderColor = outerBorderColor;
+      _borderRenderer.borderColor = component.outerBorderColor;
     }
     _borderRenderer.draw(buffer, bounds, (buffer, innerBounds) {
       Logger.trace("ButtonComponent", bounds.toString());
@@ -120,12 +127,15 @@ class ButtonComponent extends InteractableComponent {
   }
 
   void drawButtonContent(CanvasBuffer buffer, Rect bounds) {
-    final lines = label.split('\n');
-    final contentStyle =
-        isHovered || isFocused ? _dimmedButtonStyle : _undimmedButtonStyle;
+    final lines = component.label.split('\n');
+    final contentStyle = isHovered || isFocused
+        ? _dimmedButtonStyle
+        : _undimmedButtonStyle;
 
-    final contentWidth =
-        lines.fold(0, (max, line) => line.length > max ? line.length : max);
+    final contentWidth = lines.fold(
+      0,
+      (max, line) => line.length > max ? line.length : max,
+    );
 
     final totalHeight = lines.length + padding.top + padding.bottom;
 
@@ -136,7 +146,8 @@ class ButtonComponent extends InteractableComponent {
           row >= padding.top && row < totalHeight - padding.bottom;
       final contentLine = isContentRow ? lines[row - padding.top] : '';
 
-      final paddedLine = ' ' * padding.left +
+      final paddedLine =
+          ' ' * padding.left +
           contentLine.padRight(contentWidth) +
           ' ' * padding.right;
 
@@ -154,7 +165,7 @@ class ButtonComponent extends InteractableComponent {
   void onClick() {
     isFocused = false;
     isHovered = false;
-    onPressed.call();
+    component.onPressed.call();
   }
 
   @override

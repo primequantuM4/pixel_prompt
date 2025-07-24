@@ -1,14 +1,24 @@
 import 'package:pixel_prompt/components/text_component_style.dart';
 import 'package:pixel_prompt/core/canvas_buffer.dart';
 import 'package:pixel_prompt/core/component.dart';
+import 'package:pixel_prompt/core/component_instance.dart';
 import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/core/size.dart';
 
 class TextComponent extends Component {
   final String text;
+  final TextComponentStyle? style;
+  const TextComponent(this.text, {this.style});
+  @override
+  ComponentInstance createInstance() =>
+      _TextComponentInstance(text, style: style ?? TextComponentStyle());
+}
+
+class _TextComponentInstance extends ComponentInstance {
+  final String text;
   final TextComponentStyle style;
 
-  TextComponent(this.text, {required this.style, super.position});
+  _TextComponentInstance(this.text, {required this.style, super.position});
 
   @override
   Size measure(Size maxSize) {
@@ -59,7 +69,7 @@ class TextComponent extends Component {
 
     final totalWidth =
         lines.fold(0, (max, line) => line.length > max ? line.length : max) +
-        style.horizontalPadding;
+            style.horizontalPadding;
     final leftX = bounds.x + style.leftMargin;
 
     for (int i = 0; i < style.topPadding; i++) {
