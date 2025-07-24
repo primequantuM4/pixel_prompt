@@ -17,4 +17,6 @@ class Size {
   ///
   /// Both dimensions must be non-negative.
   Size({required this.width, required this.height});
+
+  static Size infite = Size(width: 1000, height: 1000);
 }

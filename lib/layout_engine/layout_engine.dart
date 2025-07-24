@@ -1,81 +1,82 @@
 import 'dart:math';
 
-import 'package:pixel_prompt/core/component.dart';
+import 'package:pixel_prompt/core/component_instance.dart';
+import 'package:pixel_prompt/core/parent_component_instance.dart';
 import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/core/axis.dart';
 import 'package:pixel_prompt/core/size.dart';
 import 'package:pixel_prompt/core/position.dart';
-import 'package:pixel_prompt/core/stateful_component.dart';
 import 'package:pixel_prompt/logger/logger.dart';
 
 import 'positioned_component.dart';
 
 class LayoutEngine {
-  final Component root;
-  final List<Component> children;
+  final ComponentInstance rootInstance;
+  final List<ComponentInstance> children;
   final Axis direction;
   final Rect bounds;
   final int childGap;
 
-  final List<PositionedComponent> result = [];
+  final List<PositionedComponentInstance> result = [];
 
   LayoutEngine({
-    required this.root,
+    required this.rootInstance,
     required this.children,
     required this.direction,
     required this.bounds,
     this.childGap = 1,
   });
 
-  List<PositionedComponent> compute(Size maxSize) {
-    final Size measured = root.measure(maxSize);
+  List<PositionedComponentInstance> compute(Size maxSize) {
+    final Size measured = rootInstance.measure(maxSize);
     final Rect rootBounds =
         Rect(x: 0, y: 0, width: measured.width, height: measured.height);
-    _layoutRecursiveCompute(root, rootBounds);
+    _layoutRecursiveCompute(rootInstance, rootBounds);
 
     return result;
   }
 
-  void _layoutRecursiveCompute(Component component, Rect bounds) {
-    component.bounds = bounds;
+  void _layoutRecursiveCompute(
+      ComponentInstance componentInstance, Rect bounds) {
+    componentInstance.bounds = bounds;
 
     Logger.trace(
       "LayoutEngine",
-      "Component $component with bounds ${component.bounds.toString()}",
+      "Component $componentInstance with bounds ${componentInstance.bounds.toString()}",
     );
 
-    if (component is! ParentComponent) return; // base case
+    if (componentInstance is! ParentComponentInstance) return; // base case
 
-    if (component is StatefulComponent) {
+    /* if (componentInstance is StatefulComponent) {
       Logger.trace(
         "LayoutEngine",
-        "Component $component is trying to assign children with bounds ${component.bounds.toString()}",
+        "Component $componentInstance is trying to assign children with bounds ${componentInstance.bounds.toString()}",
       );
-      for (var child in component.children) {
+      for (var child in componentInstance.childrenInstance) {
         Logger.trace("LayoutEngine", "Child is $child");
       }
-    }
+    } */
 
     final innerRect = Rect(
-      x: bounds.x + component.padding.left,
-      y: bounds.y + component.padding.top,
-      width: bounds.width - component.padding.horizontal,
-      height: bounds.height - component.padding.vertical,
+      x: bounds.x + componentInstance.padding.left,
+      y: bounds.y + componentInstance.padding.top,
+      width: bounds.width - componentInstance.padding.horizontal,
+      height: bounds.height - componentInstance.padding.vertical,
     );
 
     int cursorX = innerRect.x;
     int cursorY = innerRect.y;
 
-    for (var child in component.children) {
+    for (var child in componentInstance.childrenInstance) {
       final maxSize = Size(width: bounds.width, height: bounds.height);
       final size = child.measure(maxSize);
 
       final pos = child.position;
-      final isAbsolute = pos?.positionType == PositionType.absolute;
+      final isAbsolute = pos.positionType == PositionType.absolute;
 
       final rect = isAbsolute
           ? Rect(
-              x: innerRect.x + pos!.x,
+              x: innerRect.x + pos.x,
               y: innerRect.y + pos.y,
               width: size.width,
               height: size.height,
@@ -87,16 +88,16 @@ class LayoutEngine {
               height: size.height,
             );
       child.bounds = rect;
-      bool isRenderedByParent = component.shouldRenderChild(child);
-      result.add(PositionedComponent(
-        component: child,
+      bool isRenderedByParent = componentInstance.shouldRenderChild(child);
+      result.add(PositionedComponentInstance(
+        componentInstance: child,
         rect: rect,
-        parentComponent: isRenderedByParent ? component : null,
+        parentComponentInstance: isRenderedByParent ? componentInstance : null,
       ));
       _layoutRecursiveCompute(child, rect);
 
       if (!isAbsolute) {
-        if (component.direction == Axis.vertical) {
+        if (componentInstance.direction == Axis.vertical) {
           cursorY += size.height + childGap;
         } else {
           cursorX += size.width + childGap;

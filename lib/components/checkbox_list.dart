@@ -7,56 +7,74 @@ import 'package:pixel_prompt/components/colors.dart';
 import 'package:pixel_prompt/core/axis.dart';
 import 'package:pixel_prompt/core/canvas_buffer.dart';
 import 'package:pixel_prompt/core/component.dart';
+import 'package:pixel_prompt/core/component_instance.dart';
 import 'package:pixel_prompt/core/edge_insets.dart';
-import 'package:pixel_prompt/core/interactable_component.dart';
+import 'package:pixel_prompt/core/interactable_component_instance.dart';
+import 'package:pixel_prompt/core/parent_component_instance.dart';
 import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/core/size.dart';
 import 'package:pixel_prompt/events/input_event.dart';
 import 'package:pixel_prompt/renderer/border_renderer.dart';
 
-class CheckboxList extends InteractableComponent with ParentComponent {
-  @override
-  List<Checkbox> children;
+class CheckboxList extends Component {
   final List<String> items;
   final int spacing;
   final AnsiColorType? selectionColor;
   final AnsiColorType? hoverColor;
   final AnsiColorType? textColor;
-  int focusedItem = 0;
-  final Set<int> _selected = {};
+  final BorderStyle? borderStyle;
+  final Axis direction;
+  final EdgeInsets padding;
 
-  final Axis _direction;
-
-  final BorderRenderer _borderRenderer;
-  CheckboxList({
+  const CheckboxList({
     required this.items,
-    Axis? direction,
-    int? spacing,
     this.selectionColor,
     this.hoverColor,
     this.textColor,
-    BorderStyle? borderStyle,
-  })  : _borderRenderer = BorderRenderer(
-          style: borderStyle ?? BorderStyle.rounded,
+    this.borderStyle,
+    this.padding = const EdgeInsets.all(1),
+    this.spacing = 1,
+    this.direction = Axis.vertical,
+  }) : super(padding: padding);
+  @override
+  ComponentInstance createInstance() => _CheckboxListInstance(this);
+}
+
+class _CheckboxListInstance extends InteractableComponentInstance
+    implements ParentComponentInstance {
+  List<CheckboxInstance> children;
+  final BorderRenderer _borderRenderer;
+
+  int focusedItem = 0;
+  int backgroundLength = 0;
+  final Set<int> _selected = {};
+
+  final CheckboxList component;
+  _CheckboxListInstance(this.component)
+      : _borderRenderer = BorderRenderer(
+          style: component.borderStyle ?? BorderStyle.rounded,
         ),
-        _direction = direction ?? Axis.vertical,
-        children = items
+        children = component.items
             .map(
               (label) => Checkbox(
                 label: label,
-                selectionColor: selectionColor,
-                hoverColor: hoverColor,
-                textColor: textColor,
-              ),
+                selectionColor: component.selectionColor,
+                hoverColor: component.hoverColor,
+                width: component.items.map((s) => s.length).reduce(max) -
+                    label.length,
+                textColor: component.textColor,
+              ).createInstance() as CheckboxInstance,
             )
             .toList(),
-        spacing = spacing ?? 1 {
-    padding = EdgeInsets.all(1);
+        super(padding: component.padding) {
     assignParent();
   }
 
   @override
-  Axis get direction => _direction;
+  List<ComponentInstance> get childrenInstance => children;
+
+  @override
+  Axis get direction => component.direction;
 
   void assignParent() {
     for (var checkbox in children) {
@@ -65,8 +83,8 @@ class CheckboxList extends InteractableComponent with ParentComponent {
   }
 
   @override
-  bool shouldRenderChild(Component child) {
-    return child is Checkbox;
+  bool shouldRenderChild(ComponentInstance child) {
+    return child is CheckboxInstance;
   }
 
   @override
@@ -79,9 +97,11 @@ class CheckboxList extends InteractableComponent with ParentComponent {
   int fitHeight() {
     switch (direction) {
       case Axis.vertical:
-        return items.length + padding.vertical + (items.length - 1) * spacing;
+        return component.items.length +
+            component.padding.vertical +
+            (component.items.length - 1) * component.spacing;
       case Axis.horizontal:
-        return 1 + padding.horizontal;
+        return 1 + component.padding.horizontal;
     }
   }
 
@@ -92,17 +112,19 @@ class CheckboxList extends InteractableComponent with ParentComponent {
     switch (direction) {
       case Axis.vertical:
         int width = 0;
-        for (var item in items) {
+        for (var item in component.items) {
           width = max(item.length, width);
         }
-        return width + checkboxWidth + padding.vertical;
+        return width + checkboxWidth + component.padding.vertical;
       case Axis.horizontal:
         int width = 0;
-        for (var item in items) {
+        for (var item in component.items) {
           width += checkboxWidth + item.length;
         }
 
-        return width + padding.horizontal + (items.length - 1) * spacing;
+        return width +
+            component.padding.horizontal +
+            (component.items.length - 1) * component.spacing;
     }
   }
 
@@ -134,7 +156,7 @@ class CheckboxList extends InteractableComponent with ParentComponent {
       children[prevFocusedItem].isHovered = false;
       children[focusedItem].isHovered = true;
 
-      final List<Checkbox> dirtyComponents = [
+      final List<CheckboxInstance> dirtyComponents = [
         children[focusedItem],
         children[prevFocusedItem],
       ];

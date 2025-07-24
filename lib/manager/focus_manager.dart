@@ -1,39 +1,38 @@
+import 'package:pixel_prompt/core/interactable_component_instance.dart';
 import 'package:pixel_prompt/handler/input_handler.dart';
 import 'package:pixel_prompt/core/context.dart';
-import 'package:pixel_prompt/core/interactable_component.dart';
 import 'package:pixel_prompt/events/input_event.dart';
 import 'package:pixel_prompt/common/response_input.dart';
-import 'package:pixel_prompt/pixel_prompt.dart';
 
 class FocusManager implements InputHandler {
   final Context context;
 
-  final List<InteractableComponent> components = [];
-  InteractableComponent? currentComponent;
-  InteractableComponent? _hoveredComponent;
+  final List<InteractableComponentInstance> componentInstances = [];
+  InteractableComponentInstance? currentComponent;
+  InteractableComponentInstance? _hoveredComponent;
   int currentIndex = -1;
 
   FocusManager({required this.context});
 
-  void register(InteractableComponent c) {
-    components.add(c);
+  void register(InteractableComponentInstance c) {
+    componentInstances.add(c);
   }
 
   void reset() {
     currentComponent = null;
     _hoveredComponent = null;
     currentIndex = -1;
-    components.clear();
+    componentInstances.clear();
   }
 
   ResponseInput _handleTab(bool shiftPressed) {
-    if (components.isEmpty) return ResponseInput.ignored();
+    if (componentInstances.isEmpty) return ResponseInput.ignored();
 
-    final List<InteractableComponent> dirtyComponents = [];
+    final List<InteractableComponentInstance> dirtyComponents = [];
 
     int nextIndex = currentIndex;
     final int direction = shiftPressed ? -1 : 1;
-    final int total = components.length;
+    final int total = componentInstances.length;
 
     if (nextIndex == -1) {
       nextIndex = shiftPressed ? 0 : -1;
@@ -41,7 +40,7 @@ class FocusManager implements InputHandler {
 
     for (int attempt = 0; attempt < total; attempt++) {
       nextIndex = (nextIndex + direction + total) % total;
-      if (components[nextIndex].isFocusable) {
+      if (componentInstances[nextIndex].isFocusable) {
         // blur previous component
         if (currentComponent != null) {
           currentComponent!.blur();
@@ -49,7 +48,7 @@ class FocusManager implements InputHandler {
         }
 
         // focus on new component
-        currentComponent = components[nextIndex];
+        currentComponent = componentInstances[nextIndex];
         currentIndex = nextIndex;
         currentComponent!.focus();
         dirtyComponents.add(currentComponent!);
@@ -65,11 +64,11 @@ class FocusManager implements InputHandler {
   }
 
   ResponseInput _handleMouseInput(MouseEvent event) {
-    final dirtyComponents = <InteractableComponent>[];
-    InteractableComponent? hoveredNow;
+    final dirtyComponents = <InteractableComponentInstance>[];
+    InteractableComponentInstance? hoveredNow;
 
-    for (int i = components.length - 1; i >= 0; i--) {
-      final component = components[i];
+    for (int i = componentInstances.length - 1; i >= 0; i--) {
+      final component = componentInstances[i];
 
       if (!component.isHoverable) continue;
 
@@ -127,8 +126,9 @@ class FocusManager implements InputHandler {
     return ResponseInput.ignored();
   }
 
-  bool _isWithinBounds(int x, int y, InteractableComponent component) {
-    final bounds = component.bounds;
+  bool _isWithinBounds(
+      int x, int y, InteractableComponentInstance componentInstance) {
+    final bounds = componentInstance.bounds;
 
     final adjustedX = bounds.x + context.cursorX;
     final adjustedY = bounds.y + context.cursorY;

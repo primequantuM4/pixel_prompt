@@ -2,7 +2,9 @@ import 'dart:math';
 
 import 'package:pixel_prompt/common/response_input.dart';
 import 'package:pixel_prompt/core/canvas_buffer.dart';
-import 'package:pixel_prompt/core/interactable_component.dart';
+import 'package:pixel_prompt/core/component.dart';
+import 'package:pixel_prompt/core/component_instance.dart';
+import 'package:pixel_prompt/core/interactable_component_instance.dart';
 import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/core/size.dart';
 import 'package:pixel_prompt/events/input_event.dart';
@@ -10,30 +12,55 @@ import 'package:pixel_prompt/events/input_event.dart';
 import 'colors.dart';
 import 'text_component_style.dart';
 
-class TextfieldComponent extends InteractableComponent {
-  String value = "";
-  TextComponentStyle textStyle;
+class TextFieldComponent extends Component {
+  final String? initialText;
+  final AnsiColorType? foreground;
+  final AnsiColorType? background;
+  final TextComponentStyle? textStyle;
+  final String? placeHolder;
+  final TextComponentStyle? placeHolderStyle;
+  final TextComponentStyle? hoverStyle;
+  final bool obsecure;
+  final int maxWidth;
+
   final Function(String)? onSubmitted;
   final Function(String)? onChanged;
-  final String? placeHolder;
+
+  const TextFieldComponent({
+    this.onChanged,
+    this.onSubmitted,
+    this.initialText,
+    this.foreground,
+    this.background,
+    this.textStyle,
+    this.placeHolder,
+    this.placeHolderStyle,
+    this.hoverStyle,
+    this.obsecure = false,
+    this.maxWidth = 20,
+  });
+
+  @override
+  ComponentInstance createInstance() => _TextfieldComponentInstance(this);
+}
+
+class _TextfieldComponentInstance extends InteractableComponentInstance {
+  String value;
+
+  final TextFieldComponent component;
+
+  TextComponentStyle textStyle;
   final TextComponentStyle placeHolderStyle;
-  final int maxWidth;
   int cursorIndex = 0;
 
   final TextComponentStyle hoverStyle;
 
-  TextfieldComponent({
-    TextComponentStyle? textStyle,
-    TextComponentStyle? placeHolderStyle,
-    TextComponentStyle? hoverStyle,
-    this.onSubmitted,
-    this.onChanged,
-    this.placeHolder,
-    this.maxWidth = 20,
-  })  : textStyle = textStyle ?? TextComponentStyle(),
-        placeHolderStyle = placeHolderStyle ??
+  _TextfieldComponentInstance(this.component)
+      : value = component.initialText ?? '',
+        textStyle = component.textStyle ?? TextComponentStyle(),
+        placeHolderStyle = component.placeHolderStyle ??
             TextComponentStyle().foreground(ColorRGB(128, 128, 128)),
-        hoverStyle = hoverStyle ?? TextComponentStyle();
+        hoverStyle = component.hoverStyle ?? TextComponentStyle();
 
   @override
   bool get isFocusable => true;
@@ -50,7 +77,7 @@ class TextfieldComponent extends InteractableComponent {
     buffer.flushArea(bounds);
 
     final prefix = isFocused ? "|> " : "   ";
-    final inputAreaWidth = maxWidth - prefix.length;
+    final inputAreaWidth = component.maxWidth - prefix.length;
 
     final int start =
         (cursorIndex > inputAreaWidth) ? cursorIndex - inputAreaWidth : 0;
@@ -60,17 +87,18 @@ class TextfieldComponent extends InteractableComponent {
       min(value.length, start + inputAreaWidth),
     );
 
-    final String textToShow = value.isEmpty && placeHolder != null
-        ? prefix + placeHolder!
+    final String textToShow = value.isEmpty && component.placeHolder != null
+        ? prefix + component.placeHolder!
         : prefix + visibleText;
 
-    final style = value.isEmpty && placeHolder != null
+    final style = value.isEmpty && component.placeHolder != null
         ? placeHolderStyle
         : (isHovered || isFocused)
             ? hoverStyle
             : textStyle;
 
-    buffer.drawAt(bounds.x, bounds.y, textToShow.padRight(maxWidth), style);
+    buffer.drawAt(
+        bounds.x, bounds.y, textToShow.padRight(component.maxWidth), style);
 
     if (isFocused) {
       final int cursorScreenX =
@@ -106,7 +134,7 @@ class TextfieldComponent extends InteractableComponent {
     }
 
     if (input != null && input == '\n') {
-      onSubmitted?.call(value);
+      component.onSubmitted?.call(value);
       blur();
     } else if (event.code == KeyCode.backspace) {
       if (cursorIndex > 0) {
@@ -123,7 +151,7 @@ class TextfieldComponent extends InteractableComponent {
       cursorIndex += len;
     }
 
-    onChanged?.call(value);
+    component.onChanged?.call(value);
 
     return ResponseInput(
       commands: ResponseCommands.none,
@@ -138,9 +166,7 @@ class TextfieldComponent extends InteractableComponent {
   }
 
   @override
-  void onBlur() {
-    // TODO: implement onBlur
-  }
+  void onBlur() {}
 
   @override
   void onFocus() {}
@@ -149,7 +175,7 @@ class TextfieldComponent extends InteractableComponent {
   int fitHeight() => 1;
 
   @override
-  int fitWidth() => maxWidth;
+  int fitWidth() => component.maxWidth;
 
   @override
   void onHover() {}

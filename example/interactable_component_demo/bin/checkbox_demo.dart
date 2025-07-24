@@ -1,7 +1,13 @@
-import 'package:pixel_prompt/common/border.dart';
 import 'package:pixel_prompt/components/border_style.dart';
+import 'package:pixel_prompt/components/checkbox.dart';
+import 'package:pixel_prompt/components/checkbox_list.dart';
+import 'package:pixel_prompt/components/colors.dart';
+import 'package:pixel_prompt/components/column.dart';
+import 'package:pixel_prompt/components/row.dart';
+import 'package:pixel_prompt/components/text_component.dart';
+import 'package:pixel_prompt/components/text_component_style.dart';
+import 'package:pixel_prompt/core/app.dart';
 import 'package:pixel_prompt/core/axis.dart';
-import 'package:pixel_prompt/pixel_prompt.dart';
 
 void main() {
   App(

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:pixel_prompt/core/component_instance.dart';
+import 'package:pixel_prompt/core/parent_component_instance.dart';
 import 'package:pixel_prompt/handler/input_handler.dart';
 import 'package:pixel_prompt/core/axis.dart';
 import 'package:pixel_prompt/core/canvas_buffer.dart';
@@ -32,7 +34,115 @@ import 'package:pixel_prompt/terminal/terminal_functions.dart';
 ///
 /// The [run] extension method initializes the terminal screen, builds the layout,
 /// configures focus and input handlers, and renders the first frame.
-class App extends Component with ParentComponent {
+
+class App extends Component {
+  final List<Component> children;
+  final Axis layoutDirection;
+
+  static const String _tag = 'App';
+  const App({required this.children, this.layoutDirection = Axis.vertical});
+
+  Axis get direction => layoutDirection;
+
+  @override
+  ComponentInstance createInstance() => AppInstance(this);
+}
+
+class AppInstance extends ParentComponentInstance {
+  final App component;
+  List<ComponentInstance> _childrenInstance;
+  final List<ComponentInstance> initialChildren;
+
+  AppInstance(this.component)
+      : _childrenInstance = component.children
+            .map((Component comp) => comp.createInstance())
+            .toList(),
+        initialChildren = component.children
+            .map((Component comp) => comp.createInstance())
+            .toList(),
+        super(component) {
+    AppInstance.instance = this;
+  }
+  @override
+  List<ComponentInstance> get childrenInstance => _childrenInstance;
+
+  static const String _tag = 'App';
+  static late AppInstance instance;
+
+  bool shouldRebuild = false;
+
+  void requestRebuild() {
+    shouldRebuild = true;
+  }
+
+  @override
+  int fitHeight() {
+    // TODO: implement fitHeight
+    throw UnimplementedError();
+  }
+
+  @override
+  int fitWidth() {
+    // TODO: implement fitWidth
+    throw UnimplementedError();
+  }
+
+  @override
+  Size measure(Size maxSize) {
+    int totalHeight = 0;
+    int maxWidth = 0;
+
+    for (final child in _childrenInstance) {
+      if (child.position.positionType == PositionType.absolute) continue;
+
+      final childSize = child.measure(maxSize);
+      totalHeight += childSize.height;
+
+      maxWidth = max(childSize.width, maxWidth);
+    }
+
+    return Size(width: maxWidth, height: totalHeight);
+  }
+
+  @override
+  void render(CanvasBuffer buffer, Rect bounds) {
+    final LayoutEngine engine = LayoutEngine(
+      rootInstance: this,
+      children: _childrenInstance,
+      direction: direction,
+      bounds: bounds,
+    );
+
+    final maxSize = Size(
+        width: TerminalFunctions.hasTerminal
+            ? TerminalFunctions.terminalWidth
+            : 80,
+        height: TerminalFunctions.hasTerminal
+            ? TerminalFunctions.terminalHeight
+            : 20);
+    final positionedItems = engine.compute(maxSize);
+    _renderPositionedComponents(buffer, positionedItems);
+  }
+
+  void _renderPositionedComponents(CanvasBuffer buffer,
+      List<PositionedComponentInstance> positionedComponents) {
+    for (var item in positionedComponents) {
+      final component = item.componentInstance;
+      if (item.parentComponentInstance != null) {
+        Logger.trace(
+          _tag,
+          "Component instance of $component is being rendered by their parent component",
+        );
+        continue;
+      }
+
+      Logger.trace(_tag, "Component instance of $component being rendered");
+      component.render(buffer, item.rect);
+    }
+  }
+}
+
+/* class App extends Component with ParentComponent {
   /// The list of components that make up the UI.
   @override
   List<Component> children;
@@ -40,7 +150,6 @@ class App extends Component with ParentComponent {
   /// The layout direction for arranging [children] — vertical or horizontal.
   final Axis direction;
 
-  static const String _tag = 'App';
   static late App instance;
   final List<Component> initialChildren;
 
@@ -85,7 +194,7 @@ class App extends Component with ParentComponent {
   @override
   void render(CanvasBuffer buffer, Rect bounds) {
     final LayoutEngine engine = LayoutEngine(
-      root: this,
+      rootInstance: this,
       children: children,
       direction: direction,
       bounds: bounds,
@@ -102,11 +211,11 @@ class App extends Component with ParentComponent {
     _renderPositionedComponents(buffer, positionedItems);
   }
 
-  void _renderPositionedComponents(
-      CanvasBuffer buffer, List<PositionedComponent> positionedComponents) {
+  void _renderPositionedComponents(CanvasBuffer buffer,
+      List<PositionedComponentInstance> positionedComponents) {
     for (var item in positionedComponents) {
-      final component = item.component;
-      if (item.parentComponent != null) {
+      final component = item.componentInstance;
+      if (item.parentComponentInstance != null) {
         Logger.trace(
           _tag,
           "Component instance of $component is being rendered by their parent component",
@@ -136,7 +245,7 @@ class App extends Component with ParentComponent {
     // TODO: Implement once dynamic sizing (flex/grow/shrink) is supported
     throw UnimplementedError();
   }
-}
+} */
 
 /// Extension that runs the TUI application by bootstrapping all core managers.
 ///
@@ -164,14 +273,16 @@ extension AppRunner on App {
   /// 3. Initializes input handling, focus, and interactivity.
   /// 4. Measures layout and renders the component tree.
   void run() async {
+    final AppInstance appInstance = createInstance() as AppInstance;
+
     final rawTerminalWidth =
         TerminalFunctions.hasTerminal ? TerminalFunctions.terminalWidth : 80;
     final rawTerminalHeight =
         TerminalFunctions.hasTerminal ? TerminalFunctions.terminalHeight : 20;
 
     final LayoutEngine engine = LayoutEngine(
-      root: this,
-      children: children,
+      rootInstance: appInstance,
+      children: appInstance.childrenInstance,
       direction: direction,
       bounds:
           Rect(x: 0, y: 0, width: rawTerminalWidth, height: rawTerminalHeight),
@@ -214,7 +325,7 @@ extension AppRunner on App {
 
     final InteractableRegistry registry = InteractableRegistry();
 
-    registry.registerInteractables(this, focusManager, renderer);
+    registry.registerInteractables(appInstance, focusManager, renderer);
 
     final List<InputHandler> handlers = [
       focusManager,
@@ -226,7 +337,7 @@ extension AppRunner on App {
       dispatcher.registerHandler(handler);
     }
 
-    final measuredSize = measure(
+    final measuredSize = appInstance.measure(
       Size(width: rawTerminalWidth, height: rawTerminalHeight),
     );
 
@@ -238,7 +349,7 @@ extension AppRunner on App {
     );
 
     Logger.trace(App._tag, 'Writing Components to Canvas Buffer');
-    render(buffer, bounds);
+    appInstance.render(buffer, bounds);
     Logger.trace(
       App._tag,
       'READY',
@@ -246,19 +357,20 @@ extension AppRunner on App {
     buffer.render();
 
     Timer.periodic(Duration(milliseconds: 16), (timer) {
-      if (shouldRebuild || renderer.needsRecompute) {
-        shouldRebuild = false;
-        children = initialChildren; // reassign to reset any tree state
+      if (appInstance.shouldRebuild || renderer.needsRecompute) {
+        appInstance.shouldRebuild = false;
+        appInstance._childrenInstance =
+            appInstance.initialChildren; // reassign to reset any tree state
 
         buffer.clear();
         buffer.render();
 
         focusManager.reset();
-        registry.registerInteractables(this, focusManager, renderer);
+        registry.registerInteractables(appInstance, focusManager, renderer);
 
         final engine = LayoutEngine(
-          root: this,
-          children: children,
+          rootInstance: appInstance,
+          children: appInstance.childrenInstance,
           direction: direction,
           bounds: Rect(x: 0, y: 0, width: bounds.width, height: bounds.height),
         );
@@ -278,7 +390,7 @@ extension AppRunner on App {
 
         renderer.requestRecompute(bounds);
         renderer.needsRecompute = false;
-        _renderPositionedComponents(buffer, items);
+        appInstance._renderPositionedComponents(buffer, items);
         buffer.render();
       }
     });

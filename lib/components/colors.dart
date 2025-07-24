@@ -1,41 +1,49 @@
 abstract class AnsiColorType {
   String get fg;
   String get bg;
+
+  AnsiColorType dimmed();
 }
 
-enum Colors implements AnsiColorType {
-  black(30, 40),
-  red(31, 41),
-  green(32, 42),
-  yellow(33, 43),
-  blue(34, 44),
-  magenta(35, 45),
-  cyan(36, 46),
-  white(37, 47),
-  highBlack(90, 100),
-  highRed(91, 101),
-  highGreen(92, 102),
-  highYellow(93, 103),
-  highBlue(94, 104),
-  highMagenta(95, 105),
-  highCyan(96, 106),
-  highWhite(97, 107);
-
+class Colors implements AnsiColorType {
   final int code;
   final int bgCode;
-  const Colors(this.code, this.bgCode);
+  final bool _dim;
+
+  const Colors._(this.code, this.bgCode, [this._dim = false]);
+
+  static const black = Colors._(30, 40);
+  static const red = Colors._(31, 41);
+  static const green = Colors._(32, 42);
+  static const yellow = Colors._(33, 43);
+  static const blue = Colors._(34, 44);
+  static const magenta = Colors._(35, 45);
+  static const cyan = Colors._(36, 46);
+  static const white = Colors._(37, 47);
+
+  static const highBlack = Colors._(90, 100);
+  static const highRed = Colors._(91, 101);
+  static const highGreen = Colors._(92, 102);
+  static const highYellow = Colors._(93, 103);
+  static const highBlue = Colors._(94, 104);
+  static const highMagenta = Colors._(95, 105);
+  static const highCyan = Colors._(96, 106);
+  static const highWhite = Colors._(97, 107);
 
   @override
-  String get fg => '$code';
+  String get fg => _dim ? '2;$code' : '$code';
+  @override
+  String get bg => _dim ? '2;$bgCode' : '$bgCode';
 
   @override
-  String get bg => '$bgCode';
+  Colors dimmed() => Colors._(code, bgCode, true);
 }
 
 class ColorRGB implements AnsiColorType {
   final int r, g, b;
   const ColorRGB(this.r, this.g, this.b);
 
+  @override
   ColorRGB dimmed({dimFactor = 0.5}) {
     return ColorRGB(
       (r * dimFactor).round(),

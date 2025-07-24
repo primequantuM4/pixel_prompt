@@ -1,12 +1,9 @@
 import 'dart:io';
 
-import 'package:pixel_prompt/components/button_component.dart';
 import 'package:pixel_prompt/components/colors.dart';
 import 'package:pixel_prompt/components/font_style.dart';
-import 'package:pixel_prompt/components/text_component.dart';
 import 'package:pixel_prompt/components/text_component_style.dart';
 import 'package:pixel_prompt/core/buffer_cell.dart';
-import 'package:pixel_prompt/core/component.dart';
 import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/logger/logger.dart';
 
@@ -176,7 +173,7 @@ class CanvasBuffer {
     }
   }
 
-  void printComponentTree(Component comp, [int level = 0]) {
+  /* void printComponentTree(Component comp, [int level = 0]) {
     print(
         '${' ' * level * 2}${comp.runtimeType} ${comp is TextComponent ? comp.text : comp is ButtonComponent ? comp.label : ''}');
     if (comp is ParentComponent) {
@@ -184,7 +181,7 @@ class CanvasBuffer {
         printComponentTree(child, level + 1);
       }
     }
-  }
+  } */
 
   /// Renders the entire buffer content to the terminal.
   ///

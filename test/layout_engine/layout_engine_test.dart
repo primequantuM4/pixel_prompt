@@ -69,7 +69,7 @@ void main() {
       ); // arbitrary number of width and height;
       final DummyComponent dummyComponent = DummyComponent(children: children);
       final engine = LayoutEngine(
-        root: dummyComponent,
+        rootInstance: dummyComponent,
         children: children,
         direction: direction,
         bounds: bounds,
