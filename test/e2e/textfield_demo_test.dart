@@ -6,19 +6,19 @@ import 'package:test/test.dart';
 
 import '../utils/test_utils.dart';
 
-final _traceRegex =
-    RegExp(r'^==PIXEL_PROMPT_TRACING_(\w+)==\[(.*?)\]\[(.*?)\] (.*)$');
+final _traceRegex = RegExp(
+  r'^==PIXEL_PROMPT_TRACING_(\w+)==\[(.*?)\]\[(.*?)\] (.*)$',
+);
 
 void main() {
   group('Textboxfield E2E', () {
     test('Should match golden file before and after toggle', () async {
       final process = await Process.start(
-          'dart',
-          [
-            'example/interactable_component_demo/bin/textfield_demo.dart',
-          ],
-          environment: {'PIXEL_PROMPT_TRACING': '1'},
-          runInShell: true);
+        'dart',
+        ['example/interactable_component_demo/bin/textfield_demo.dart'],
+        environment: {'PIXEL_PROMPT_TRACING': '1'},
+        runInShell: true,
+      );
 
       final outputLines = <String>[];
       final completer = Completer<void>();
@@ -29,99 +29,100 @@ void main() {
       late final StreamSubscription<String> stderrSub;
       bool locked = false;
 
+      final frames = <String>[];
+
       stdoutSub = process.stdout
           .transform(utf8.decoder)
           .transform(const LineSplitter())
           .listen((line) {
-        if (!_traceRegex.hasMatch(line) && !locked) {
-          outputLines.add(line);
-        }
-      });
+            if (!_traceRegex.hasMatch(line) && !locked) {
+              outputLines.add(line);
+            }
+          });
 
       stderrSub = process.stderr
           .transform(utf8.decoder)
           .transform(const LineSplitter())
           .listen((line) async {
-        final match = _traceRegex.firstMatch(line);
+            final match = _traceRegex.firstMatch(line);
 
-        if (match == null || locked) return;
+            if (match == null || locked) return;
 
-        // 1 -> level, ie logger TRACE, WARN, INFO, ERROR
-        // 2 -> ISO timestamp
-        // 3 -> tag, ie App, CanvasBuffer etc..
+            // 1 -> level, ie logger TRACE, WARN, INFO, ERROR
+            // 2 -> ISO timestamp
+            // 3 -> tag, ie App, CanvasBuffer etc..
 
-        final message = match[4];
+            final message = match[4];
 
-        switch (step) {
-          case 0:
             if (message == 'RENDERED') {
-              final before = outputLines.join('\n');
-
-              await compareOrUpdateGolden(
-                path: 'test/golden/textfield_before_write.txt',
-                actual: before,
-              );
-
-              process.stdin.write('\t');
+              print(frames);
+              frames.add(outputLines.join('\n'));
               outputLines.clear();
-              step++;
-            }
-            break;
-          case 1:
-            locked = true;
-            const valueInserted = 'John Doe';
-
-            for (final char in valueInserted.split('')) {
-              process.stdin.write(char);
-              await Future.delayed(Duration(milliseconds: 100));
             }
 
-            process.stdin.write('\t');
-            await Future.delayed(Duration(milliseconds: 100));
+            switch (step) {
+              case 0:
+                if (message == 'RENDERED') {
+                  await compareOrUpdateGolden(
+                    path: 'test/golden/textfield_before_write.txt',
+                    actual: frames.last,
+                  );
 
-            const emailValue = 'john.example@gmail.com';
-            for (final char in emailValue.split('')) {
-              process.stdin.write(char);
-              await Future.delayed(Duration(milliseconds: 100));
+                  process.stdin.write('\t');
+                  step++;
+                }
+                break;
+              case 1:
+                locked = true;
+                const valueInserted = 'John Doe';
+
+                for (final char in valueInserted.split('')) {
+                  process.stdin.write(char);
+                  await Future.delayed(Duration(milliseconds: 100));
+                }
+
+                process.stdin.write('\t');
+                await Future.delayed(Duration(milliseconds: 100));
+
+                const emailValue = 'john.example@gmail.com';
+                for (final char in emailValue.split('')) {
+                  process.stdin.write(char);
+                  await Future.delayed(Duration(milliseconds: 100));
+                }
+
+                step++;
+
+                locked = false;
+                process.stdin.write('\n');
+                break;
+
+              case 2:
+                if (message == 'RENDERED') {
+                  await compareOrUpdateGolden(
+                    path: 'test/golden/textfield_after_write.txt',
+                    actual: frames.last,
+                  );
+
+                  completer.complete();
+                  break;
+                }
             }
+          });
 
-            outputLines.clear();
-            step++;
-
-            locked = false;
-            process.stdin.write('\n');
-            break;
-
-          case 2:
-            if (message == 'RENDERED') {
-              final after = outputLines.join('\n');
-              await compareOrUpdateGolden(
-                path: 'test/golden/textfield_after_write.txt',
-                actual: after,
-              );
-
-              await Future.delayed(Duration(milliseconds: 100));
-              process.stdin.write(':');
-              await Future.delayed(Duration(milliseconds: 100));
-              process.stdin.write('q');
-              await Future.delayed(Duration(milliseconds: 100));
-              process.stdin.write('\n');
-              await Future.delayed(Duration(milliseconds: 100));
-
-              break;
+      try {
+        await Future.any([
+          completer.future,
+          process.exitCode.then((code) {
+            if (!completer.isCompleted) {
+              completer.completeError('Exited early with code $code');
             }
-        }
-      });
-
-      await process.exitCode.then((code) {
-        expect(code, 0);
-        completer.complete();
-      });
-      await completer.future.timeout(Duration(seconds: 50));
-      await stdoutSub.cancel();
-      await stderrSub.cancel();
-
-      process.kill();
+          }),
+        ]).timeout(const Duration(seconds: 15));
+      } finally {
+        await stdoutSub.cancel();
+        await stderrSub.cancel();
+        process.kill();
+      }
     });
   });
 }

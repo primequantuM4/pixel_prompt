@@ -196,9 +196,10 @@ class CanvasBuffer {
       stdout.write('\x1B[$renderY;${renderX}H');
     }
 
+    final buffer = StringBuffer();
+
     for (int y = 0; y < _screenBuffer.length; y++) {
       final row = _screenBuffer[y];
-      final buffer = StringBuffer();
       BufferCell? lastCell;
 
       for (final cell in row) {
@@ -212,8 +213,8 @@ class CanvasBuffer {
 
       buffer.write('\x1B[0m');
       buffer.write('\n');
-      stdout.write(buffer.toString());
     }
+    stdout.write(buffer.toString());
 
     Logger.trace(_tag, 'RENDERED');
   }
