@@ -93,7 +93,7 @@ class _StopWatchState extends ComponentState<StopWatchComponent> {
   void start() {
     if (component.startCounting) return;
     component.startCounting = true;
-    component.millisecondTimer = Timer.periodic(Duration(milliseconds: 100), (
+    component.millisecondTimer = Timer.periodic(Duration(milliseconds: 10), (
       _,
     ) {
       setState(() {
