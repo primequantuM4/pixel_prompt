@@ -17,7 +17,6 @@ void main() {
         'dart',
         ['example/interactable_component_demo/bin/textfield_demo.dart'],
         environment: {'PIXEL_PROMPT_TRACING': '1'},
-        runInShell: true,
       );
 
       final outputLines = <String>[];
@@ -55,7 +54,11 @@ void main() {
             final message = match[4];
 
             if (message == 'RENDERED') {
-              print(frames);
+              await stdoutSub.asFuture<void>().timeout(
+                Duration.zero,
+                onTimeout: () {},
+              );
+
               frames.add(outputLines.join('\n'));
               outputLines.clear();
             }
@@ -66,6 +69,7 @@ void main() {
                   await compareOrUpdateGolden(
                     path: 'test/golden/textfield_before_write.txt',
                     actual: frames.last,
+                    process: process,
                   );
 
                   process.stdin.write('\t');
@@ -101,6 +105,7 @@ void main() {
                   await compareOrUpdateGolden(
                     path: 'test/golden/textfield_after_write.txt',
                     actual: frames.last,
+                    process: process,
                   );
 
                   completer.complete();
