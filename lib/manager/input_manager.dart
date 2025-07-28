@@ -29,7 +29,7 @@ class InputManager {
   final List<int> _cursorInputBuffer = [];
 
   InputManager({required InputDispatcher dispatcher})
-      : _dispatcher = dispatcher {
+    : _dispatcher = dispatcher {
     _configureStdin();
     _enableMouseInput();
 
@@ -52,12 +52,22 @@ class InputManager {
     }
   }
 
-  void _enableMouseInput() {
-    stdout.write('\x1B[?1006h\x1B[?1003h');
+  void _enableMouseInput() async {
+    bool cursorSupported = await isCursorSupported();
+
+    if (cursorSupported) {
+      stdout.write('\x1B[?1006h\x1B[?1003h');
+    } else {
+      Logger.warn(
+        _tag,
+        'Mouse Input not supported ignore if in test environment',
+      );
+    }
   }
 
-  Future<bool> supportsCursorResponse(
-      {Duration timeout = const Duration(milliseconds: 200)}) {
+  Future<bool> supportsCursorResponse({
+    Duration timeout = const Duration(milliseconds: 200),
+  }) {
     final completer = Completer<bool>();
     getCursorPosition((x, y) {
       if (!completer.isCompleted) {
