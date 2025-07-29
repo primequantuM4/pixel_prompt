@@ -52,17 +52,8 @@ class InputManager {
     }
   }
 
-  void _enableMouseInput() async {
-    bool cursorSupported = await isCursorSupported();
-
-    if (cursorSupported) {
-      stdout.write('\x1B[?1006h\x1B[?1003h');
-    } else {
-      Logger.warn(
-        _tag,
-        'Mouse Input not supported ignore if in test environment',
-      );
-    }
+  void _enableMouseInput() {
+    stdout.write('\x1B[?1006h\x1B[?1003h');
   }
 
   Future<bool> supportsCursorResponse({

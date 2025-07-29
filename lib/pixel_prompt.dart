@@ -9,7 +9,14 @@ export 'components/text_component.dart';
 export 'core/app.dart';
 export 'components/checkbox_list.dart';
 export 'components/checkbox.dart';
-
-// TODO: remove the following packages to not be exposed to developer when an entry point is developed for the framework
+export 'core/stateful_component.dart';
+export 'core/component_state.dart';
+export 'core/buildable_component.dart';
+export 'core/edge_insets.dart';
+export 'core/axis.dart';
+export 'core/component.dart';
+export 'components/border_style.dart';
+export 'components/text_field_component.dart';
+export 'components/button_component.dart';
 export 'core/rect.dart';
 export 'core/canvas_buffer.dart';
