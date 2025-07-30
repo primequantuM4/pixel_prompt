@@ -29,14 +29,10 @@ class BufferCell {
   /// and a set of [styles].
   ///
   /// If [styles] is not provided, it defaults to an empty set.
-  BufferCell({
-    required this.char,
-    this.fg,
-    this.bg,
-    Set<FontStyle>? styles,
-  }) : styles = {
-          ...(styles ?? {})
-        }; // copying since TextComponentStyle is not modifiable
+  BufferCell({required this.char, this.fg, this.bg, Set<FontStyle>? styles})
+    : styles = {
+        ...(styles ?? {}),
+      }; // copying since TextComponentStyle is not modifiable
 
   /// Clears the contents of this cell.
   ///
@@ -66,6 +62,8 @@ class BufferCell {
   @override
   int get hashCode =>
       Object.hash(char, fg, bg, Object.hashAllUnordered(styles));
+
+  BufferCell copy() => BufferCell(char: char, fg: fg, bg: bg);
 
   /// Compares two sets for unordered equality.
   bool _setEquals(Set a, Set b) {

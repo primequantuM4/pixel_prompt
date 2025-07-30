@@ -27,7 +27,6 @@ class RenderManager {
     if (needsRecompute || AppInstance.instance.shouldRebuild) return;
     for (var component in _dirtyComponents) {
       buffer.clearBufferArea(component.bounds);
-      buffer.flushArea(component.bounds);
       component.render(buffer, component.bounds);
     }
 

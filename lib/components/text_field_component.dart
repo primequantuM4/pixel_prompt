@@ -74,7 +74,6 @@ class _TextfieldComponentInstance extends InteractableComponentInstance {
   @override
   void render(CanvasBuffer buffer, Rect bounds) {
     buffer.clearBufferArea(bounds);
-    buffer.flushArea(bounds);
 
     final prefix = isFocused ? "|> " : "   ";
     final inputAreaWidth = component.maxWidth - prefix.length;
