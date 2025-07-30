@@ -48,14 +48,21 @@ class CanvasBuffer {
   /// Internal 2D grid storing the screen cells.
   List<List<BufferCell>> _screenBuffer;
 
+  /// Internal previous 2D grid for storing and comparing with current screen cells.
+  List<List<BufferCell>> _previousFrame;
+
   /// Creates a [CanvasBuffer] with the specified [width] and [height].
   ///
   /// Initializes the internal buffer with empty spaces.
   CanvasBuffer({required this.width, required this.height})
-      : _screenBuffer = List.generate(
-          height,
-          (_) => List.filled(width, BufferCell(char: ' ')),
-        );
+    : _screenBuffer = List.generate(
+        height,
+        (_) => List.filled(width, BufferCell(char: ' ')),
+      ),
+      _previousFrame = List.generate(
+        height,
+        (_) => List.filled(width, BufferCell(char: '')),
+      );
 
   /// Sets the original terminal cursor offset for relative rendering.
   ///
@@ -70,15 +77,19 @@ class CanvasBuffer {
   }
 
   void updateDimensions(int width, int height) {
+    if (this.width == width && this.height == height) return;
+
     this.width = width;
     this.height = height;
 
     _screenBuffer = List.generate(
       height,
-      (_) => List.filled(
-        width,
-        BufferCell(char: ' '),
-      ),
+      (_) => List.filled(width, BufferCell(char: ' ')),
+    );
+
+    _previousFrame = List.generate(
+      height,
+      (_) => List.filled(width, BufferCell(char: '')),
     );
   }
 
@@ -95,8 +106,9 @@ class CanvasBuffer {
     Set<FontStyle>? styles,
   }) {
     if (x >= 0 && x < width && y >= 0 && y < height) {
-      final Set<FontStyle> effectiveStyle =
-          (char.trim().isEmpty) ? {} : (styles ?? {});
+      final Set<FontStyle> effectiveStyle = (char.trim().isEmpty)
+          ? {}
+          : (styles ?? {});
       _screenBuffer[y][x] = BufferCell(
         char: char,
         fg: fg,
@@ -129,7 +141,6 @@ class CanvasBuffer {
     for (var row in _screenBuffer) {
       for (final cell in row) {
         cell.clear();
-        stdout.write(' ');
       }
     }
   }
@@ -189,33 +200,32 @@ class CanvasBuffer {
   /// optimizes by grouping cells with identical styles, and manages cursor visibility.
   void render() {
     hideCursor();
-    final renderY = isFullscreen ? 1 : cursorOriginalY;
-    final renderX = isFullscreen ? 1 : cursorOriginalX;
-
-    if (renderX != -1 && renderX != -1) {
-      stdout.write('\x1B[$renderY;${renderX}H');
-    }
-
     final buffer = StringBuffer();
 
+    final baseY = isFullscreen ? 1 : cursorOriginalY;
+    final baseX = isFullscreen ? 1 : cursorOriginalX;
+
     for (int y = 0; y < _screenBuffer.length; y++) {
-      final row = _screenBuffer[y];
-      BufferCell? lastCell;
+      for (int x = 0; x < _screenBuffer[y].length; x++) {
+        final curr = _screenBuffer[y][x];
+        final prev = _previousFrame[y][x];
 
-      for (final cell in row) {
-        if (lastCell == null || !_sameStyle(cell, lastCell)) {
-          buffer.write('\x1B[0');
-          buffer.write(_ansiCode(cell));
-          lastCell = cell;
+        if (!_cellEquals(curr, prev)) {
+          final cursorY = baseY + y;
+          final cursorX = baseX + x;
+
+          buffer.write('\x1B[$cursorY;${cursorX}H'); // Move cursor
+          buffer.write('\x1B[0'); // Reset styles
+          buffer.write(_ansiCode(curr)); // Apply style
+          buffer.write(curr.char); // Write char
+
+          _previousFrame[y][x] = curr.copy();
         }
-        buffer.write(cell.char);
       }
-
-      buffer.write('\x1B[0m');
-      buffer.write('\n');
     }
-    stdout.write(buffer.toString());
 
+    buffer.write('\x1B[0m'); // Reset styles at the end
+    stdout.write(buffer.toString());
     Logger.trace(_tag, 'RENDERED');
   }
 
@@ -271,6 +281,9 @@ class CanvasBuffer {
     if (ansiCode.isEmpty) return 'm';
     return ';${ansiCode}m';
   }
+
+  bool _cellEquals(BufferCell currentCell, BufferCell previousCell) =>
+      currentCell == previousCell;
 
   // ========== FOR TESTING PURPOSES ==========
 

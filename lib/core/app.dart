@@ -261,7 +261,6 @@ extension AppRunner on App {
             appInstance.initialChildren; // reassign to reset any tree state
 
         buffer.clear();
-        buffer.render();
 
         focusManager.reset();
         registry.registerInteractables(appInstance, focusManager, renderer);
