@@ -235,7 +235,6 @@ class CanvasBuffer {
         buffer.write(curr.char);
 
         _previousFrame[y][x] = curr.copy();
-        lastCursorX = (lastCursorX ?? 0) + 1;
       }
     }
 
