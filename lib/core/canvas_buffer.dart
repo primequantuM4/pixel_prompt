@@ -205,26 +205,41 @@ class CanvasBuffer {
     final baseY = isFullscreen ? 1 : cursorOriginalY;
     final baseX = isFullscreen ? 1 : cursorOriginalX;
 
+    int? lastCursorX, lastCursorY;
+
     for (int y = 0; y < _screenBuffer.length; y++) {
+      BufferCell? lastCell;
       for (int x = 0; x < _screenBuffer[y].length; x++) {
         final curr = _screenBuffer[y][x];
         final prev = _previousFrame[y][x];
 
-        if (!_cellEquals(curr, prev)) {
-          final cursorY = baseY + y;
-          final cursorX = baseX + x;
+        if (_cellEquals(curr, prev)) continue;
 
-          buffer.write('\x1B[$cursorY;${cursorX}H'); // Move cursor
-          buffer.write('\x1B[0'); // Reset styles
-          buffer.write(_ansiCode(curr)); // Apply style
-          buffer.write(curr.char); // Write char
+        final cursorY = baseY + y;
+        final cursorX = baseX + x;
 
-          _previousFrame[y][x] = curr.copy();
+        final shouldCursorMove =
+            (cursorY != lastCursorY) || (cursorX != (lastCursorX ?? -1) + 1);
+
+        if (baseY != -1 && shouldCursorMove) {
+          buffer.write('\x1B[$cursorY;${cursorX}H');
+          lastCursorY = cursorY;
+          lastCursorX = cursorX;
         }
+
+        if (lastCell == null || !_sameStyle(curr, lastCell)) {
+          buffer.write('\x1B[0');
+          buffer.write(_ansiCode(curr));
+          lastCell = curr;
+        }
+        buffer.write(curr.char);
+
+        _previousFrame[y][x] = curr.copy();
+        lastCursorX = (lastCursorX ?? 0) + 1;
       }
     }
 
-    buffer.write('\x1B[0m'); // Reset styles at the end
+    buffer.write('\x1B[0m');
     stdout.write(buffer.toString());
     Logger.trace(_tag, 'RENDERED');
   }
