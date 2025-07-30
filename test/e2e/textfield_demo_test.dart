@@ -30,14 +30,11 @@ void main() {
 
       final frames = <String>[];
 
-      stdoutSub = process.stdout
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen((line) {
-            if (!_traceRegex.hasMatch(line) && !locked) {
-              outputLines.add(line);
-            }
-          });
+      stdoutSub = process.stdout.transform(utf8.decoder).listen((line) {
+        if (!_traceRegex.hasMatch(line) && !locked) {
+          outputLines.add(line);
+        }
+      });
 
       stderrSub = process.stderr
           .transform(utf8.decoder)

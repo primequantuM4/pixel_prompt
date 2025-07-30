@@ -29,14 +29,11 @@ void main() {
 
       final frames = <String>[];
 
-      stdoutSub = process.stdout
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen((line) async {
-            if (!_traceRegex.hasMatch(line)) {
-              outputLines.add(line);
-            }
-          });
+      stdoutSub = process.stdout.transform(utf8.decoder).listen((line) async {
+        if (!_traceRegex.hasMatch(line)) {
+          outputLines.add(line);
+        }
+      });
 
       stderrSub = process.stderr
           .transform(utf8.decoder)
@@ -67,6 +64,7 @@ void main() {
                   await compareOrUpdateGolden(
                     path: 'test/golden/checkbox_before_toggle.txt',
                     actual: frames.last,
+                    process: process,
                   );
                   process.stdin.write('\t');
                   step++;
