@@ -79,7 +79,7 @@ void main() {
 
                   await compareOrUpdateGolden(
                     path: 'test/golden/checkbox_before_toggle_bg.txt',
-                    actual: ti.fgColorsToString(),
+                    actual: ti.bgColorsToString(),
                     process: process,
                   );
                   process.stdin.write('\t');
@@ -110,7 +110,7 @@ void main() {
 
                   await compareOrUpdateGolden(
                     path: 'test/golden/checkbox_after_toggle_bg.txt',
-                    actual: ti.fgColorsToString(),
+                    actual: ti.bgColorsToString(),
                     process: process,
                   );
 
