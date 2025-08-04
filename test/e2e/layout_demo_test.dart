@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:pixel_prompt/terminal/terminal_interpreter.dart';
 import 'package:test/test.dart';
 
 import '../utils/test_utils.dart';
@@ -19,12 +20,15 @@ void main() {
     final outputLines = <String>[];
     final completer = Completer<void>();
 
+    final TerminalInterpreter ti = TerminalInterpreter(11, 55);
+
     late final StreamSubscription<String> stdoutSub;
     late final StreamSubscription<String> stderrSub;
 
     stdoutSub = process.stdout.transform(utf8.decoder).listen((line) {
       if (!_traceRegex.hasMatch(line)) {
         outputLines.add(line);
+        ti.processInput(line);
       }
     });
 
@@ -47,11 +51,21 @@ void main() {
               Duration.zero,
               onTimeout: () {},
             );
-            final actual = outputLines.join('\n');
 
             await compareOrUpdateGolden(
-              path: 'test/golden/layout_demo.txt',
-              actual: actual,
+              path: 'test/golden/layout_demo_char.txt',
+              actual: ti.charactersToString(),
+              process: process,
+            );
+            await compareOrUpdateGolden(
+              path: 'test/golden/layout_demo_fg.txt',
+              actual: ti.fgColorsToString(),
+              process: process,
+            );
+
+            await compareOrUpdateGolden(
+              path: 'test/golden/layout_demo_bg.txt',
+              actual: ti.bgColorsToString(),
               process: process,
             );
             completer.complete();

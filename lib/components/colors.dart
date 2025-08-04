@@ -2,6 +2,9 @@ abstract class AnsiColorType {
   String get fg;
   String get bg;
 
+  String get printableFg;
+  String get printableBg;
+
   AnsiColorType dimmed();
 }
 
@@ -36,7 +39,52 @@ class Colors implements AnsiColorType {
   String get bg => _dim ? '2;$bgCode' : '$bgCode';
 
   @override
+  String get printableFg =>
+      _dim ? '${_colorFromCode(code)}(d)' : _colorFromCode(code);
+  @override
+  String get printableBg =>
+      _dim ? '${_colorFromCode(bgCode)}(d)' : _colorFromCode(bgCode);
+
+  @override
   Colors dimmed() => Colors._(code, bgCode, true);
+
+  String _colorFromCode(int code) {
+    final mapping = <int, String>{
+      30: 'black',
+      31: 'red',
+      32: 'green',
+      33: 'yellow',
+      34: 'blue',
+      35: 'magenta',
+      36: 'cyan',
+      37: 'white',
+      90: 'highBlack',
+      91: 'highRed',
+      92: 'highGreen',
+      93: 'highYellow',
+      94: 'highBlue',
+      95: 'highMagenta',
+      96: 'highCyan',
+      97: 'highWhite',
+      40: 'black',
+      41: 'red',
+      42: 'green',
+      43: 'yellow',
+      44: 'blue',
+      45: 'magenta',
+      46: 'cyan',
+      47: 'white',
+      100: 'highBlack',
+      101: 'highRed',
+      102: 'highGreen',
+      103: 'highYellow',
+      104: 'highBlue',
+      105: 'highMagenta',
+      106: 'highCyan',
+      107: 'highWhite',
+    };
+    return mapping[code]!;
+  }
 }
 
 class ColorRGB implements AnsiColorType {
@@ -57,6 +105,14 @@ class ColorRGB implements AnsiColorType {
 
   @override
   String get bg => '48;2;$r;$g;$b';
+
+  @override
+  get printableFg =>
+      '#${r.toRadixString(16).padLeft(2, '0')}${g.toRadixString(16).padLeft(2, '0')}${b.toRadixString(16).padLeft(2, '0')}';
+
+  @override
+  get printableBg =>
+      '#${r.toRadixString(16).padLeft(2, '0')}${g.toRadixString(16).padLeft(2, '0')}${b.toRadixString(16).padLeft(2, '0')}';
 
   @override
   bool operator ==(Object other) {

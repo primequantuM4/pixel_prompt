@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:pixel_prompt/terminal/terminal_interpreter.dart';
 import 'package:test/test.dart';
 
 import '../utils/test_utils.dart';
@@ -24,6 +25,7 @@ void main() {
 
       int step = 0;
 
+      final TerminalInterpreter ti = TerminalInterpreter(3, 25);
       late final StreamSubscription<String> stdoutSub;
       late final StreamSubscription<String> stderrSub;
       bool locked = false;
@@ -31,8 +33,9 @@ void main() {
       final frames = <String>[];
 
       stdoutSub = process.stdout.transform(utf8.decoder).listen((line) {
-        if (!_traceRegex.hasMatch(line) && !locked) {
+        if (!_traceRegex.hasMatch(line)) {
           outputLines.add(line);
+          ti.processInput(line);
         }
       });
 
@@ -64,8 +67,20 @@ void main() {
               case 0:
                 if (message == 'RENDERED') {
                   await compareOrUpdateGolden(
-                    path: 'test/golden/textfield_before_write.txt',
-                    actual: frames.last,
+                    path: 'test/golden/textfield_before_write_char.txt',
+                    actual: ti.charactersToString(),
+                    process: process,
+                  );
+
+                  await compareOrUpdateGolden(
+                    path: 'test/golden/textfield_before_write_fg.txt',
+                    actual: ti.fgColorsToString(),
+                    process: process,
+                  );
+
+                  await compareOrUpdateGolden(
+                    path: 'test/golden/textfield_before_write_bg.txt',
+                    actual: ti.fgColorsToString(),
                     process: process,
                   );
 
@@ -100,8 +115,20 @@ void main() {
               case 2:
                 if (message == 'RENDERED') {
                   await compareOrUpdateGolden(
-                    path: 'test/golden/textfield_after_write.txt',
-                    actual: frames.last,
+                    path: 'test/golden/textfield_after_write_char.txt',
+                    actual: ti.charactersToString(),
+                    process: process,
+                  );
+
+                  await compareOrUpdateGolden(
+                    path: 'test/golden/textfield_after_write_fg.txt',
+                    actual: ti.fgColorsToString(),
+                    process: process,
+                  );
+
+                  await compareOrUpdateGolden(
+                    path: 'test/golden/textfield_after_write_bg.txt',
+                    actual: ti.fgColorsToString(),
                     process: process,
                   );
 
