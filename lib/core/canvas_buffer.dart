@@ -32,11 +32,13 @@ class CanvasBuffer {
   /// The height of the canvas in characters.
   int height;
 
-  /// The original horizontal cursor offset in the terminal.
-  int cursorOriginalX = 1;
+  /// The original horizontal cursor column in the terminal (1-based).
+  /// Columns increase from left to right.
+  int cursorOriginalColumn = 1;
 
-  /// The original vertical cursor offset in the terminal.
-  int cursorOriginalY = 1;
+  /// The original vertical cursor line in the terminal (1-based).
+  /// Lines increase from top to bottom.
+  int cursorOriginalLine = 1;
 
   static const String _tag = 'CanvasBuffer';
 
@@ -67,13 +69,13 @@ class CanvasBuffer {
   /// Sets the original terminal cursor offset for relative rendering.
   ///
   /// Typically set to the terminal’s current cursor position before rendering.
-  setTerminalOffset(int x, int y) {
-    cursorOriginalX = x;
-    cursorOriginalY = y;
+  setTerminalOffset(int column, int line) {
+    cursorOriginalColumn = column;
+    cursorOriginalLine = line;
   }
 
   (int, int) getTerminalOffset() {
-    return (cursorOriginalX, cursorOriginalY);
+    return (cursorOriginalColumn, cursorOriginalLine);
   }
 
   void updateDimensions(int width, int height) {
@@ -93,23 +95,23 @@ class CanvasBuffer {
     );
   }
 
-  /// Draws a single character at position ([x], [y]) with optional style.
+  /// Draws a single character at position ([column], [line]) with optional style.
   ///
   /// If the character is whitespace, the style is cleared.
   /// Ignores drawing if coordinates are out of bounds.
   void drawChar(
-    int x,
-    int y,
+    int column,
+    int line,
     String char, {
     AnsiColorType? fg,
     AnsiColorType? bg,
     Set<FontStyle>? styles,
   }) {
-    if (x >= 0 && x < width && y >= 0 && y < height) {
+    if (column >= 0 && column < width && line >= 0 && line < height) {
       final Set<FontStyle> effectiveStyle = (char.trim().isEmpty)
           ? {}
           : (styles ?? {});
-      _screenBuffer[y][x] = BufferCell(
+      _screenBuffer[line][column] = BufferCell(
         char: char,
         fg: fg,
         bg: bg,
@@ -118,14 +120,14 @@ class CanvasBuffer {
     }
   }
 
-  /// Draws a string [data] starting at position ([x], [y]) with a given [style].
+  /// Draws a string [data] starting at position ([column], [line]) with a given [style].
   ///
   /// Each character in [data] is drawn sequentially on the same row.
-  void drawAt(int x, int y, String data, TextComponentStyle style) {
+  void drawAt(int column, int line, String data, TextComponentStyle style) {
     for (int i = 0; i < data.length; i++) {
       drawChar(
-        x + i,
-        y,
+        column + i,
+        line,
         data[i],
         fg: style.color,
         bg: style.bgColor,
@@ -149,11 +151,11 @@ class CanvasBuffer {
   ///
   /// All cells within [area] are reset to spaces with no style.
   void clearBufferArea(Rect area) {
-    for (int y = area.y; y < area.y + area.height; y++) {
-      if (y >= _screenBuffer.length) break;
-      for (int x = area.x; x < area.x + area.width; x++) {
-        if (x >= _screenBuffer[0].length) break;
-        _screenBuffer[y][x].clear();
+    for (int line = area.y; line < area.y + area.height; line++) {
+      if (line >= _screenBuffer.length) break;
+      for (int column = area.x; column < area.x + area.width; column++) {
+        if (column >= _screenBuffer[0].length) break;
+        _screenBuffer[line][column].clear();
       }
     }
   }
@@ -166,19 +168,19 @@ class CanvasBuffer {
   /// Note: This implementation currently clears the area visually without
   /// redrawing the buffer content.
   void flushArea(Rect area) {
-    for (int y = area.y; y < area.y + area.height; y++) {
-      if (y >= _screenBuffer.length) break;
+    for (int line = area.y; line < area.y + area.height; line++) {
+      if (line >= _screenBuffer.length) break;
 
-      if (cursorOriginalX != -1 && cursorOriginalY != -1) {
-        final cursorY = isFullscreen ? y + 1 : cursorOriginalY + y;
-        final cursorX = isFullscreen ? 1 : cursorOriginalX;
+      if (cursorOriginalColumn != -1 && cursorOriginalLine != -1) {
+        final cursorLine = isFullscreen ? line + 1 : cursorOriginalLine + line;
+        final cursorColumn = isFullscreen ? 1 : cursorOriginalColumn;
 
-        String cursorMove = '\x1B[$cursorY;${cursorX}H';
+        String cursorMove = '\x1B[$cursorLine;${cursorColumn}H';
         stdout.write(cursorMove);
       }
 
-      for (int x = area.x; x < area.x + area.width; x++) {
-        if (x >= _screenBuffer[0].length) break;
+      for (int column = area.x; column < area.x + area.width; column++) {
+        if (column >= _screenBuffer[0].length) break;
         stdout.write(' ');
       }
     }
@@ -202,27 +204,28 @@ class CanvasBuffer {
     hideCursor();
     final buffer = StringBuffer();
 
-    final baseY = isFullscreen ? 1 : cursorOriginalY;
-    final baseX = isFullscreen ? 1 : cursorOriginalX;
+    final baseLine = isFullscreen ? 1 : cursorOriginalLine;
+    final baseColumn = isFullscreen ? 1 : cursorOriginalColumn;
 
-    int? lastCursorX, lastCursorY;
+    int? lastColumnPos, lastLinePos;
 
-    for (int y = 0; y < _screenBuffer.length; y++) {
+    for (int line = 0; line < _screenBuffer.length; line++) {
       BufferCell? lastCell;
-      for (int x = 0; x < _screenBuffer[y].length; x++) {
-        final curr = _screenBuffer[y][x];
-        final prev = _previousFrame[y][x];
+      for (int column = 0; column < _screenBuffer[line].length; column++) {
+        final curr = _screenBuffer[line][column];
+        final prev = _previousFrame[line][column];
 
         if (_cellEquals(curr, prev)) continue;
 
-        final cursorY = baseY + y;
-        final cursorX = baseX + x;
+        final cursorLine = baseLine + line;
+        final cursorColumn = baseColumn + column;
         final shouldCursorMove =
-            (cursorY != lastCursorY) || (cursorX != (lastCursorX ?? -1));
+            (cursorLine != lastLinePos) ||
+            (cursorColumn != (lastColumnPos ?? -1));
         if (shouldCursorMove) {
-          buffer.write('\x1B[$cursorY;${cursorX}H');
-          lastCursorY = cursorY;
-          lastCursorX = cursorX;
+          buffer.write('\x1B[$cursorLine;${cursorColumn}H');
+          lastLinePos = cursorLine;
+          lastColumnPos = cursorColumn;
         }
 
         if (lastCell == null || !_sameStyle(curr, lastCell)) {
@@ -232,8 +235,8 @@ class CanvasBuffer {
         }
         buffer.write(curr.char);
 
-        _previousFrame[y][x] = curr.copy();
-        lastCursorX = (lastCursorX ?? 1) + 1;
+        _previousFrame[line][column] = curr.copy();
+        lastColumnPos = (lastColumnPos ?? 1) + 1;
       }
     }
 
@@ -242,15 +245,16 @@ class CanvasBuffer {
     Logger.trace(_tag, 'RENDERED');
   }
 
-  /// Moves the terminal cursor to position ([x], [y]) relative to the original offset.
+  /// Moves the terminal cursor to position ([column], [line]) relative to the original offset.
   ///
   /// Ignores the call if coordinates are -1.
-  void moveCursorTo(int x, int y) {
-    if (x == -1 || y == -1) return;
-    final int renderX = isFullscreen ? 1 : cursorOriginalX;
-    final int renderY = isFullscreen ? 1 : cursorOriginalY;
+  void moveCursorTo(int column, int line) {
+    if (column == -1 || line == -1) return;
+    final int renderColumn = isFullscreen ? 1 : cursorOriginalColumn;
+    final int renderLine = isFullscreen ? 1 : cursorOriginalLine;
 
-    String cursorPosition = '\x1B[${renderY + y};${renderX + x}H';
+    String cursorPosition =
+        '\x1B[${renderLine + line};${renderColumn + column}H';
     stdout.write(cursorPosition);
   }
 

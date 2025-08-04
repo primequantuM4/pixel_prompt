@@ -45,6 +45,40 @@ class TerminalInterpreter {
   static const String enableTerminatingCharacter = 'h';
   static const String disableTerminatingCharacter = 'l';
 
+  static const Set<String> terminatingCharacters = {
+    styleTerminatingCharacter,
+    cursorHomeTerminatingCharacter,
+    upMovementTerminatingCharacter,
+    downMovementTerminatingCharacter,
+    forwardMovementTerminatingCharacter,
+    backMovementTerminatingCharacter,
+    clearLineTerminatingCharacter,
+    requestCursorTerminatingCharacter,
+    respondCursorTerminatingCharacter,
+    enableTerminatingCharacter,
+    disableTerminatingCharacter,
+  };
+
+  static const int _ansiFgRGB = 38;
+  static const int _ansiBgRGB = 48;
+  static const int _ansiRgbMode = 2;
+  static const int _rgbComponentCount = 3;
+  static const int _expectedExtraArgs = _rgbComponentCount + 1;
+
+  static const int _ansiFgStart = 30;
+  static const int _ansiFgBrightStart = 90;
+  static const int _ansiFgEnd = 37;
+  static const int _ansiFgBrightEnd = 97;
+
+  static const int _ansiBgStart = 40;
+  static const int _ansiBgBrightStart = 100;
+  static const int _ansiBgEnd = 47;
+  static const int _ansiBgBrightEnd = 107;
+
+  static const int _eraseCursorToEndCommand = 0;
+  static const int _eraseStartToCursorCommand = 1;
+  static const int _eraseLineCommand = 2;
+
   void processInput(String data) {
     for (int i = 0; i < data.length; i++) {
       String char = data[i];
@@ -124,20 +158,6 @@ class TerminalInterpreter {
   }
 
   void _handleAnsiSequence(String char) {
-    Set<String> terminatingCharacters = {
-      styleTerminatingCharacter,
-      cursorHomeTerminatingCharacter,
-      upMovementTerminatingCharacter,
-      downMovementTerminatingCharacter,
-      forwardMovementTerminatingCharacter,
-      backMovementTerminatingCharacter,
-      clearLineTerminatingCharacter,
-      requestCursorTerminatingCharacter,
-      respondCursorTerminatingCharacter,
-      enableTerminatingCharacter,
-      disableTerminatingCharacter,
-    };
-
     if (terminatingCharacters.contains(char)) {
       _handleAnsiBuffer(char);
       _terminalState = TerminalState.normal;
@@ -190,6 +210,7 @@ class TerminalInterpreter {
     // equivalent to \x1B[0m
     if (data.isEmpty) {
       _clearStyles();
+      return;
     }
 
     for (int i = 0; i < data.length; i++) {
@@ -200,39 +221,35 @@ class TerminalInterpreter {
         _clearStyles();
       }
       // rgb foreground condition
-      else if (val == 38 && i + 4 < data.length && data[i + 1] == 2) {
-        int r = data[i + 2];
-        int g = data[i + 3];
-        int b = data[i + 4];
-
-        if (_validRgbColor(r, g, b)) {
-          _foregroundColor = ColorRGB(r, g, b);
-        }
-        i += 4;
+      else if (val == _ansiFgRGB &&
+          i + _expectedExtraArgs < data.length &&
+          data[i + 1] == _ansiRgbMode) {
+        final rgb = _extractRGB(data, i);
+        if (rgb != null) _foregroundColor = rgb;
+        i += _expectedExtraArgs;
       }
       // rgb background condition
-      else if (val == 48 && i + 4 < data.length && data[i + 1] == 2) {
-        int r = data[i + 2];
-        int g = data[i + 3];
-        int b = data[i + 4];
-
-        if (_validRgbColor(r, g, b)) {
-          _backgroundColor = ColorRGB(r, g, b);
-        }
-        i += 4;
+      else if (val == _ansiBgRGB &&
+          i + _expectedExtraArgs < data.length &&
+          data[i + 1] == _ansiRgbMode) {
+        final rgb = _extractRGB(data, i);
+        if (rgb != null) _backgroundColor = rgb;
+        i += _expectedExtraArgs;
       }
       // ANSI foreground colors
-      else if ((30 <= val && val <= 37) || (90 <= val && val <= 97)) {
-        _foregroundColor = _colorFromCode(val);
+      else if ((_ansiFgStart <= val && val <= _ansiFgEnd) ||
+          (_ansiFgBrightStart <= val && val <= _ansiFgBrightEnd)) {
+        _foregroundColor = Colors.fromCode(val);
       }
       // ANSI background colors
-      else if ((40 <= val && val <= 47) || (100 <= val && val <= 107)) {
-        _backgroundColor = _colorFromCode(val);
+      else if ((_ansiBgStart <= val && val <= _ansiBgEnd) ||
+          (_ansiBgBrightStart <= val && val <= _ansiBgBrightEnd)) {
+        _backgroundColor = Colors.fromCode(val);
       }
       // Styles
       else {
         for (final fs in FontStyle.values) {
-          if (fs.code == val) _fontStyles.add(_styleFromCode(fs.code));
+          if (fs.code == val) _fontStyles.add(FontStyle.fromCode(fs.code));
         }
       }
     }
@@ -251,11 +268,11 @@ class TerminalInterpreter {
 
     int command = ansiNumbers[0];
 
-    if (command == 0) {
+    if (command == _eraseCursorToEndCommand) {
       _eraseFromCursorToEnd();
-    } else if (command == 1) {
+    } else if (command == _eraseStartToCursorCommand) {
       _eraseFromBeginningToCursor();
-    } else if (command == 2) {
+    } else if (command == _eraseLineCommand) {
       _eraseEntireLine();
     } // ignore other numbers as they don't do anything
   }
@@ -403,61 +420,19 @@ class TerminalInterpreter {
     _fontStyles.clear();
   }
 
+  ColorRGB? _extractRGB(List<int> data, int start) {
+    final r = data[start + 2];
+    final g = data[start + 3];
+    final b = data[start + 4];
+    return _validRgbColor(r, g, b) ? ColorRGB(r, g, b) : null;
+  }
+
   bool _validRgbColor(int r, int g, int b) {
     bool validRed = 0 <= r && r < 256;
     bool validGreen = 0 <= g && g < 256;
     bool validBlue = 0 <= b && b < 256;
 
     return validRed && validGreen && validBlue;
-  }
-
-  AnsiColorType _colorFromCode(int code) {
-    final mapping = <int, Colors>{
-      30: Colors.black,
-      31: Colors.red,
-      32: Colors.green,
-      33: Colors.yellow,
-      34: Colors.blue,
-      35: Colors.magenta,
-      36: Colors.cyan,
-      37: Colors.white,
-      90: Colors.highBlack,
-      91: Colors.highRed,
-      92: Colors.highGreen,
-      93: Colors.highYellow,
-      94: Colors.highBlue,
-      95: Colors.highMagenta,
-      96: Colors.highCyan,
-      97: Colors.highWhite,
-      40: Colors.black,
-      41: Colors.red,
-      42: Colors.green,
-      43: Colors.yellow,
-      44: Colors.blue,
-      45: Colors.magenta,
-      46: Colors.cyan,
-      47: Colors.white,
-      100: Colors.highBlack,
-      101: Colors.highRed,
-      102: Colors.highGreen,
-      103: Colors.highYellow,
-      104: Colors.highBlue,
-      105: Colors.highMagenta,
-      106: Colors.highCyan,
-      107: Colors.highWhite,
-    };
-    return mapping[code]!;
-  }
-
-  FontStyle _styleFromCode(int code) {
-    final mapping = <int, FontStyle>{
-      1: FontStyle.bold,
-      3: FontStyle.italic,
-      4: FontStyle.underline,
-      9: FontStyle.strikethrough,
-    };
-
-    return mapping[code]!;
   }
 }
 
