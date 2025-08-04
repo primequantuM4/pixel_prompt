@@ -479,12 +479,4 @@ class CellState {
 
     return 'CellState(char: $character fg: ${foregroundColor?.fg}, bg: ${backgroundColor?.bg}, style: $style})';
   }
-
-  String toAnsi() {
-    String fg = foregroundColor?.fg ?? '';
-    String bg = backgroundColor?.bg ?? '';
-    String style = fontStyles.map((val) => val.code).join(';');
-
-    return '\x1B[$fg$bg${style}m$character\x1B[0m';
-  }
 }
