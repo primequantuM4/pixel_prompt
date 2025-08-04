@@ -33,10 +33,10 @@ class CanvasBuffer {
   int height;
 
   /// The original horizontal cursor offset in the terminal.
-  int cursorOriginalX = -1;
+  int cursorOriginalX = 1;
 
   /// The original vertical cursor offset in the terminal.
-  int cursorOriginalY = -1;
+  int cursorOriginalY = 1;
 
   static const String _tag = 'CanvasBuffer';
 
@@ -217,11 +217,9 @@ class CanvasBuffer {
 
         final cursorY = baseY + y;
         final cursorX = baseX + x;
-
         final shouldCursorMove =
-            (cursorY != lastCursorY) || (cursorX != (lastCursorX ?? -1) + 1);
-
-        if (baseY != -1 && shouldCursorMove) {
+            (cursorY != lastCursorY) || (cursorX != (lastCursorX ?? -1));
+        if (shouldCursorMove) {
           buffer.write('\x1B[$cursorY;${cursorX}H');
           lastCursorY = cursorY;
           lastCursorX = cursorX;
@@ -235,6 +233,7 @@ class CanvasBuffer {
         buffer.write(curr.char);
 
         _previousFrame[y][x] = curr.copy();
+        lastCursorX = (lastCursorX ?? 1) + 1;
       }
     }
 

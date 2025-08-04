@@ -1,0 +1,11 @@
+                                                       
+            Pixel Prompt TUI demo                      
+                                                       
+                                                       
+        Status: [Ok]             Uptime: [03:42:12]    
+                                                       
+  Info:                                                
+                                                       
+Welcome to PixelPrompt!                                
+                                                       
+This TUI demo shows how rows and columns work.         
