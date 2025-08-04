@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:pixel_prompt/terminal/terminal_interpreter.dart';
 import 'package:test/test.dart';
 
 import '../utils/test_utils.dart';
@@ -29,8 +30,11 @@ void main() {
 
       final frames = <String>[];
 
+      final TerminalInterpreter ti = TerminalInterpreter(13, 44);
+
       stdoutSub = process.stdout.transform(utf8.decoder).listen((line) async {
         if (!_traceRegex.hasMatch(line)) {
+          ti.processInput(line);
           outputLines.add(line);
         }
       });
@@ -62,8 +66,20 @@ void main() {
               case 0:
                 if (message == 'RENDERED') {
                   await compareOrUpdateGolden(
-                    path: 'test/golden/checkbox_before_toggle.txt',
-                    actual: frames.last,
+                    path: 'test/golden/checkbox_before_toggle_char.txt',
+                    actual: ti.charactersToString(),
+                    process: process,
+                  );
+
+                  await compareOrUpdateGolden(
+                    path: 'test/golden/checkbox_before_toggle_fg.txt',
+                    actual: ti.fgColorsToString(),
+                    process: process,
+                  );
+
+                  await compareOrUpdateGolden(
+                    path: 'test/golden/checkbox_before_toggle_bg.txt',
+                    actual: ti.fgColorsToString(),
                     process: process,
                   );
                   process.stdin.write('\t');
@@ -81,10 +97,23 @@ void main() {
               case 2:
                 if (message == 'RENDERED' && !completer.isCompleted) {
                   await compareOrUpdateGolden(
-                    path: 'test/golden/checkbox_after_toggle.txt',
-                    actual: frames.last,
+                    path: 'test/golden/checkbox_after_toggle_char.txt',
+                    actual: ti.charactersToString(),
                     process: process,
                   );
+
+                  await compareOrUpdateGolden(
+                    path: 'test/golden/checkbox_after_toggle_fg.txt',
+                    actual: ti.fgColorsToString(),
+                    process: process,
+                  );
+
+                  await compareOrUpdateGolden(
+                    path: 'test/golden/checkbox_after_toggle_bg.txt',
+                    actual: ti.fgColorsToString(),
+                    process: process,
+                  );
+
                   completer.complete();
                 }
                 break;

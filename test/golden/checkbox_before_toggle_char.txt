@@ -1,0 +1,13 @@
+                                            
+            Choose your Settings            
+                                            
+                                            
+╭────────────────────────╮                  
+│[ ] Enable Notifications│                  
+│                        │                  
+│[ ] Dark Mode           │                  
+│                        │                  
+│[ ] Use Custom DNS      │                  
+╰────────────────────────╯                  
+                                            
+[ ] Linux [ ] Windows [ ] Mac               

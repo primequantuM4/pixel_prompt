@@ -1,3 +1,0 @@
-[6n[6n                                        [?25l[0;38;2;128;128;128m   Enter your name  [0m
-[0m                    [0m
-[0;38;2;128;128;128m   Enter your email [0m
