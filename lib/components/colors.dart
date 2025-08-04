@@ -33,6 +33,75 @@ class Colors implements AnsiColorType {
   static const highCyan = Colors._(96, 106);
   static const highWhite = Colors._(97, 107);
 
+  static const mapping = <int, Colors>{
+    30: black,
+    31: red,
+    32: green,
+    33: yellow,
+    34: blue,
+    35: magenta,
+    36: cyan,
+    37: white,
+    90: highBlack,
+    91: highRed,
+    92: highGreen,
+    93: highYellow,
+    94: highBlue,
+    95: highMagenta,
+    96: highCyan,
+    97: highWhite,
+    40: black,
+    41: red,
+    42: green,
+    43: yellow,
+    44: blue,
+    45: magenta,
+    46: cyan,
+    47: white,
+    100: highBlack,
+    101: highRed,
+    102: highGreen,
+    103: highYellow,
+    104: highBlue,
+    105: highMagenta,
+    106: highCyan,
+    107: highWhite,
+  };
+
+  static const stringMapping = <int, String>{
+    30: 'black',
+    31: 'red',
+    32: 'green',
+    33: 'yellow',
+    34: 'blue',
+    35: 'magenta',
+    36: 'cyan',
+    37: 'white',
+    90: 'highBlack',
+    91: 'highRed',
+    92: 'highGreen',
+    93: 'highYellow',
+    94: 'highBlue',
+    95: 'highMagenta',
+    96: 'highCyan',
+    97: 'highWhite',
+    40: 'black',
+    41: 'red',
+    42: 'green',
+    43: 'yellow',
+    44: 'blue',
+    45: 'magenta',
+    46: 'cyan',
+    47: 'white',
+    100: 'highBlack',
+    101: 'highRed',
+    102: 'highGreen',
+    103: 'highYellow',
+    104: 'highBlue',
+    105: 'highMagenta',
+    106: 'highCyan',
+    107: 'highWhite',
+  };
   @override
   String get fg => _dim ? '2;$code' : '$code';
   @override
@@ -48,42 +117,11 @@ class Colors implements AnsiColorType {
   @override
   Colors dimmed() => Colors._(code, bgCode, true);
 
-  String _colorFromCode(int code) {
-    final mapping = <int, String>{
-      30: 'black',
-      31: 'red',
-      32: 'green',
-      33: 'yellow',
-      34: 'blue',
-      35: 'magenta',
-      36: 'cyan',
-      37: 'white',
-      90: 'highBlack',
-      91: 'highRed',
-      92: 'highGreen',
-      93: 'highYellow',
-      94: 'highBlue',
-      95: 'highMagenta',
-      96: 'highCyan',
-      97: 'highWhite',
-      40: 'black',
-      41: 'red',
-      42: 'green',
-      43: 'yellow',
-      44: 'blue',
-      45: 'magenta',
-      46: 'cyan',
-      47: 'white',
-      100: 'highBlack',
-      101: 'highRed',
-      102: 'highGreen',
-      103: 'highYellow',
-      104: 'highBlue',
-      105: 'highMagenta',
-      106: 'highCyan',
-      107: 'highWhite',
-    };
+  factory Colors.fromCode(int code) {
     return mapping[code]!;
+  }
+  String _colorFromCode(int code) {
+    return stringMapping[code]!;
   }
 }
 
