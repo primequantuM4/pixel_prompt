@@ -80,7 +80,7 @@ void main() {
 
                   await compareOrUpdateGolden(
                     path: 'test/golden/textfield_before_write_bg.txt',
-                    actual: ti.fgColorsToString(),
+                    actual: ti.bgColorsToString(),
                     process: process,
                   );
 
@@ -128,7 +128,7 @@ void main() {
 
                   await compareOrUpdateGolden(
                     path: 'test/golden/textfield_after_write_bg.txt',
-                    actual: ti.fgColorsToString(),
+                    actual: ti.bgColorsToString(),
                     process: process,
                   );
 

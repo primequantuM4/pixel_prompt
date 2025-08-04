@@ -52,19 +52,15 @@ class TerminalInterpreter {
     }
   }
 
-  String _matrixToString(List<List<String>> matrix) {
-    return matrix.map((row) => row.join()).join('\n');
-  }
+  String charactersToString() => _matrixToString(getCharactersMatrix());
+  String fgColorsToString() => _formatMatrixToString(getFgMatrix());
+  String bgColorsToString() => _formatMatrixToString(getBgMatrix());
 
-  String _formatMatrixToString(List<List<String>> matrix) {
-    final padded = _padMatrix(matrix);
-    return padded.map((row) => row.join()).join('\n');
-  }
-
-  List<List<String>> _padMatrix(List<List<String>> matrix) {
-    return matrix
-        .map((row) => row.map((cell) => cell.padRight(8)).toList())
-        .toList();
+  void writeToBufferState(String char) {
+    bufferState[currentLine][currentColumn].character = char;
+    bufferState[currentLine][currentColumn].foregroundColor = _foregroundColor;
+    bufferState[currentLine][currentColumn].backgroundColor = _backgroundColor;
+    bufferState[currentLine][currentColumn].fontStyles = {..._fontStyles};
   }
 
   List<List<String>> getCharactersMatrix() => bufferState
@@ -86,17 +82,6 @@ class TerminalInterpreter {
             .toList(),
       )
       .toList();
-
-  String charactersToString() => _matrixToString(getCharactersMatrix());
-  String fgColorsToString() => _formatMatrixToString(getFgMatrix());
-  String bgColorsToString() => _formatMatrixToString(getBgMatrix());
-
-  void writeToBufferState(String char) {
-    bufferState[currentLine][currentColumn].character = char;
-    bufferState[currentLine][currentColumn].foregroundColor = _foregroundColor;
-    bufferState[currentLine][currentColumn].backgroundColor = _backgroundColor;
-    bufferState[currentLine][currentColumn].fontStyles = {..._fontStyles};
-  }
 
   void _handleCharacterByState(String char) {
     switch (_terminalState) {
@@ -391,6 +376,21 @@ class TerminalInterpreter {
       bufferState[currentLine][i].backgroundColor = _backgroundColor;
       bufferState[currentLine][i].foregroundColor = _foregroundColor;
     }
+  }
+
+  String _matrixToString(List<List<String>> matrix) {
+    return matrix.map((row) => row.join()).join('\n');
+  }
+
+  String _formatMatrixToString(List<List<String>> matrix) {
+    final padded = _padMatrix(matrix);
+    return padded.map((row) => row.join()).join('\n');
+  }
+
+  List<List<String>> _padMatrix(List<List<String>> matrix) {
+    return matrix
+        .map((row) => row.map((cell) => cell.padRight(8)).toList())
+        .toList();
   }
 
   bool _canConvertToNumber(String char) {
