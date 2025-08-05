@@ -22,7 +22,7 @@ PixelPrompt bridges that gap by offering:
 - Built-in **layouts, stateful components, keyboard & mouse input**.
 - **Customizable styling** (colors, padding, margin, borders).
 - Extensible **API** via `BuilableComponent` and `StatefulComponent`.
-- Cross-platform. 
+- Cross-platform: supports Linux, macOS, and Windows terminals.
 
 ---
 
@@ -63,7 +63,7 @@ void main() {
     children: [
       TextComponent(
         "Hello, PixelPrompt!",
-        // style is optional and not required
+        // style is optional
         style: TextComponentStyle(
           // foreground color for the text
           color: ColorRGB(200, 200, 200),
@@ -77,82 +77,19 @@ void main() {
 }
 ```
 
-Runt it:
+Run it:
 ```bash
 dart run hello_world.dart
 ```
 ---
-### Example App - Counter
-```dart
-import 'package:pixel_prompt/pixel_prompt.dart';
-
-class CounterComponent extends StatefulComponent {
-  int counter = 0;
-  bool revealed = false;
-
-  @override
-  ComponentState<CounterComponent> createState() => CounterState();
-}
-
-class CounterState extends ComponentState<CounterComponent> {
-  @override
-  List<Component> build() {
-    return [
-      Row(
-        children: [
-          ButtonComponent(
-            label: 'Increment',
-            borderStyle: BorderStyle.rounded,
-            outerBorderColor: ColorRGB(0, 200, 0),
-            buttonColor: ColorRGB(0, 200, 0),
-            onPressed: () {
-              setState(() => component.counter++);
-            },
-          ),
-          ButtonComponent(
-            label: 'Decrement',
-            outerBorderColor: ColorRGB(255, 0, 0),
-            buttonColor: ColorRGB(255, 0, 0),
-            borderStyle: BorderStyle.rounded,
-            onPressed: () {
-              setState(() => component.counter--);
-            },
-          ),
-        ],
-      ),
-      TextComponent(
-        'Counter: ${component.counter}',
-        style: TextComponentStyle(
-          color: ColorRGB(200, 200, 200),
-          bgColor: ColorRGB(20, 20, 20),
-          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-        ),
-      ),
-      ButtonComponent(
-        label: component.revealed ? 'Hide Text' : 'Click to reveal hidden text',
-        onPressed: () => setState(() => component.revealed = !component.revealed),
-      ),
-      if (component.revealed)
-        TextComponent(
-          'Shh! This is a hidden text',
-          style: TextComponentStyle()
-              .background(ColorRGB(236, 110, 170))
-              .foreground(Colors.white),
-        ),
-    ];
-  }
-}
-
-void main() {
-  App(children: [CounterComponent()]).run();
-}
-
-```
+### Examples 
+- [Counter App](https://github.com/primequantuM4/pixel_prompt/blob/main/example/stateful_component_demo/bin/counter_demo.dart) — demonstrates stateful components and buttons.
+- [Stopwatch App](https://github.com/primequantuM4/pixel_prompt/blob/main/example/buildable_component_demo/bin/stop_watch_demo.dart)  — demonstrates timers and dynamic updates.
 ---
 ### Roadmap
-- Optimizations and Verbosity for layout and buffer.
+- Optimizations and verbosity for layout.
 - Additional Components (menus, tables, textfield area).
-- Double buffering to remove flickering.
+- Visual Debugger
 ---
 ### Contributing
 1. Fork the repo and clone it.
