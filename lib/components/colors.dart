@@ -12,28 +12,29 @@ class Colors implements AnsiColorType {
   final int code;
   final int bgCode;
   final bool _dim;
+  final String name;
 
-  const Colors._(this.code, this.bgCode, [this._dim = false]);
+  const Colors._(this.code, this.bgCode, this.name, [this._dim = false]);
 
-  static const black = Colors._(30, 40);
-  static const red = Colors._(31, 41);
-  static const green = Colors._(32, 42);
-  static const yellow = Colors._(33, 43);
-  static const blue = Colors._(34, 44);
-  static const magenta = Colors._(35, 45);
-  static const cyan = Colors._(36, 46);
-  static const white = Colors._(37, 47);
+  static const black = Colors._(30, 40, 'black');
+  static const red = Colors._(31, 41, 'red');
+  static const green = Colors._(32, 42, 'green');
+  static const yellow = Colors._(33, 43, 'yellow');
+  static const blue = Colors._(34, 44, 'blue');
+  static const magenta = Colors._(35, 45, 'magenta');
+  static const cyan = Colors._(36, 46, 'cyan');
+  static const white = Colors._(37, 47, 'white');
 
-  static const highBlack = Colors._(90, 100);
-  static const highRed = Colors._(91, 101);
-  static const highGreen = Colors._(92, 102);
-  static const highYellow = Colors._(93, 103);
-  static const highBlue = Colors._(94, 104);
-  static const highMagenta = Colors._(95, 105);
-  static const highCyan = Colors._(96, 106);
-  static const highWhite = Colors._(97, 107);
+  static const highBlack = Colors._(90, 100, 'highBlack');
+  static const highRed = Colors._(91, 101, 'highRed');
+  static const highGreen = Colors._(92, 102, 'highGreen');
+  static const highYellow = Colors._(93, 103, 'highYellow');
+  static const highBlue = Colors._(94, 104, 'highBlue');
+  static const highMagenta = Colors._(95, 105, 'highMagenta');
+  static const highCyan = Colors._(96, 106, 'highCyan');
+  static const highWhite = Colors._(97, 107, 'highWhite');
 
-  static const mapping = <int, Colors>{
+  static const _ansiCodes = <int, Colors>{
     30: black,
     31: red,
     32: green,
@@ -68,61 +69,20 @@ class Colors implements AnsiColorType {
     107: highWhite,
   };
 
-  static const stringMapping = <int, String>{
-    30: 'black',
-    31: 'red',
-    32: 'green',
-    33: 'yellow',
-    34: 'blue',
-    35: 'magenta',
-    36: 'cyan',
-    37: 'white',
-    90: 'highBlack',
-    91: 'highRed',
-    92: 'highGreen',
-    93: 'highYellow',
-    94: 'highBlue',
-    95: 'highMagenta',
-    96: 'highCyan',
-    97: 'highWhite',
-    40: 'black',
-    41: 'red',
-    42: 'green',
-    43: 'yellow',
-    44: 'blue',
-    45: 'magenta',
-    46: 'cyan',
-    47: 'white',
-    100: 'highBlack',
-    101: 'highRed',
-    102: 'highGreen',
-    103: 'highYellow',
-    104: 'highBlue',
-    105: 'highMagenta',
-    106: 'highCyan',
-    107: 'highWhite',
-  };
   @override
   String get fg => _dim ? '2;$code' : '$code';
   @override
   String get bg => _dim ? '2;$bgCode' : '$bgCode';
 
   @override
-  String get printableFg =>
-      _dim ? '${_colorFromCode(code)}(d)' : _colorFromCode(code);
+  String get printableFg => _dim ? '$name(d)' : name;
   @override
-  String get printableBg =>
-      _dim ? '${_colorFromCode(bgCode)}(d)' : _colorFromCode(bgCode);
+  String get printableBg => _dim ? '$name(d)' : name;
 
   @override
-  Colors dimmed() => Colors._(code, bgCode, true);
+  Colors dimmed() => Colors._(code, bgCode, name, true);
 
-  factory Colors.fromCode(int code) {
-    return mapping[code]!;
-  }
-  String _colorFromCode(int code) {
-    return stringMapping[code]!;
-  }
+  factory Colors.fromCode(int code) => _ansiCodes[code]!;
 }
 
 class ColorRGB implements AnsiColorType {
