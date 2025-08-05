@@ -1,8 +1,8 @@
 # PixelPrompt 
 
 
-[![pub package](https://img.shields.io/pub/v/pixel_prompt.svg)](https://pub.dev/packages/pixel_prompt)  
 [![documentation](https://img.shields.io/badge/documentation-dartdoc-blue)](https://pub.dev/documentation/pixel_prompt/latest/)
+
 
 PixelPrompt is a **Terminal UI (TUI) framework for Dart**, inspired by Flutter’s widget-driven architecture.  
 It brings Dart’s familiar, declarative UI style to the command line, letting you build interactive, styled terminal applications with **layouts, stateful components, and keyboard/mouse events**.
