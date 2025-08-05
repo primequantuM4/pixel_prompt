@@ -9,12 +9,7 @@ class FontStyle {
   static const underline = FontStyle._(4, 'underline');
   static const strikethrough = FontStyle._(9, 'strikethrough');
 
-  static const mapping = <int, FontStyle>{
-    1: bold,
-    3: italic,
-    4: underline,
-    9: strikethrough,
-  };
+  static final _fromCode = {for (final style in values) style.code: style};
 
   static const List<FontStyle> values = [
     bold,
@@ -24,7 +19,7 @@ class FontStyle {
   ];
 
   factory FontStyle.fromCode(int code) {
-    return mapping[code]!;
+    return _fromCode[code]!;
   }
 
   @override
