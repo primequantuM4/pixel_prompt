@@ -1,0 +1,13 @@
+╭───────────────╮ ╭───────────────╮
+│   Increment   │ │   Decrement   │
+╰───────────────╯ ╰───────────────╯
+                                   
+                                   
+      Counter: 1                   
+                                   
+                                   
+                                   
+    Hide Text                      
+                                   
+                                   
+Shh! This is a hidden text         

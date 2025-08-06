@@ -1,15 +1,15 @@
 import 'dart:async';
 
-import 'package:pixel_prompt/components/border_style.dart';
-import 'package:pixel_prompt/components/button_component.dart';
-import 'package:pixel_prompt/core/buildable_component.dart';
-import 'package:pixel_prompt/core/component.dart';
-import 'package:pixel_prompt/core/component_state.dart';
-import 'package:pixel_prompt/core/edge_insets.dart';
-import 'package:pixel_prompt/core/stateful_component.dart';
+import 'package:pixel_prompt/common/response_input.dart';
+import 'package:pixel_prompt/events/input_event.dart';
+import 'package:pixel_prompt/handler/input_handler.dart';
+import 'package:pixel_prompt/logger/logger.dart';
+import 'package:pixel_prompt/manager/input_registry.dart';
 import 'package:pixel_prompt/pixel_prompt.dart';
 
 class HeaderComponent extends BuildableComponent {
+  const HeaderComponent();
+
   @override
   List<Component> build() {
     return [
@@ -45,17 +45,37 @@ class StopWatchComponent extends StatefulComponent {
   bool startCounting = false;
   bool isReset = false;
 
+  bool tickTrigged = false;
+
   @override
   ComponentState<StopWatchComponent> createState() => _StopWatchState();
 }
 
-class _StopWatchState extends ComponentState<StopWatchComponent> {
+class _StopWatchState extends ComponentState<StopWatchComponent>
+    implements InputHandler {
+  _StopWatchState() {
+    InputRegistry.register(this);
+  }
+
   String _formatTime(int millis) {
     final totalSeconds = millis ~/ 1000;
     final minutes = (totalSeconds ~/ 60).toString().padLeft(2, '0');
     final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
     final hundredths = ((millis % 1000) ~/ 10).toString().padLeft(2, '0');
     return "$minutes:$seconds.$hundredths";
+  }
+
+  @override
+  ResponseInput handleInput(InputEvent event) {
+    if (event is! KeyEvent) return ResponseInput.ignored();
+
+    if (event.char == 'T') {
+      Logger.trace('_StopWatchState', "Triggering Stopwatch for one second");
+      tick(1000);
+      return ResponseInput(commands: ResponseCommands.none, handled: true);
+    }
+
+    return ResponseInput.ignored();
   }
 
   @override
@@ -88,6 +108,12 @@ class _StopWatchState extends ComponentState<StopWatchComponent> {
       ),
       TextComponent(_formatTime(component.millisecond)),
     ];
+  }
+
+  void tick(int ms) {
+    setState(() {
+      component.millisecond += ms;
+    });
   }
 
   void start() {

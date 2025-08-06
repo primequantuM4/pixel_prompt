@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:pixel_prompt/components/colors.dart';
 import 'package:pixel_prompt/components/font_style.dart';
@@ -83,17 +84,17 @@ class CanvasBuffer {
   void updateDimensions(int width, int height) {
     if (this.width == width && this.height == height) return;
 
-    this.width = width;
-    this.height = height;
+    this.width = max(width, this.width);
+    this.height = max(height, this.height);
 
     _screenBuffer = List.generate(
-      height,
-      (_) => List.filled(width, BufferCell(char: ' ')),
+      this.height,
+      (_) => List.filled(this.width, BufferCell(char: ' ')),
     );
 
     _previousFrame = List.generate(
-      height,
-      (_) => List.filled(width, BufferCell(char: '')),
+      this.height,
+      (_) => List.filled(this.width, BufferCell(char: '')),
     );
   }
 

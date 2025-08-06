@@ -1,5 +1,6 @@
 import 'package:pixel_prompt/handler/input_handler.dart';
 
+<<<<<<< HEAD
 ///
 /// Maintains a global registry of [InputHandler] instances.
 ///
