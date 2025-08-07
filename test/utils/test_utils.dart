@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:pixel_prompt/terminal/terminal_interpreter.dart';
 import 'package:test/test.dart';
 
 final _shouldUpdateGolden =
@@ -10,8 +11,11 @@ Future<void> compareOrUpdateGolden({
   required String actual,
   Process? process,
 }) async {
+  final file = File(path);
+
   if (_shouldUpdateGolden) {
-    await File(path).writeAsString(actual);
+    await file.parent.create(recursive: true);
+    await file.writeAsString(actual);
     print('Updated golden: $path');
   } else {
     final expected = await File(path).readAsString();
@@ -32,4 +36,29 @@ Future<void> compareOrUpdateGolden({
       rethrow;
     }
   }
+}
+
+Future<void> updateOrTestGolden({
+  required String testName,
+  required String directory,
+  required TerminalInterpreter ti,
+  Process? process,
+}) async {
+  await compareOrUpdateGolden(
+    path: '$directory/${testName}_char.txt',
+    actual: ti.charactersToString(),
+    process: process,
+  );
+
+  await compareOrUpdateGolden(
+    path: '$directory/${testName}_fg.txt',
+    actual: ti.fgColorsToString(),
+    process: process,
+  );
+
+  await compareOrUpdateGolden(
+    path: '$directory/${testName}_bg.txt',
+    actual: ti.bgColorsToString(),
+    process: process,
+  );
 }

@@ -52,22 +52,13 @@ void main() {
               onTimeout: () {},
             );
 
-            await compareOrUpdateGolden(
-              path: 'test/golden/layout_demo_char.txt',
-              actual: ti.charactersToString(),
-              process: process,
-            );
-            await compareOrUpdateGolden(
-              path: 'test/golden/layout_demo_fg.txt',
-              actual: ti.fgColorsToString(),
+            await updateOrTestGolden(
+              testName: 'layout_demo',
+              directory: 'test/golden/layout_demo',
+              ti: ti,
               process: process,
             );
 
-            await compareOrUpdateGolden(
-              path: 'test/golden/layout_demo_bg.txt',
-              actual: ti.bgColorsToString(),
-              process: process,
-            );
             completer.complete();
           }
         });

@@ -20,7 +20,6 @@ void main() {
         environment: {'PIXEL_PROMPT_TRACING': '1'},
       );
 
-      final outputLines = <String>[];
       final completer = Completer<void>();
 
       int step = 0;
@@ -28,14 +27,11 @@ void main() {
       late final StreamSubscription<String> stdoutSub;
       late final StreamSubscription<String> stderrSub;
 
-      final frames = <String>[];
-
       final TerminalInterpreter ti = TerminalInterpreter(13, 44);
 
       stdoutSub = process.stdout.transform(utf8.decoder).listen((line) async {
         if (!_traceRegex.hasMatch(line)) {
           ti.processInput(line);
-          outputLines.add(line);
         }
       });
 
@@ -58,65 +54,34 @@ void main() {
                 Duration.zero,
                 onTimeout: () {},
               );
-              frames.add(outputLines.join('\n'));
-              outputLines.clear();
-            }
-
-            switch (step) {
-              case 0:
-                if (message == 'RENDERED') {
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/checkbox_before_toggle_char.txt',
-                    actual: ti.charactersToString(),
-                    process: process,
-                  );
-
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/checkbox_before_toggle_fg.txt',
-                    actual: ti.fgColorsToString(),
-                    process: process,
-                  );
-
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/checkbox_before_toggle_bg.txt',
-                    actual: ti.bgColorsToString(),
+              switch (step) {
+                case 0:
+                  await updateOrTestGolden(
+                    testName: 'checkbox_before_toggle',
+                    directory: 'test/golden/checkbox_demo',
+                    ti: ti,
                     process: process,
                   );
                   process.stdin.write('\t');
                   step++;
-                }
-                break;
+                  break;
 
-              case 1:
-                if (message == 'RENDERED') {
+                case 1:
                   process.stdin.write(' ');
                   step++;
-                }
-                break;
+                  break;
 
-              case 2:
-                if (message == 'RENDERED' && !completer.isCompleted) {
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/checkbox_after_toggle_char.txt',
-                    actual: ti.charactersToString(),
-                    process: process,
-                  );
-
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/checkbox_after_toggle_fg.txt',
-                    actual: ti.fgColorsToString(),
-                    process: process,
-                  );
-
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/checkbox_after_toggle_bg.txt',
-                    actual: ti.bgColorsToString(),
+                case 2:
+                  await updateOrTestGolden(
+                    testName: 'checkbox_after_toggle',
+                    directory: 'test/golden/checkbox_demo',
+                    ti: ti,
                     process: process,
                   );
 
                   completer.complete();
-                }
-                break;
+                  break;
+              }
             }
           });
 

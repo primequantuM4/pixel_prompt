@@ -56,25 +56,12 @@ void main() {
                 Duration.zero,
                 onTimeout: () {},
               );
-            }
-
-            switch (step) {
-              case 0:
-                if (message == 'RENDERED') {
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/counter_demo_before_char.txt',
-                    actual: ti.charactersToString(),
-                    process: process,
-                  );
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/counter_demo_before_fg.txt',
-                    actual: ti.fgColorsToString(),
-                    process: process,
-                  );
-
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/counter_demo_before_bg.txt',
-                    actual: ti.bgColorsToString(),
+              switch (step) {
+                case 0:
+                  await updateOrTestGolden(
+                    testName: 'counter_demo_before',
+                    directory: 'test/golden/counter_demo',
+                    ti: ti,
                     process: process,
                   );
 
@@ -95,30 +82,17 @@ void main() {
 
                   locked = false;
                   break;
-                }
-              case 1:
-                if (message == 'RENDERED') {
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/counter_demo_after_char.txt',
-                    actual: ti.charactersToString(),
-                    process: process,
-                  );
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/counter_demo_after_fg.txt',
-                    actual: ti.fgColorsToString(),
-                    process: process,
-                  );
-
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/counter_demo_after_bg.txt',
-                    actual: ti.bgColorsToString(),
+                case 1:
+                  await updateOrTestGolden(
+                    testName: 'counter_demo_after',
+                    directory: 'test/golden/counter_demo',
+                    ti: ti,
                     process: process,
                   );
 
                   completer.complete();
-                }
-                break;
-              default:
+                  break;
+              }
             }
           });
 

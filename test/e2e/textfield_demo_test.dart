@@ -20,7 +20,6 @@ void main() {
         environment: {'PIXEL_PROMPT_TRACING': '1'},
       );
 
-      final outputLines = <String>[];
       final completer = Completer<void>();
 
       int step = 0;
@@ -30,11 +29,8 @@ void main() {
       late final StreamSubscription<String> stderrSub;
       bool locked = false;
 
-      final frames = <String>[];
-
       stdoutSub = process.stdout.transform(utf8.decoder).listen((line) {
         if (!_traceRegex.hasMatch(line)) {
-          outputLines.add(line);
           ti.processInput(line);
         }
       });
@@ -58,83 +54,53 @@ void main() {
                 Duration.zero,
                 onTimeout: () {},
               );
-
-              frames.add(outputLines.join('\n'));
-              outputLines.clear();
-            }
-
-            switch (step) {
-              case 0:
-                if (message == 'RENDERED') {
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/textfield_before_write_char.txt',
-                    actual: ti.charactersToString(),
-                    process: process,
-                  );
-
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/textfield_before_write_fg.txt',
-                    actual: ti.fgColorsToString(),
-                    process: process,
-                  );
-
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/textfield_before_write_bg.txt',
-                    actual: ti.bgColorsToString(),
+              switch (step) {
+                case 0:
+                  await updateOrTestGolden(
+                    testName: 'textfield_before_write',
+                    directory: 'test/golden/textfield_demo',
+                    ti: ti,
                     process: process,
                   );
 
                   process.stdin.write('\t');
                   step++;
-                }
-                break;
-              case 1:
-                locked = true;
-                const valueInserted = 'John Doe';
+                  break;
+                case 1:
+                  locked = true;
+                  const valueInserted = 'John Doe';
 
-                for (final char in valueInserted.split('')) {
-                  process.stdin.write(char);
+                  for (final char in valueInserted.split('')) {
+                    process.stdin.write(char);
+                    await Future.delayed(Duration(milliseconds: 100));
+                  }
+
+                  process.stdin.write('\t');
                   await Future.delayed(Duration(milliseconds: 100));
-                }
 
-                process.stdin.write('\t');
-                await Future.delayed(Duration(milliseconds: 100));
+                  const emailValue = 'john.example@gmail.com';
+                  for (final char in emailValue.split('')) {
+                    process.stdin.write(char);
+                    await Future.delayed(Duration(milliseconds: 100));
+                  }
 
-                const emailValue = 'john.example@gmail.com';
-                for (final char in emailValue.split('')) {
-                  process.stdin.write(char);
-                  await Future.delayed(Duration(milliseconds: 100));
-                }
+                  step++;
 
-                step++;
+                  locked = false;
+                  process.stdin.write('\n');
+                  break;
 
-                locked = false;
-                process.stdin.write('\n');
-                break;
-
-              case 2:
-                if (message == 'RENDERED') {
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/textfield_after_write_char.txt',
-                    actual: ti.charactersToString(),
-                    process: process,
-                  );
-
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/textfield_after_write_fg.txt',
-                    actual: ti.fgColorsToString(),
-                    process: process,
-                  );
-
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/textfield_after_write_bg.txt',
-                    actual: ti.bgColorsToString(),
+                case 2:
+                  await updateOrTestGolden(
+                    testName: 'textfield_after_write',
+                    directory: 'test/golden/textfield_demo',
+                    ti: ti,
                     process: process,
                   );
 
                   completer.complete();
                   break;
-                }
+              }
             }
           });
 

@@ -48,49 +48,32 @@ void main() {
                 Duration.zero,
                 onTimeout: () {},
               );
-            }
 
-            switch (step) {
-              case 0:
-                if (message == 'RENDERED') {
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/stop_watch_before_start_char.txt',
-                    actual: ti.charactersToString(),
-                  );
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/stop_watch_before_start_fg.txt',
-                    actual: ti.fgColorsToString(),
-                  );
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/stop_watch_before_start_bg.txt',
-                    actual: ti.bgColorsToString(),
+              switch (step) {
+                case 0:
+                  await updateOrTestGolden(
+                    testName: 'stop_watch_before_start',
+                    directory: 'test/golden/stop_watch_demo',
+                    ti: ti,
+                    process: process,
                   );
 
                   await Future.delayed(Duration(milliseconds: 200));
                   process.stdin.write('T');
                   step++;
-                }
 
-                break;
-              case 1:
-                if (message == 'RENDERED') {
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/stop_watch_after_start_char.txt',
-                    actual: ti.charactersToString(),
-                  );
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/stop_watch_after_start_fg.txt',
-                    actual: ti.fgColorsToString(),
-                  );
-                  await compareOrUpdateGolden(
-                    path: 'test/golden/stop_watch_after_start_bg.txt',
-                    actual: ti.bgColorsToString(),
+                  break;
+                case 1:
+                  await updateOrTestGolden(
+                    testName: 'stop_watch_after_start',
+                    directory: 'test/golden/stop_watch_demo',
+                    ti: ti,
+                    process: process,
                   );
 
                   completer.complete();
                   break;
-                }
-              default:
+              }
             }
           });
 
