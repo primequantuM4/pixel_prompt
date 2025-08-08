@@ -3,8 +3,18 @@ import 'dart:io';
 import 'package:pixel_prompt/terminal/terminal_interpreter.dart';
 import 'package:test/test.dart';
 
+final _traceRegex = RegExp(
+  r'^==PIXEL_PROMPT_TRACING_(\w+)==\[(.*?)\]\[(.*?)\] (.*)$',
+);
+
 final _shouldUpdateGolden =
     Platform.environment['PIXEL_PROMPT_UPDATE_GOLDENS'] == '1';
+
+Future<void> expectRender(Stream<String> stderrLines) async {
+  await stderrLines
+      .firstWhere((line) => _traceRegex.firstMatch(line)?[4] == 'RENDERED')
+      .timeout(const Duration(seconds: 5));
+}
 
 Future<void> compareOrUpdateGolden({
   required String path,

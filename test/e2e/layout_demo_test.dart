@@ -20,6 +20,7 @@ void main() {
     final outputLines = <String>[];
     final completer = Completer<void>();
 
+    bool renderedSeen = false;
     final TerminalInterpreter ti = TerminalInterpreter(11, 55);
 
     late final StreamSubscription<String> stdoutSub;
@@ -47,6 +48,7 @@ void main() {
           final message = match[4];
 
           if (message == 'RENDERED' && !completer.isCompleted) {
+            renderedSeen = true;
             await stdoutSub.asFuture<void>().timeout(
               Duration.zero,
               onTimeout: () {},
@@ -71,7 +73,20 @@ void main() {
             completer.completeError('Exited early with code $code');
           }
         }),
-      ]).timeout(const Duration(seconds: 15));
+      ]).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          if (!renderedSeen) {
+            throw Exception(
+              'Test failed: Did not receive "RENDERED" message within timeout.',
+            );
+          } else {
+            throw Exception(
+              'Test timed out despite seeing "RENDERED". Possible logic issue.',
+            );
+          }
+        },
+      );
     } finally {
       await stdoutSub.cancel();
       await stderrSub.cancel();

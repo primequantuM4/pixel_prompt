@@ -23,6 +23,7 @@ void main() {
       final completer = Completer<void>();
 
       int step = 0;
+      List<bool> renderedSeen = [];
 
       late final StreamSubscription<String> stdoutSub;
       late final StreamSubscription<String> stderrSub;
@@ -50,6 +51,7 @@ void main() {
             final message = match[4];
 
             if (message == 'RENDERED') {
+              renderedSeen.add(true);
               await stdoutSub.asFuture<void>().timeout(
                 Duration.zero,
                 onTimeout: () {},
@@ -93,7 +95,25 @@ void main() {
               completer.completeError('Exited early with code $code');
             }
           }),
-        ]).timeout(const Duration(seconds: 15));
+        ]).timeout(
+          const Duration(seconds: 15),
+          onTimeout: () {
+            if (renderedSeen.isEmpty) {
+              throw Exception(
+                'Test failed: Did not receive "RENDERED" message within timeout.',
+              );
+            } else {
+              throw Exception(
+                'Test timed out despite seeing "RENDERED". Possible logic issue.',
+              );
+            }
+          },
+        );
+        expect(
+          step + 1,
+          renderedSeen.length,
+          reason: 'Expected ${step + 1} RENDERED log messages',
+        );
       } finally {
         await stdoutSub.cancel();
         await stderrSub.cancel();
