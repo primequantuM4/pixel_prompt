@@ -3,6 +3,35 @@ import 'package:pixel_prompt/core/component_instance.dart';
 import 'package:pixel_prompt/events/input_event.dart';
 import 'package:pixel_prompt/renderer/render_manager.dart';
 
+/// Base class for a [ComponentInstance] that can respond to user interaction.
+///
+/// An `InteractableComponentInstance` adds focus, hover, and input-handling
+/// capabilities to a component instance. Subclasses can override interaction
+/// flags and event handlers to define custom behavior.
+///
+/// ### Interaction flags:
+/// - [isFocusable] — whether the component can gain focus.
+/// - [isHoverable] — whether the component can be hovered.
+/// - [wantsInput] — whether the component requests input events when focused.
+///
+/// ### State:
+/// - [isFocused] — whether the component is currently focused.
+/// - [isHovered] — whether the component is currently hovered.
+///
+/// ### Event lifecycle:
+/// - [focus] → [onFocus]
+/// - [blur] → [onBlur]
+/// - [hover] → [onHover]
+/// - [onClick] — triggered on user click/tap.
+/// - [handleInput] — process raw [InputEvent]s and return a [ResponseInput].
+///
+/// ### Rendering:
+/// May optionally hold a [RenderManager] reference for rendering coordination.
+///
+/// ### See also:
+/// - [ComponentInstance] — the base type for all renderable component instances.
+/// - [ResponseInput] — standard return type for processing user input.
+/// - [InputEvent] — encapsulates raw user interaction events.
 abstract class InteractableComponentInstance extends ComponentInstance {
   InteractableComponentInstance({super.padding, super.position});
   bool isFocused = false;
