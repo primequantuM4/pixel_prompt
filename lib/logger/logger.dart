@@ -22,6 +22,7 @@ import 'dart:io';
 /// ```
 ///
 /// No logs are written if tracing is disabled.
+/// {@category Utilities}
 class Logger {
   /// Whether logging is currently enabled based on the
   /// `PIXEL_PROMPT_TRACING` environment variable.
