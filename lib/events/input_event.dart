@@ -2,6 +2,7 @@
 ///
 /// All specific event types such as key presses,
 /// mouse clicks, and escape sequences extend [InputEvent].
+/// {@category Events}
 sealed class InputEvent {
   const InputEvent();
 }
@@ -9,6 +10,7 @@ sealed class InputEvent {
 /// Represents a keyboard event.
 ///
 /// Includes the key code and optional character value.
+/// {@category Events}
 class KeyEvent extends InputEvent {
   /// The code identifying the key pressed.
   final KeyCode code;
@@ -20,6 +22,7 @@ class KeyEvent extends InputEvent {
 }
 
 /// Identifies different kinds of key presses.
+/// {@category Events}
 enum KeyCode {
   character,
   enter,
@@ -37,6 +40,7 @@ enum KeyCode {
 /// Represents a raw character input event.
 ///
 /// Typically used for printable characters.
+/// {@category Events}
 class CharEvent extends InputEvent {
   /// The character that was input.
   final String char;
@@ -45,11 +49,13 @@ class CharEvent extends InputEvent {
 }
 
 /// Indicates where a terminal escape sequence originated.
+/// {@category Events}
 enum SequenceOrigin { generic, windows, linux }
 
 /// Represents a terminal escape sequence event.
 ///
 /// Used for control sequences that are not simple key presses.
+/// {@category Events}
 class SequenceEvent extends InputEvent {
   /// The raw sequence bytes.
   final List<int> sequence;
@@ -64,11 +70,13 @@ class SequenceEvent extends InputEvent {
 }
 
 /// Represents an escape key event with no additional data.
+/// {@category Events}
 class EscapeEvent extends InputEvent {}
 
 /// Represents a mouse input event.
 ///
 /// Includes the event type, position, and button used.
+/// {@category Events}
 class MouseEvent extends InputEvent {
   /// The type of mouse action performed.
   final MouseEventType type;
@@ -96,6 +104,7 @@ class MouseEvent extends InputEvent {
 }
 
 /// Represents an unrecognized or unsupported input event.
+/// {@category Events}
 class UnknownEvent extends InputEvent {
   /// The raw byte received, if available.
   final int? byte;
@@ -104,4 +113,5 @@ class UnknownEvent extends InputEvent {
 }
 
 /// Enumerates possible mouse event actions.
+/// {@category Events}
 enum MouseEventType { click, release, hover, error }
