@@ -4,8 +4,40 @@ import 'package:pixel_prompt/pixel_prompt.dart';
 
 enum TerminalState { csi, normal }
 
+/// ## Terminal ANSI Interpreter and Buffer Manager
+///
+/// Interprets ANSI escape sequences from terminal input and maintains
+/// a virtual terminal buffer state representing characters, colors,
+/// and font styles for each cell on the terminal screen.
+///
+/// This class processes input strings containing normal characters and
+/// ANSI control sequences, updating the internal buffer accordingly.
+///
+/// The buffer is a 2D grid (`bufferState`) of [CellState], each cell
+/// storing the character and its styling attributes.
+///
+/// Maintains cursor position (`currentLine`, `currentColumn`) and supports
+/// ANSI sequences for text styling, cursor movement, clearing, and colors.
+///
+/// ### Example
+/// ```dart
+/// final interpreter = TerminalInterpreter(24, 80);
+/// interpreter.processInput('Hello \x1B[31mRed\x1B[0m World!');
+/// print(interpreter.charactersToString());
+/// ```
+///
+/// ### See Also
+/// - [ANSI escape code Wikipedia](https://en.wikipedia.org/wiki/ANSI_escape_code)
+/// - [AnsiColorType] for color representations.
+/// - [FontStyle] for supported font styles.
+/// {@category Terminal}
+/// {@subCategory Parsing}
+/// {@subCategory Rendering}
 class TerminalInterpreter {
+  /// Current cursor line (row), zero-based.
   int currentLine = 0;
+
+  /// Current cursor column, zero-based.
   int currentColumn = 0;
 
   AnsiColorType? _foregroundColor;
@@ -13,26 +45,24 @@ class TerminalInterpreter {
 
   final Set<FontStyle> _fontStyles = {};
 
-  int lines;
-  int columns;
+  /// Number of lines (rows) in the terminal buffer.
+  final int lines;
 
-  List<List<CellState>> bufferState;
+  /// Number of columns in the terminal buffer.
+  final int columns;
 
-  StringBuffer ansiBuffer = StringBuffer();
+  /// 2D buffer storing the state of each terminal cell.
+  final List<List<CellState>> bufferState;
+
+  /// Buffer accumulating characters of an ongoing ANSI escape sequence.
+  final StringBuffer ansiBuffer = StringBuffer();
 
   TerminalState _terminalState = TerminalState.normal;
 
-  TerminalInterpreter(this.lines, this.columns)
-    : bufferState = [
-        for (int i = 0; i < lines; i++)
-          [for (int j = 0; j < columns; j++) CellState()],
-      ];
-
+  /// Tracks if an escape code has been seen (e.g., '\x1B').
   bool seenEscapeCode = false;
 
-  // terminating characters that trigger ANSI commands
-  // Any latin alphabet character is technically a terminating character
-  // TODO: Add more terminating characters when needed
+  /// ANSI control sequence terminating characters.
   static const String styleTerminatingCharacter = 'm';
   static const String cursorHomeTerminatingCharacter = 'H';
   static const String upMovementTerminatingCharacter = 'A';
@@ -45,6 +75,7 @@ class TerminalInterpreter {
   static const String enableTerminatingCharacter = 'h';
   static const String disableTerminatingCharacter = 'l';
 
+  /// Set of terminating characters for ANSI sequences.
   static const Set<String> terminatingCharacters = {
     styleTerminatingCharacter,
     cursorHomeTerminatingCharacter,
@@ -59,6 +90,7 @@ class TerminalInterpreter {
     disableTerminatingCharacter,
   };
 
+  // Constants for parsing ANSI color and style codes.
   static const int _ansiFgRGB = 38;
   static const int _ansiBgRGB = 48;
   static const int _ansiRgbMode = 2;
@@ -79,6 +111,18 @@ class TerminalInterpreter {
   static const int _eraseStartToCursorCommand = 1;
   static const int _eraseLineCommand = 2;
 
+  /// Creates a terminal interpreter with given [lines] and [columns] size.
+  ///
+  /// Initializes the internal buffer state with empty cells.
+  TerminalInterpreter(this.lines, this.columns)
+    : bufferState = [
+        for (int i = 0; i < lines; i++)
+          [for (int j = 0; j < columns; j++) CellState()],
+      ];
+
+  /// Processes an input string containing text and ANSI sequences.
+  ///
+  /// Updates the terminal buffer and cursor position accordingly.
   void processInput(String data) {
     for (int i = 0; i < data.length; i++) {
       String char = data[i];
@@ -86,10 +130,16 @@ class TerminalInterpreter {
     }
   }
 
+  /// Returns the character content of the buffer as a multi-line string.
   String charactersToString() => _matrixToString(getCharactersMatrix());
+
+  /// Returns the foreground color matrix as a formatted string.
   String fgColorsToString() => _formatMatrixToString(getFgMatrix());
+
+  /// Returns the background color matrix as a formatted string.
   String bgColorsToString() => _formatMatrixToString(getBgMatrix());
 
+  /// Writes a single character and current style attributes at the cursor.
   void writeToBufferState(String char) {
     bufferState[currentLine][currentColumn].character = char;
     bufferState[currentLine][currentColumn].foregroundColor = _foregroundColor;
@@ -97,10 +147,12 @@ class TerminalInterpreter {
     bufferState[currentLine][currentColumn].fontStyles = {..._fontStyles};
   }
 
+  /// Returns a 2D list of characters from the buffer.
   List<List<String>> getCharactersMatrix() => bufferState
       .map((row) => row.map((cell) => cell.character).toList())
       .toList();
 
+  /// Returns a 2D list of foreground colors as printable strings.
   List<List<String>> getFgMatrix() => bufferState
       .map(
         (row) => row
@@ -109,6 +161,7 @@ class TerminalInterpreter {
       )
       .toList();
 
+  /// Returns a 2D list of background colors as printable strings.
   List<List<String>> getBgMatrix() => bufferState
       .map(
         (row) => row
@@ -117,6 +170,14 @@ class TerminalInterpreter {
       )
       .toList();
 
+  /// Handles an incoming character [char] according to the current terminal state.
+  ///
+  /// - If the terminal is in the [TerminalState.normal] state,
+  ///   it processes the character as either normal text or escape sequence start.
+  ///
+  /// - If the terminal is in the [TerminalState.csi] (Control Sequence Introducer) state,
+  ///   it accumulates the character into the ANSI escape sequence buffer and
+  ///   triggers handling when a terminating character is reached.
   void _handleCharacterByState(String char) {
     switch (_terminalState) {
       case TerminalState.normal:
@@ -128,6 +189,13 @@ class TerminalInterpreter {
     }
   }
 
+  /// Processes a single character in the normal terminal state.
+  ///
+  /// - Detects the start of an escape sequence (ESC, '\x1B') and marks `seenEscapeCode`.
+  /// - On receiving newline `\n` or carriage return `\r`, moves the cursor appropriately.
+  /// - Writes normal characters to the buffer at the current cursor position.
+  /// - If an escape code was previously seen, switches state to CSI if the next char is '['.
+  ///   Otherwise, throws if unknown escape sequences are encountered.
   void _processSingleCharacter(String char) {
     if (seenEscapeCode) {
       switch (char) {
@@ -136,7 +204,7 @@ class TerminalInterpreter {
           seenEscapeCode = false;
           break;
         default:
-          throw UnimplementedError();
+          throw UnimplementedError('Unknown escape sequence: \x1B$char');
       }
     } else {
       switch (char) {
@@ -157,6 +225,11 @@ class TerminalInterpreter {
     }
   }
 
+  /// Handles characters received while in the CSI (Control Sequence Introducer) state.
+  ///
+  /// - Accumulates characters into the ANSI escape sequence buffer (`ansiBuffer`).
+  /// - When a terminating character is detected, triggers processing of the full sequence.
+  /// - Resets the terminal state to normal after processing.
   void _handleAnsiSequence(String char) {
     if (terminatingCharacters.contains(char)) {
       _handleAnsiBuffer(char);
@@ -167,6 +240,14 @@ class TerminalInterpreter {
     }
   }
 
+  /// Interprets the accumulated ANSI escape sequence in `ansiBuffer` based on the terminating [char].
+  ///
+  /// - Dispatches to specific handlers based on the terminating character:
+  ///   - Style changes ('m')
+  ///   - Cursor movements ('A', 'B', 'C', 'D', 'H')
+  ///   - Line clearing ('K')
+  ///   - Ignored or unsupported sequences clear the buffer silently.
+  /// - Throws on unrecognized terminating characters to flag unsupported sequences.
   void _handleAnsiBuffer(String char) {
     switch (char) {
       case styleTerminatingCharacter:
@@ -194,20 +275,23 @@ class TerminalInterpreter {
       case respondCursorTerminatingCharacter:
       case disableTerminatingCharacter:
       case enableTerminatingCharacter:
-        // ignore and clear buffer
+        // Ignored sequences; just clear buffer.
         ansiBuffer.clear();
         break;
       default:
-        throw UnimplementedError();
+        throw UnimplementedError('Unhandled ANSI terminating char: $char');
     }
   }
 
+  /// Processes ANSI style escape sequences (e.g., '\x1B[31m' for red text).
+  ///
+  /// - Parses the numeric parameters in the escape sequence.
+  /// - Applies style resets, foreground/background color changes (including RGB),
+  ///   and font style toggles accordingly.
   void _handleStyleAnsi() {
     List<int>? data = _tryParseAnsiBuffer(clearLineTerminatingCharacter);
-
     if (data == null) return;
 
-    // equivalent to \x1B[0m
     if (data.isEmpty) {
       _clearStyles();
       return;
@@ -216,38 +300,27 @@ class TerminalInterpreter {
     for (int i = 0; i < data.length; i++) {
       int val = data[i];
 
-      // clear styles
       if (val == 0) {
         _clearStyles();
-      }
-      // rgb foreground condition
-      else if (val == _ansiFgRGB &&
+      } else if (val == _ansiFgRGB &&
           i + _expectedExtraArgs < data.length &&
           data[i + 1] == _ansiRgbMode) {
         final rgb = _extractRGB(data, i);
         if (rgb != null) _foregroundColor = rgb;
         i += _expectedExtraArgs;
-      }
-      // rgb background condition
-      else if (val == _ansiBgRGB &&
+      } else if (val == _ansiBgRGB &&
           i + _expectedExtraArgs < data.length &&
           data[i + 1] == _ansiRgbMode) {
         final rgb = _extractRGB(data, i);
         if (rgb != null) _backgroundColor = rgb;
         i += _expectedExtraArgs;
-      }
-      // ANSI foreground colors
-      else if ((_ansiFgStart <= val && val <= _ansiFgEnd) ||
+      } else if ((_ansiFgStart <= val && val <= _ansiFgEnd) ||
           (_ansiFgBrightStart <= val && val <= _ansiFgBrightEnd)) {
         _foregroundColor = Colors.fromCode(val);
-      }
-      // ANSI background colors
-      else if ((_ansiBgStart <= val && val <= _ansiBgEnd) ||
+      } else if ((_ansiBgStart <= val && val <= _ansiBgEnd) ||
           (_ansiBgBrightStart <= val && val <= _ansiBgBrightEnd)) {
         _backgroundColor = Colors.fromCode(val);
-      }
-      // Styles
-      else {
+      } else {
         for (final fs in FontStyle.values) {
           if (fs.code == val) _fontStyles.add(FontStyle.fromCode(fs.code));
         }
@@ -255,12 +328,15 @@ class TerminalInterpreter {
     }
   }
 
+  /// Processes the ANSI clear line commands (e.g., '\x1B[K').
+  ///
+  /// - Supports clearing from cursor to end of line,
+  ///   from start of line to cursor,
+  ///   or the entire line based on parameters.
   void _handleClearCommand() {
     List<int>? ansiNumbers = _tryParseAnsiBuffer(clearLineTerminatingCharacter);
-
     if (ansiNumbers == null) return;
 
-    // equivalent to \x1B[0K
     if (ansiNumbers.isEmpty) {
       _eraseFromCursorToEnd();
       return;
@@ -274,9 +350,13 @@ class TerminalInterpreter {
       _eraseFromBeginningToCursor();
     } else if (command == _eraseLineCommand) {
       _eraseEntireLine();
-    } // ignore other numbers as they don't do anything
+    }
   }
 
+  /// Handles cursor movement to a specific location (e.g., '\x1B[10;20H').
+  ///
+  /// - Parses the line and column numbers from the escape sequence parameters.
+  /// - Updates [currentLine] and [currentColumn] cursor positions within buffer limits.
   void _handleMovement() {
     List<int>? ansiNumbers = _tryParseAnsiBuffer(
       cursorHomeTerminatingCharacter,
@@ -291,22 +371,28 @@ class TerminalInterpreter {
     }
   }
 
+  /// Handles directional cursor movements (up, down, back, forward) using ANSI sequences.
+  ///
+  /// - Uses parameters to determine how many cells to move.
+  /// - Updates the current cursor position accordingly, clamping within terminal bounds.
   void _handleDirectionMovementAnsi(String direction) {
-    // current character is counted as a line so movement in any direction is n - 1
-    // movement should be valid otherwise write to buffer whatever is in _ansiBuffer
-    // nA/nB/nC/nD should be movement where n -> is a valid int
-
     List<int>? ansiNumbers;
-    if (direction == 'up') {
-      ansiNumbers = _tryParseAnsiBuffer(upMovementTerminatingCharacter);
-    } else if (direction == 'down') {
-      ansiNumbers = _tryParseAnsiBuffer(downMovementTerminatingCharacter);
-    } else if (direction == 'back') {
-      ansiNumbers = _tryParseAnsiBuffer(backMovementTerminatingCharacter);
-    } else if (direction == 'forward') {
-      ansiNumbers = _tryParseAnsiBuffer(forwardMovementTerminatingCharacter);
-    } else {
-      ansiNumbers = [];
+
+    switch (direction) {
+      case 'up':
+        ansiNumbers = _tryParseAnsiBuffer(upMovementTerminatingCharacter);
+        break;
+      case 'down':
+        ansiNumbers = _tryParseAnsiBuffer(downMovementTerminatingCharacter);
+        break;
+      case 'back':
+        ansiNumbers = _tryParseAnsiBuffer(backMovementTerminatingCharacter);
+        break;
+      case 'forward':
+        ansiNumbers = _tryParseAnsiBuffer(forwardMovementTerminatingCharacter);
+        break;
+      default:
+        ansiNumbers = [];
     }
 
     if (ansiNumbers == null || ansiNumbers.isEmpty) return;
@@ -326,10 +412,22 @@ class TerminalInterpreter {
       case 'forward':
         currentColumn = min(currentColumn + cursorMovement, columns - 1);
         break;
-      default:
     }
   }
 
+  /// Attempts to parse the accumulated ANSI buffer into a list of integers.
+  ///
+  /// Returns `null` if parsing fails or buffer contains non-numeric data.
+  /// Parses the accumulated ANSI parameter string in [ansiBuffer] into a list of integers.
+  ///
+  /// - The ANSI parameters are typically separated by semicolons (`;`).
+  /// - Returns a list of integer parameters extracted from the buffer.
+  /// - If non-numeric characters are found during parsing (unexpected input),
+  ///   writes those characters literally into the buffer starting at the current cursor,
+  ///   inserts the terminating character literally as well, then returns null to indicate failure.
+  ///
+  /// Example:
+  ///   For input buffer "1;34;48;2;255;0;0", returns [1, 34, 48, 2, 255, 0, 0].
   List<int>? _tryParseAnsiBuffer(String terminatingCharacter) {
     String value = ansiBuffer.toString();
     List<int> res = [];
@@ -344,6 +442,7 @@ class TerminalInterpreter {
       }
 
       if (!_canConvertToNumber(value[i])) {
+        // Write remaining characters literally to buffer starting at cursor.
         String remainingString = i + 1 < value.length
             ? value.substring(i + 1)
             : '';
@@ -354,6 +453,7 @@ class TerminalInterpreter {
           currentColumn++;
         }
 
+        // Write the terminating character literally if possible.
         if (currentColumn <= columns - 1 && currentLine <= lines - 1) {
           bufferState[currentLine][currentColumn].character =
               terminatingCharacter;
@@ -361,16 +461,21 @@ class TerminalInterpreter {
 
         return null;
       } else {
+        // Build the number digit-by-digit (note the multiplication by 10).
         num = (num + int.parse(value[i])) * 10;
       }
     }
 
-    // any remaining unprocessed number
+    // Add the last parsed number if any.
     if (num > 0) res.add((num / 10).toInt());
 
     return res;
   }
 
+  /// Erases characters from the cursor position to the end of the current line.
+  ///
+  /// - Sets characters to space (' ').
+  /// - Applies current background and foreground colors.
   void _eraseFromCursorToEnd() {
     for (int i = currentColumn; i < columns; i++) {
       bufferState[currentLine][i].character = ' ';
@@ -379,6 +484,10 @@ class TerminalInterpreter {
     }
   }
 
+  /// Erases characters from the beginning of the current line up to the cursor position.
+  ///
+  /// - Sets characters to space (' ').
+  /// - Applies current background and foreground colors.
   void _eraseFromBeginningToCursor() {
     for (int i = 0; i <= currentColumn; i++) {
       bufferState[currentLine][i].character = ' ';
@@ -387,6 +496,10 @@ class TerminalInterpreter {
     }
   }
 
+  /// Erases the entire current line.
+  ///
+  /// - Sets all characters in the line to space (' ').
+  /// - Applies current background and foreground colors.
   void _eraseEntireLine() {
     for (int i = 0; i < columns; i++) {
       bufferState[currentLine][i].character = ' ';
@@ -395,31 +508,49 @@ class TerminalInterpreter {
     }
   }
 
+  /// Converts a matrix of strings (e.g., characters) to a single string with newlines.
+  ///
+  /// - Each row is concatenated to a string.
+  /// - Rows are joined by newline characters.
   String _matrixToString(List<List<String>> matrix) {
     return matrix.map((row) => row.join()).join('\n');
   }
 
+  /// Formats a matrix of strings by padding each cell to width 8, then joins as string.
+  ///
+  /// - Useful for aligned output of color or style matrices.
   String _formatMatrixToString(List<List<String>> matrix) {
     final padded = _padMatrix(matrix);
     return padded.map((row) => row.join()).join('\n');
   }
 
+  /// Pads each cell string in the matrix to fixed width (8) by right-padding with spaces.
+  ///
+  /// - Helps to visually align output columns.
   List<List<String>> _padMatrix(List<List<String>> matrix) {
     return matrix
         .map((row) => row.map((cell) => cell.padRight(8)).toList())
         .toList();
   }
 
+  /// Checks if the given character can be parsed as a decimal digit.
+  ///
+  /// Returns true if the character is a digit, false otherwise.
   bool _canConvertToNumber(String char) {
     return int.tryParse(char) != null;
   }
 
+  /// Clears all current text styles and colors (foreground and background).
   void _clearStyles() {
     _foregroundColor = null;
     _backgroundColor = null;
     _fontStyles.clear();
   }
 
+  /// Extracts an RGB color from a list of ANSI parameters starting at [start].
+  ///
+  /// - Expects the format: [38|48, 2, R, G, B] starting at index [start].
+  /// - Returns a [ColorRGB] if the color components are valid; otherwise null.
   ColorRGB? _extractRGB(List<int> data, int start) {
     final r = data[start + 2];
     final g = data[start + 3];
@@ -427,21 +558,31 @@ class TerminalInterpreter {
     return _validRgbColor(r, g, b) ? ColorRGB(r, g, b) : null;
   }
 
+  /// Validates whether RGB color components [r], [g], and [b] are within 0-255.
+  ///
+  /// Returns true if all components are valid colors.
   bool _validRgbColor(int r, int g, int b) {
-    bool validRed = 0 <= r && r < 256;
-    bool validGreen = 0 <= g && g < 256;
-    bool validBlue = 0 <= b && b < 256;
-
-    return validRed && validGreen && validBlue;
+    return (0 <= r && r < 256) && (0 <= g && g < 256) && (0 <= b && b < 256);
   }
 }
 
+/// Represents the state of a single cell in the terminal buffer.
+///
+/// Stores the character, foreground and background colors, and font styles.
 class CellState {
+  /// The character displayed in this cell.
   String character = ' ';
+
+  /// The foreground color of this cell.
   AnsiColorType? foregroundColor;
+
+  /// The background color of this cell.
   AnsiColorType? backgroundColor;
+
+  /// The set of font styles applied to this cell.
   Set<FontStyle> fontStyles = {};
 
+  /// Resets this cell to default empty state.
   void reset() {
     character = ' ';
     foregroundColor = null;
@@ -451,7 +592,6 @@ class CellState {
   @override
   String toString() {
     String style = fontStyles.map((style) => style.code).join(';');
-
-    return 'CellState(char: $character fg: ${foregroundColor?.fg}, bg: ${backgroundColor?.bg}, style: $style})';
+    return 'CellState(char: $character fg: ${foregroundColor?.fg}, bg: ${backgroundColor?.bg}, style: $style)';
   }
 }
