@@ -20,6 +20,9 @@ import 'package:pixel_prompt/renderer/render_manager.dart';
 /// final registry = InteractableRegistry();
 /// registry.registerInteractables(rootComponent, focusManager, renderManager);
 /// ```
+///
+/// {@category Core}
+/// {@category Interaction}
 class InteractableRegistry {
   void registerInteractables(
     ComponentInstance componentInstance,
@@ -31,8 +34,10 @@ class InteractableRegistry {
       componentInstance.renderManager = renderManager;
     }
     if (componentInstance is StatefulComponentInstance) {
-      Logger.trace("InteractableRegistry",
-          'Stateful Component $componentInstance registered');
+      Logger.trace(
+        "InteractableRegistry",
+        'Stateful Component $componentInstance registered',
+      );
       componentInstance.renderManager = renderManager;
     }
 

@@ -11,6 +11,10 @@ import 'package:pixel_prompt/core/app.dart';
 /// ### See also:
 /// - [ComponentInstance] — the base interface for all component instances.
 /// - [AppInstance] — a specialized parent instance that owns the application's root component tree.
+///
+/// {@category Core}
+/// {@category Components}
+/// {@category Layout}
 abstract class ParentComponentInstance extends ComponentInstance {
   /// The direct child component instances managed by this parent.
   List<ComponentInstance> get childrenInstance;

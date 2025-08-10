@@ -50,6 +50,8 @@ import 'package:pixel_prompt/terminal/terminal_functions.dart';
 /// See also:
 /// - [AppInstance], the runtime representation of an [App] during rendering.
 /// - [ComponentInstance], the base type for all runtime component instances.
+///
+/// {@category Core}
 class App extends Component {
   /// The list of [Component]s that make up this application’s UI.
   final List<Component> children;
@@ -90,6 +92,8 @@ class App extends Component {
 /// ### See also:
 /// - [App] — the root component type used to define the application's UI.
 /// - [ComponentInstance] — the base interface implemented by all component instances.
+///
+/// {@category Core}
 class AppInstance extends ParentComponentInstance {
   /// The root [App] component.
   final App component;

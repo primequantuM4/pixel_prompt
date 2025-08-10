@@ -27,6 +27,9 @@
 /// See also:
 /// - [PositionType] for available positioning modes
 /// - [Component.position] for component placement
+///
+/// {@category Core}
+/// {@category Layout}
 class Position {
   /// The horizontal offset from the origin or reference point.
   final int x;

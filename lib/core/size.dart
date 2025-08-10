@@ -4,6 +4,8 @@
 /// containers, and layout regions within the terminal UI framework.
 ///
 /// Both [width] and [height] are mutable to allow dynamic resizing.
+///
+/// {@category Core}
 class Size {
   /// The horizontal extent.
 

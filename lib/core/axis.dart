@@ -2,4 +2,6 @@
 ///
 /// - [horizontal]: Arrange children in a row, left-to-right.
 /// - [vertical]: Arrange children in a column, top-to-bottom.
+///
+/// {@category Layout}
 enum Axis { horizontal, vertical }

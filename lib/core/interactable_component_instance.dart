@@ -32,6 +32,10 @@ import 'package:pixel_prompt/renderer/render_manager.dart';
 /// - [ComponentInstance] — the base type for all renderable component instances.
 /// - [ResponseInput] — standard return type for processing user input.
 /// - [InputEvent] — encapsulates raw user interaction events.
+///
+/// {@category Core}
+/// {@category Components}
+/// {@category Interaction}
 abstract class InteractableComponentInstance extends ComponentInstance {
   InteractableComponentInstance({super.padding, super.position});
   bool isFocused = false;

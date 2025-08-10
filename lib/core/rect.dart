@@ -7,6 +7,8 @@
 ///
 /// This class is typically used for layout, rendering bounds, or hit-testing
 /// in the terminal UI system.
+///
+/// {@category Core}
 class Rect {
   /// The horizontal coordinate of the top-left corner.
   final int x;

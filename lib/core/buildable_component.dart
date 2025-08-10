@@ -48,7 +48,9 @@ import 'package:pixel_prompt/core/stateful_component.dart';
 /// See also:
 /// - [BuildableComponentInstance] for the runtime representation.
 /// - [StatefulComponent] for stateful, mutable UI.
-
+///
+/// {@category Core}
+/// {@category Components}
 abstract class BuildableComponent extends Component {
   /// Creates a stateless, buildable component.
   const BuildableComponent();
@@ -85,6 +87,9 @@ abstract class BuildableComponent extends Component {
 /// See also:
 /// - [BuildableComponent] for the configuration object.
 /// - [ParentComponentInstance] for shared child-management behavior.
+///
+/// {@category Core}
+/// {@category Components}
 class BuildableComponentInstance extends ParentComponentInstance {
   /// The stateless [BuildableComponent] configuration for this instance.
   final BuildableComponent component;

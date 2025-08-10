@@ -28,6 +28,10 @@ import 'package:pixel_prompt/renderer/render_manager.dart';
 /// ### See also:
 /// - [ComponentState] — manages the mutable state for a `StatefulComponent`.
 /// - [StatefulComponentInstance] — runtime instance of a `StatefulComponent`.
+///
+/// {@category Core}
+/// {@category Components}
+/// {@category State Management}
 abstract class StatefulComponent extends Component {
   const StatefulComponent();
 

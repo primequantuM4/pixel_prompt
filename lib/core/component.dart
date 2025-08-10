@@ -27,6 +27,8 @@ import 'package:pixel_prompt/core/position.dart';
 /// See also:
 /// - [EdgeInsets] for defining padding
 /// - [Position] for specifying placement
+/// {@category Core}
+/// {@category Components}
 abstract class Component {
   /// The padding inside the component’s layout bounds.
   ///

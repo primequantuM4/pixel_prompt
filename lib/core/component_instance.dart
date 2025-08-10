@@ -46,6 +46,9 @@ import 'package:pixel_prompt/core/canvas_buffer.dart';
 /// - [EdgeInsets] for padding
 /// - [Position] for placement
 /// - [Rect] and [Size] for layout geometry
+///
+/// {@category Core}
+/// {@category Components}
 abstract class ComponentInstance {
   /// The current layout bounds of this component instance.
   ///

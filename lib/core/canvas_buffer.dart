@@ -25,6 +25,8 @@ import 'package:pixel_prompt/logger/logger.dart';
 /// 2. Use [drawChar] or [drawAt] to update cells.
 /// 3. Call [render] to flush changes to the terminal.
 /// 4. Use [clear] or [clearBufferArea] to reset contents.
+/// {@category Core}
+/// {@category Rendering}
 class CanvasBuffer {
   /// The width of the canvas in characters.
   int width;

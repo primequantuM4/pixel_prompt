@@ -19,6 +19,8 @@
 /// // Only top and left padding
 /// final padding3 = EdgeInsets.only(top: 5, left: 3);
 /// ```
+///
+/// {@category Core}
 class EdgeInsets {
   /// The padding on the top side.
   final int top;

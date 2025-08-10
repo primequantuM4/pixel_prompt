@@ -23,6 +23,10 @@ typedef VoidCallback = void Function();
 /// - [build] is called whenever the component needs to render itself.
 /// - [setState] is used to schedule a rebuild after mutating state.
 ///
+///
+/// {@category Core}
+/// {@category Components}
+/// {@category State Management}
 abstract class ComponentState<T extends StatefulComponent> {
   /// The associated [StatefulComponent] that owns this state.
   late T component;

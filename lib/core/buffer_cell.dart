@@ -10,6 +10,8 @@ import 'package:pixel_prompt/components/font_style.dart';
 ///
 /// The cell is mutable and can be cleared or compared to others
 /// for optimized redraws or diffing purposes.
+///
+/// {@category Core}
 class BufferCell {
   /// The character rendered in the cell.
   ///
