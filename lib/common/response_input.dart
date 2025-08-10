@@ -2,6 +2,8 @@ import 'package:pixel_prompt/core/component_instance.dart';
 
 /// Represents the type of response command returned
 /// after processing an input event.
+///
+///{@category Input}
 enum ResponseCommands { none, exit }
 
 /// Encapsulates the result of processing an input event.
@@ -9,6 +11,8 @@ enum ResponseCommands { none, exit }
 /// A [ResponseInput] specifies whether an event was handled,
 /// any response commands to execute, and optionally which
 /// [ComponentInstance]s need to be re-rendered.
+///
+///{@category Input}
 class ResponseInput {
   /// The command to be executed after processing the event.
   final ResponseCommands commands;
