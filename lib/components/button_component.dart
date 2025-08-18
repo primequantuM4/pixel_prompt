@@ -157,7 +157,6 @@ class _ButtonComponentInstance extends InteractableComponentInstance {
     if (event.code == KeyCode.enter || (event.char == ' ')) {
       Logger.trace("ButtonComponent", "Triggering On Pressed");
       component.onPressed.call();
-      onBlur();
       return ResponseInput(
         handled: true,
         commands: ResponseCommands.none,
@@ -216,8 +215,6 @@ class _ButtonComponentInstance extends InteractableComponentInstance {
 
   @override
   void onClick() {
-    isFocused = false;
-    isHovered = false;
     component.onPressed.call();
   }
 

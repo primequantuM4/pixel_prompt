@@ -42,7 +42,7 @@ class ComponentInputHandler implements InputHandler {
   /// returns [ResponseInput.ignored].
   @override
   ResponseInput handleInput(InputEvent event) {
-    final focused = _focusManager.currentComponent;
+    final focused = _focusManager.context.currentComponent;
 
     if (focused == null) {
       return ResponseInput.ignored();

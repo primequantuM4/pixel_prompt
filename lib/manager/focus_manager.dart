@@ -58,18 +58,6 @@ class FocusManager implements InputHandler {
   /// mouse coordinates into component bounds space in [_isWithinBounds].
   final Context context;
 
-  /// All interactive components registered for focus and hover tracking.
-  final List<InteractableComponentInstance> componentInstances = [];
-
-  /// The component that currently has keyboard focus.
-  InteractableComponentInstance? currentComponent;
-
-  /// The component currently under the mouse cursor (hovered).
-  InteractableComponentInstance? _hoveredComponent;
-
-  /// Index of the [currentComponent] in [componentInstances], or -1 if none.
-  int currentIndex = -1;
-
   /// Creates a new [FocusManager] bound to the given [context].
   FocusManager({required this.context});
 
@@ -79,18 +67,20 @@ class FocusManager implements InputHandler {
   /// handling input. Components should be re-registered every frame after
   /// layout, since [componentInstances] is cleared on [reset].
   void register(InteractableComponentInstance c) {
-    componentInstances.add(c);
+    context.componentInstances.add(c);
+    if (context.componentInstances.length - 1 ==
+        context.currentComponentIndex) {
+      context.currentComponent = c;
+      context.currentComponent!.focus();
+    }
   }
 
-  /// Clears all registered components and resets focus and hover state.
+  /// Clears all registered components.
   ///
   /// Call this before rebuilding the component tree or when tearing down
   /// the UI to avoid dangling references.
   void reset() {
-    currentComponent = null;
-    _hoveredComponent = null;
-    currentIndex = -1;
-    componentInstances.clear();
+    context.componentInstances.clear();
   }
 
   /// Handles cycling focus forward (`Tab`) or backward (`Shift+Tab`).
@@ -101,28 +91,33 @@ class FocusManager implements InputHandler {
   ///
   /// Returns a [ResponseInput] with the components that were blurred or focused.
   ResponseInput _handleTab(bool shiftPressed) {
-    if (componentInstances.isEmpty) return ResponseInput.ignored();
+    if (context.componentInstances.isEmpty) return ResponseInput.ignored();
+
+    if (context.currentComponentIndex >= context.componentInstances.length) {
+      context.currentComponentIndex = -1;
+      context.currentComponent = null;
+      context.hoveredComponent = null;
+    }
 
     final List<InteractableComponentInstance> dirtyComponents = [];
-    int nextIndex = currentIndex;
+    int nextIndex = context.currentComponentIndex;
     final int direction = shiftPressed ? -1 : 1;
-    final int total = componentInstances.length;
+    final int total = context.componentInstances.length;
 
     if (nextIndex == -1) {
       nextIndex = shiftPressed ? 0 : -1;
     }
-
     for (int attempt = 0; attempt < total; attempt++) {
       nextIndex = (nextIndex + direction + total) % total;
-      if (componentInstances[nextIndex].isFocusable) {
-        if (currentComponent != null) {
-          currentComponent!.blur();
-          dirtyComponents.add(currentComponent!);
+      if (context.componentInstances[nextIndex].isFocusable) {
+        if (context.currentComponent != null) {
+          context.currentComponent!.blur();
+          dirtyComponents.add(context.currentComponent!);
         }
-        currentComponent = componentInstances[nextIndex];
-        currentIndex = nextIndex;
-        currentComponent!.focus();
-        dirtyComponents.add(currentComponent!);
+        context.currentComponent = context.componentInstances[nextIndex];
+        context.currentComponentIndex = nextIndex;
+        context.currentComponent!.focus();
+        dirtyComponents.add(context.currentComponent!);
 
         return ResponseInput(
           commands: ResponseCommands.none,
@@ -137,8 +132,8 @@ class FocusManager implements InputHandler {
   /// Handles all mouse-driven focus and hover updates.
   ///
   /// Supports:
-  /// - Hover tracking (`MouseEventType.hover` / `release`)
-  /// - Focus on click (`MouseEventType.click`)
+  /// - Hover tracking ([MouseEventType.hover] / [MouseEventType.release])
+  /// - Focus on click ([MouseEventType.click])
   /// - Calling `onClick` on clicked components
   ///
   /// Returns a [ResponseInput] containing any components that changed state.
@@ -146,8 +141,8 @@ class FocusManager implements InputHandler {
     final dirtyComponents = <InteractableComponentInstance>[];
     InteractableComponentInstance? hoveredNow;
 
-    for (int i = componentInstances.length - 1; i >= 0; i--) {
-      final component = componentInstances[i];
+    for (int i = context.componentInstances.length - 1; i >= 0; i--) {
+      final component = context.componentInstances[i];
       if (!component.isHoverable) continue;
 
       if (_isWithinBounds(event.x, event.y, component)) {
@@ -159,13 +154,13 @@ class FocusManager implements InputHandler {
           dirtyComponents.add(component);
         } else if (event.type == MouseEventType.click) {
           if (component.isFocusable) {
-            currentComponent?.blur();
-            if (currentComponent != null) {
-              dirtyComponents.add(currentComponent!);
+            context.currentComponent?.blur();
+            if (context.currentComponent != null) {
+              dirtyComponents.add(context.currentComponent!);
             }
             component.focus();
-            currentComponent = component;
-            currentIndex = i;
+            context.currentComponent = component;
+            context.currentComponentIndex = i;
             dirtyComponents.add(component);
           }
           component.onClick();
@@ -174,12 +169,12 @@ class FocusManager implements InputHandler {
       }
     }
 
-    if (_hoveredComponent != hoveredNow) {
-      if (_hoveredComponent != null) {
-        _hoveredComponent!.unhover();
-        dirtyComponents.add(_hoveredComponent!);
+    if (context.hoveredComponent != hoveredNow) {
+      if (context.hoveredComponent != null) {
+        context.hoveredComponent!.unhover();
+        dirtyComponents.add(context.hoveredComponent!);
       }
-      _hoveredComponent = hoveredNow;
+      context.hoveredComponent = hoveredNow;
     }
 
     return ResponseInput(
@@ -212,7 +207,7 @@ class FocusManager implements InputHandler {
   /// Returns whether the given screen-space point ([x], [y]) is inside
   /// the bounds of [componentInstance], with a small horizontal grace area.
   ///
-  /// This method uses [context.cursorX] and [context.cursorY] to translate
+  /// This method uses [Context.cursorX] and [Context.cursorY] to translate
   /// component bounds into screen coordinates.
   bool _isWithinBounds(
     int x,
