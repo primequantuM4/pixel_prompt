@@ -63,31 +63,69 @@ abstract class AnsiColorType {
 /// {@category Component}
 /// {@category Styling}
 class Colors implements AnsiColorType {
+  /// The ANSI escape code for the foreground color.
   final int code;
+
+  /// The ANSI escape code for the background color.
   final int bgCode;
+
+  /// Whether this color is dimmed (faint).
   final bool _dim;
+
+  /// Human-readable name of the color.
   final String name;
 
   const Colors._(this.code, this.bgCode, this.name, [this._dim = false]);
 
+  /// Standard black ANSI color.
   static const black = Colors._(30, 40, 'black');
+
+  /// Standard red ANSI color.
   static const red = Colors._(31, 41, 'red');
+
+  /// Standard green ANSI color.
   static const green = Colors._(32, 42, 'green');
+
+  /// Standard yellow ANSI color.
   static const yellow = Colors._(33, 43, 'yellow');
+
+  /// Standard blue ANSI color.
   static const blue = Colors._(34, 44, 'blue');
+
+  /// Standard magenta ANSI color.
   static const magenta = Colors._(35, 45, 'magenta');
+
+  /// Standard cyan ANSI color.
   static const cyan = Colors._(36, 46, 'cyan');
+
+  /// Standard white ANSI color.
   static const white = Colors._(37, 47, 'white');
 
+  /// Bright black ANSI color.
   static const highBlack = Colors._(90, 100, 'highBlack');
+
+  /// Bright red ANSI color.
   static const highRed = Colors._(91, 101, 'highRed');
+
+  /// Bright green ANSI color.
   static const highGreen = Colors._(92, 102, 'highGreen');
+
+  /// Bright yellow ANSI color.
   static const highYellow = Colors._(93, 103, 'highYellow');
+
+  /// Bright blue ANSI color.
   static const highBlue = Colors._(94, 104, 'highBlue');
+
+  /// Bright magenta ANSI color.
   static const highMagenta = Colors._(95, 105, 'highMagenta');
+
+  /// Bright cyan ANSI color.
   static const highCyan = Colors._(96, 106, 'highCyan');
+
+  /// Bright white ANSI color.
   static const highWhite = Colors._(97, 107, 'highWhite');
 
+  /// Mapping of ANSI codes to their corresponding [Colors] instances.
   static const _ansiCodes = <int, Colors>{
     30: black,
     31: red,
@@ -123,22 +161,47 @@ class Colors implements AnsiColorType {
     107: highWhite,
   };
 
+  /// Returns the ANSI escape sequence for the foreground color.
+  ///
+  /// If the color is dimmed, returns a compound escape sequence
+  /// that includes both the dim code (2) and the color code.
   @override
   String get fg => _dim ? '2;$code' : '$code';
 
+  /// Returns the ANSI escape sequence for the background color.
+  ///
+  /// If the color is dimmed, returns a compound escape sequence
+  /// that includes both the dim code (2) and the color code.
   @override
   String get bg => _dim ? '2;$bgCode' : '$bgCode';
 
+  /// Returns a human-readable string representation of the foreground color.
+  ///
+  /// For dimmed colors, appends "(d)" to the color name.
   @override
   String get printableFg => _dim ? '$name(d)' : name;
 
+  /// Returns a human-readable string representation of the background color.
+  ///
+  /// For dimmed colors, appends "(d)" to the color name.
   @override
   String get printableBg => _dim ? '$name(d)' : name;
 
+  /// Creates a dimmed version of this color.
+  ///
+  /// Returns a new [Colors] instance with the same base color code
+  /// but marked as dimmed.
   @override
   Colors dimmed() => Colors._(code, bgCode, name, true);
 
   /// Returns the predefined color corresponding to the given ANSI code.
+  ///
+  /// Throws an exception if the code is not recognized.
+  ///
+  /// Example:
+  /// ```dart
+  /// final color = Colors.fromCode(31); // Returns Colors.red
+  /// ```
   factory Colors.fromCode(int code) => _ansiCodes[code]!;
 }
 
@@ -171,13 +234,39 @@ class Colors implements AnsiColorType {
 /// {@category Component}
 /// {@category Styling}
 class ColorRGB implements AnsiColorType {
-  final int r, g, b;
+  /// The red component of the RGB color (0-255).
+  final int r;
 
+  /// The green component of the RGB color (0-255).
+  final int g;
+
+  /// The blue component of the RGB color (0-255).
+  final int b;
+
+  /// Creates a true color RGB color with the given components.
+  ///
+  /// - [r]: Red component (0-255)
+  /// - [g]: Green component (0-255)
+  /// - [b]: Blue component (0-255)
+  ///
+  /// Example:
+  /// ```dart
+  /// const pureRed = ColorRGB(255, 0, 0);
+  /// const pureGreen = ColorRGB(0, 255, 0);
+  /// const pureBlue = ColorRGB(0, 0, 255);
+  /// ```
   const ColorRGB(this.r, this.g, this.b);
 
   /// Returns a dimmed version of this color by scaling RGB components by [dimFactor].
   ///
-  /// The default dim factor is 0.5.
+  /// The default dim factor is 0.5, which reduces each color component by half.
+  ///
+  /// Example:
+  /// ```dart
+  /// final brightRed = ColorRGB(255, 0, 0);
+  /// final dimRed = brightRed.dimmed(); // RGB(127, 0, 0)
+  /// final veryDimRed = brightRed.dimmed(dimFactor: 0.2); // RGB(51, 0, 0)
+  /// ```
   @override
   ColorRGB dimmed({double dimFactor = 0.5}) {
     return ColorRGB(
@@ -187,29 +276,48 @@ class ColorRGB implements AnsiColorType {
     );
   }
 
+  /// Returns the ANSI escape sequence for the RGB foreground color.
+  ///
+  /// Format: "38;2;r;g;b"
   @override
   String get fg => '38;2;$r;$g;$b';
 
+  /// Returns the ANSI escape sequence for the RGB background color.
+  ///
+  /// Format: "48;2;r;g;b"
   @override
   String get bg => '48;2;$r;$g;$b';
 
+  /// Returns a hexadecimal string representation of the foreground color.
+  ///
+  /// Format: "#rrggbb" where each component is 2-digit hex.
   @override
   String get printableFg =>
       '#${r.toRadixString(16).padLeft(2, '0')}${g.toRadixString(16).padLeft(2, '0')}${b.toRadixString(16).padLeft(2, '0')}';
 
+  /// Returns a hexadecimal string representation of the background color.
+  ///
+  /// Format: "#rrggbb" where each component is 2-digit hex.
   @override
   String get printableBg =>
       '#${r.toRadixString(16).padLeft(2, '0')}${g.toRadixString(16).padLeft(2, '0')}${b.toRadixString(16).padLeft(2, '0')}';
 
+  /// Compares two [ColorRGB] instances for equality.
+  ///
+  /// Returns true if both colors have the same RGB components.
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         other is ColorRGB && r == other.r && g == other.g && b == other.b;
   }
 
+  /// Returns the hash code for this color based on its RGB components.
   @override
   int get hashCode => Object.hash(r, g, b);
 
+  /// Returns a string representation of this RGB color.
+  ///
+  /// Format: "ColorRGB: r: {r}, g: {g}, b: {b}"
   @override
   String toString() => 'ColorRGB: r: $r, g: $g, b: $b';
 }

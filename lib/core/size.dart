@@ -20,5 +20,8 @@ class Size {
   /// Both dimensions must be non-negative.
   Size({required this.width, required this.height});
 
+  /// A large fixed size representing effectively infinite dimensions.
+  ///
+  /// Used when a component should not be constrained by available space
   static Size infite = Size(width: 1000, height: 1000);
 }

@@ -1,10 +1,5 @@
 import 'dart:async';
 
-import 'package:pixel_prompt/common/response_input.dart';
-import 'package:pixel_prompt/events/input_event.dart';
-import 'package:pixel_prompt/handler/input_handler.dart';
-import 'package:pixel_prompt/logger/logger.dart';
-import 'package:pixel_prompt/manager/input_registry.dart';
 import 'package:pixel_prompt/pixel_prompt.dart';
 
 class HeaderComponent extends BuildableComponent {

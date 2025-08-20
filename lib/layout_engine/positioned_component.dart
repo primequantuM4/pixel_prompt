@@ -33,6 +33,12 @@ class PositionedComponentInstance {
   /// or `null` if the renderer handles it directly.
   ComponentInstance? parentComponentInstance;
 
+  /// Creates a positioned component instance with the given bounds.
+  ///
+  /// Parameters:
+  /// - [componentInstance]: The component to be positioned
+  /// - [rect]: The final position and size of the component
+  /// - [parentComponentInstance]: Optional parent component responsible for rendering
   PositionedComponentInstance({
     required this.componentInstance,
     required this.rect,

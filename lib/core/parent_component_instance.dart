@@ -27,5 +27,9 @@ abstract class ParentComponentInstance extends ComponentInstance {
   /// Defaults to `false`, meaning the decision is left to layout/rendering code.
   bool shouldRenderChild(ComponentInstance child) => false;
 
+  /// Creates a parent component instance for the given [component].
+  ///
+  /// The [component] parameter defines the component type and properties
+  /// that this instance will represent and manage.
   ParentComponentInstance(Component component);
 }

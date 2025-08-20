@@ -33,11 +33,20 @@ import 'package:pixel_prompt/renderer/render_manager.dart';
 /// {@category Components}
 /// {@category State Management}
 abstract class StatefulComponent extends Component {
+  /// Creates a stateful component that can maintain mutable state.
+  ///
+  /// Stateful components are useful when the component's appearance
+  /// or behavior needs to change in response to user interaction or
+  /// other events.
   const StatefulComponent();
 
   @override
   ComponentInstance createInstance() => StatefulComponentInstance(this);
 
+  /// Creates the mutable state object associated with this component.
+  ///
+  /// The framework calls this method once when creating the component instance.
+  /// Subclasses must override this method to return a new [ComponentState] instance.
   ComponentState createState();
 }
 

@@ -65,9 +65,6 @@ class ButtonComponent extends Component {
   /// The border style applied to the button (e.g., none, single, double).
   final BorderStyle borderStyle;
 
-  /// The internal padding around the label text.
-  final EdgeInsets padding;
-
   /// The callback invoked when the button is pressed.
   final void Function() onPressed;
 
@@ -78,12 +75,12 @@ class ButtonComponent extends Component {
   const ButtonComponent({
     required this.label,
     required this.onPressed,
-    this.padding = const EdgeInsets.symmetric(horizontal: 3),
     this.buttonColor = const ColorRGB(0, 0, 0),
     this.outerBorderColor = const ColorRGB(50, 50, 50),
     this.textColor = const ColorRGB(255, 255, 255),
     this.borderStyle = BorderStyle.empty,
-  }) : super(padding: padding);
+    super.padding = const EdgeInsets.symmetric(horizontal: 3),
+  });
 
   @override
   ComponentInstance createInstance() => _ButtonComponentInstance(this);

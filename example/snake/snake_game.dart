@@ -1,10 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:pixel_prompt/common/response_input.dart';
-import 'package:pixel_prompt/events/input_event.dart';
-import 'package:pixel_prompt/handler/input_handler.dart';
-import 'package:pixel_prompt/manager/input_registry.dart';
 import 'package:pixel_prompt/pixel_prompt.dart';
 
 import 'snake_segment.dart';

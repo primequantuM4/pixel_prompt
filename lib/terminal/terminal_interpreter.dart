@@ -2,7 +2,17 @@ import 'dart:math';
 
 import 'package:pixel_prompt/pixel_prompt.dart';
 
-enum TerminalState { csi, normal }
+/// Represents the current parsing state of terminal input.
+///
+/// Used by input parsers to track whether they're processing normal
+/// characters or Control Sequence Introducer (CSI) sequences.
+enum TerminalState {
+  /// Processing a Control Sequence Introducer (escape sequence)
+  csi,
+
+  /// Processing normal character input
+  normal,
+}
 
 /// ## Terminal ANSI Interpreter and Buffer Manager
 ///
@@ -63,16 +73,38 @@ class TerminalInterpreter {
   bool seenEscapeCode = false;
 
   /// ANSI control sequence terminating characters.
+
+  /// Terminating character for text style sequences (SGR - Select Graphic Rendition)
   static const String styleTerminatingCharacter = 'm';
+
+  /// Terminating character for cursor home position sequences (CUP - Cursor Position)
   static const String cursorHomeTerminatingCharacter = 'H';
+
+  /// Terminating character for cursor up movement sequences (CUU - Cursor Up)
   static const String upMovementTerminatingCharacter = 'A';
+
+  /// Terminating character for cursor down movement sequences (CUD - Cursor Down)
   static const String downMovementTerminatingCharacter = 'B';
+
+  /// Terminating character for cursor forward movement sequences (CUF - Cursor Forward)
   static const String forwardMovementTerminatingCharacter = 'C';
+
+  /// Terminating character for cursor back movement sequences (CUB - Cursor Back)
   static const String backMovementTerminatingCharacter = 'D';
+
+  /// Terminating character for line clearing sequences (EL - Erase in Line)
   static const String clearLineTerminatingCharacter = 'K';
+
+  /// Terminating character for cursor position request sequences (DSR - Device Status Report)
   static const String requestCursorTerminatingCharacter = 'n';
+
+  /// Terminating character for cursor position response sequences (CPR - Cursor Position Report)
   static const String respondCursorTerminatingCharacter = 'R';
+
+  /// Terminating character for enable feature sequences (SM - Set Mode)
   static const String enableTerminatingCharacter = 'h';
+
+  /// Terminating character for disable feature sequences (RM - Reset Mode)
   static const String disableTerminatingCharacter = 'l';
 
   /// Set of terminating characters for ANSI sequences.

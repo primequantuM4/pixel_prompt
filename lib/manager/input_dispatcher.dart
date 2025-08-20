@@ -37,6 +37,10 @@ class InputDispatcher {
   final RenderManager _renderManager;
   final List<InputHandler> _handlers = [];
 
+  /// Creates an input dispatcher with the given render manager.
+  ///
+  /// The [renderer] parameter is required to coordinate rendering updates
+  /// when input events cause visual changes to components.
   InputDispatcher({required RenderManager renderer})
     : _renderManager = renderer;
 

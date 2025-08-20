@@ -24,6 +24,31 @@ import 'package:pixel_prompt/renderer/render_manager.dart';
 /// {@category Core}
 /// {@category Interaction}
 class InteractableRegistry {
+  /// Recursively registers interactable components with the focus and render systems.
+  ///
+  /// This method traverses the component tree starting from [componentInstance] and:
+  /// 1. Registers all [InteractableComponentInstance] instances with the [focusManager]
+  /// 2. Assigns the [renderManager] to both interactable and stateful components
+  /// 3. Recursively processes all children of parent components
+  ///
+  /// Parameters:
+  /// - [componentInstance]: The root component instance to start registration from
+  /// - [focusManager]: The focus manager that handles focus navigation and state
+  /// - [renderManager]: The render manager responsible for coordinating rendering operations
+  ///
+  /// Usage:
+  /// Typically called during application or scene initialization to wire up
+  /// interactivity and ensure all components have access to rendering services.
+  ///
+  /// Example:
+  /// ```dart
+  /// final registry = InteractableRegistry();
+  /// registry.registerInteractables(
+  ///   rootComponentInstance,
+  ///   focusManager,
+  ///   renderManager,
+  /// );
+  /// ```
   void registerInteractables(
     ComponentInstance componentInstance,
     FocusManager focusManager,

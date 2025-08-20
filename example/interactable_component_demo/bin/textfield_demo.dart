@@ -1,4 +1,3 @@
-import 'package:pixel_prompt/components/text_field_component.dart';
 import 'package:pixel_prompt/pixel_prompt.dart';
 
 void main() {

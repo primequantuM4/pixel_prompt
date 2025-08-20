@@ -18,22 +18,44 @@ class KeyEvent extends InputEvent {
   /// The character associated with the key, if applicable.
   final String? char;
 
+  /// Creates a keyboard event with the given key code and optional character.
   const KeyEvent({required this.code, this.char});
 }
 
 /// Identifies different kinds of key presses.
 /// {@category Events}
 enum KeyCode {
+  /// A printable character key
   character,
+
+  /// Enter/Return key
   enter,
+
+  /// Tab key
   tab,
+
+  /// Shift+Tab combination
   shiftTab,
+
+  /// Escape key
   escape,
+
+  /// Backspace key
   backspace,
+
+  /// Up arrow key
   arrowUp,
+
+  /// Down arrow key
   arrowDown,
+
+  /// Left arrow key
   arrowLeft,
+
+  /// Right arrow key
   arrowRight,
+
+  /// Ctrl+C combination
   ctrlC,
 }
 
@@ -45,12 +67,22 @@ class CharEvent extends InputEvent {
   /// The character that was input.
   final String char;
 
+  /// Creates a character event with the given character.
   const CharEvent({required this.char});
 }
 
 /// Indicates where a terminal escape sequence originated.
 /// {@category Events}
-enum SequenceOrigin { generic, windows, linux }
+enum SequenceOrigin {
+  /// Generic origin
+  generic,
+
+  /// Windows terminal origin
+  windows,
+
+  /// Linux terminal origin
+  linux,
+}
 
 /// Represents a terminal escape sequence event.
 ///
@@ -63,6 +95,7 @@ class SequenceEvent extends InputEvent {
   /// The origin of the escape sequence.
   final SequenceOrigin origin;
 
+  /// Creates an escape sequence event with the given bytes and origin.
   const SequenceEvent({
     required this.sequence,
     this.origin = SequenceOrigin.generic,
@@ -90,6 +123,7 @@ class MouseEvent extends InputEvent {
   /// The mouse button pressed.
   final int button;
 
+  /// Creates a mouse event with the given [type], [x], [y] and [button].
   MouseEvent({
     required this.type,
     required this.x,
@@ -109,9 +143,22 @@ class UnknownEvent extends InputEvent {
   /// The raw byte received, if available.
   final int? byte;
 
+  /// Creates an unknown event with the optional raw byte.
   const UnknownEvent({this.byte});
 }
 
 /// Enumerates possible mouse event actions.
 /// {@category Events}
-enum MouseEventType { click, release, hover, error }
+enum MouseEventType {
+  /// Mouse button press
+  click,
+
+  /// Mouse button release
+  release,
+
+  /// Mouse movement without button press
+  hover,
+
+  /// Invalid or malformed mouse event
+  error,
+}

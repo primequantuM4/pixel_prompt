@@ -4,4 +4,10 @@
 /// - [vertical]: Arrange children in a column, top-to-bottom.
 ///
 /// {@category Layout}
-enum Axis { horizontal, vertical }
+enum Axis {
+  /// Arrange children in a row, left-to-right.
+  horizontal,
+
+  /// Arrange children in a column, top-to-bottom.
+  vertical,
+}

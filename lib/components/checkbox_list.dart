@@ -76,7 +76,6 @@ class CheckboxList extends Component {
   final Axis direction;
 
   /// Padding applied around the entire checkbox list.
-  final EdgeInsets padding;
 
   /// Creates a [CheckboxList].
   ///
@@ -89,10 +88,10 @@ class CheckboxList extends Component {
     this.hoverColor,
     this.textColor,
     this.borderStyle,
-    this.padding = const EdgeInsets.all(1),
     this.spacing = 1,
     this.direction = Axis.vertical,
-  }) : super(padding: padding);
+    super.padding = const EdgeInsets.all(1),
+  });
 
   @override
   ComponentInstance createInstance() => _CheckboxListInstance(this);

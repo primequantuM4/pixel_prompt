@@ -1,9 +1,3 @@
-import 'package:pixel_prompt/components/border_style.dart';
-import 'package:pixel_prompt/components/button_component.dart';
-import 'package:pixel_prompt/core/component.dart';
-import 'package:pixel_prompt/core/component_state.dart';
-import 'package:pixel_prompt/core/edge_insets.dart';
-import 'package:pixel_prompt/core/stateful_component.dart';
 import 'package:pixel_prompt/pixel_prompt.dart';
 
 class CounterComponent extends StatefulComponent {
@@ -43,12 +37,14 @@ class CounterState extends ComponentState<CounterComponent> {
           ),
         ],
       ),
-      TextComponent('Counter: ${component.counter}',
-          style: TextComponentStyle(
-            color: ColorRGB(200, 200, 200),
-            bgColor: ColorRGB(20, 20, 20),
-            padding: EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-          )),
+      TextComponent(
+        'Counter: ${component.counter}',
+        style: TextComponentStyle(
+          color: ColorRGB(200, 200, 200),
+          bgColor: ColorRGB(20, 20, 20),
+          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+        ),
+      ),
       ButtonComponent(
         label: component.revealed ? 'Hide Text' : 'Click to reveal hidden text',
         onPressed: () {

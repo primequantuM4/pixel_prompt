@@ -77,10 +77,21 @@ class CanvasBuffer {
     cursorOriginalLine = line;
   }
 
+  /// Returns the original terminal cursor position as (column, line).
+  ///
+  /// This provides the cursor coordinates before any rendering operations.
   (int, int) getTerminalOffset() {
     return (cursorOriginalColumn, cursorOriginalLine);
   }
 
+  /// Updates the screen buffer dimensions to accommodate the new size.
+  ///
+  /// If the new dimensions are larger than current, expands the buffer
+  /// and fills new areas with empty cells. Smaller dimensions are ignored
+  /// to prevent data loss.
+  ///
+  /// [width]: New minimum width for the buffer
+  /// [height]: New minimum height for the buffer
   void updateDimensions(int width, int height) {
     if (this.width == width && this.height == height) return;
 

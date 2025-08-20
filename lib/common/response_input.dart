@@ -4,7 +4,13 @@ import 'package:pixel_prompt/core/component_instance.dart';
 /// after processing an input event.
 ///
 ///{@category Input}
-enum ResponseCommands { none, exit }
+enum ResponseCommands {
+  /// No response is required; the program continues running normally.
+  none,
+
+  /// Indicates the program should terminate.
+  exit,
+}
 
 /// Encapsulates the result of processing an input event.
 ///
@@ -23,6 +29,24 @@ class ResponseInput {
   /// The list of [ComponentInstance]s that require a redraw.
   final List<ComponentInstance>? dirty;
 
+  /// Creates a [ResponseInput] with the given parameters.
+  ///
+  /// The [commands] parameter specifies the response commands to execute
+  /// after processing the input event.
+  ///
+  /// The [handled] parameter indicates whether the input event was
+  /// successfully processed and handled by the component.
+  ///
+  /// The [dirty] parameter optionally specifies which [ComponentInstance]s
+  /// require re-rendering as a result of processing the input event.
+  ///
+  /// Example:
+  /// ```dart
+  /// ResponseInput(
+  ///   commands: ResponseCommands.none,
+  ///   handled: true,
+  ///   dirty: [myComponentInstance],
+  /// );
   const ResponseInput({
     required this.commands,
     required this.handled,

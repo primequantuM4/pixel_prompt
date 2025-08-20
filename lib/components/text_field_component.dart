@@ -90,6 +90,45 @@ class TextFieldComponent extends Component {
   /// Callback when the text changes.
   final Function(String)? onChanged;
 
+  /// Creates a text field component for user input.
+  ///
+  /// The [TextFieldComponent] provides a configurable input field with support for
+  /// styling, placeholders, text masking, and event callbacks.
+  ///
+  /// Parameters:
+  /// - [onChanged]: Callback triggered when the text content changes.
+  ///   Receives the current text value.
+  /// - [onSubmitted]: Callback triggered when the user presses Enter.
+  ///   Receives the final text value.
+  /// - [initialText]: The initial text content displayed in the field.
+  /// - [foreground]: The text color for user input.
+  /// - [background]: The background color of the text field.
+  /// - [textStyle]: Additional styling to apply to the entered text.
+  /// - [placeHolder]: Text displayed when the field is empty.
+  /// - [placeHolderStyle]: Styling to apply to the placeholder text.
+  /// - [hoverStyle]: Styling applied when the field is hovered or focused.
+  /// - [obsecure]: If `true`, masks input characters (useful for passwords).
+  ///   Defaults to `false`.
+  /// - [maxWidth]: Maximum number of characters allowed in the field.
+  ///   Defaults to `20`.
+  ///
+  /// Example:
+  /// ```dart
+  /// TextFieldComponent(
+  ///   initialText: 'Username',
+  ///   foreground: Colors.white,
+  ///   background: Colors.blue,
+  ///   placeHolder: 'Enter your username...',
+  ///   placeHolderStyle: TextComponentStyle(styles: {FontStyle.italic}),
+  ///   maxWidth: 30,
+  ///   onSubmitted: (value) => print('Submitted: $value'),
+  ///   onChanged: (value) => print('Changed: $value'),
+  /// )
+  /// ```
+  ///
+  /// See also:
+  /// - [TextComponentStyle] for text styling options
+  /// - [AnsiColorType] for color implementations
   const TextFieldComponent({
     this.onChanged,
     this.onSubmitted,

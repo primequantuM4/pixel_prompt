@@ -17,14 +17,14 @@ class DummyComponent extends Component {
 
   const DummyComponent({required this.children});
   @override
-  _DummyComponentInstance createInstance() => _DummyComponentInstance(this);
+  DummyComponentInstance createInstance() => DummyComponentInstance(this);
 }
 
-class _DummyComponentInstance extends ParentComponentInstance {
+class DummyComponentInstance extends ParentComponentInstance {
   final DummyComponent component;
   final List<ComponentInstance> _childrenInstance;
 
-  _DummyComponentInstance(this.component)
+  DummyComponentInstance(this.component)
     : _childrenInstance = component.children
           .map((Component comp) => comp.createInstance())
           .toList(),
@@ -84,7 +84,7 @@ void main() {
         height: 24,
       ); // arbitrary number of width and height;
       final DummyComponent dummyComponent = DummyComponent(children: children);
-      final _DummyComponentInstance dummyComponentInstance = dummyComponent
+      final DummyComponentInstance dummyComponentInstance = dummyComponent
           .createInstance();
 
       final engine = LayoutEngine(

@@ -65,6 +65,10 @@ class BufferCell {
   int get hashCode =>
       Object.hash(char, fg, bg, Object.hashAllUnordered(styles));
 
+  /// Creates a copy of this cell with the same character and colors.
+  ///
+  /// Returns a new [BufferCell] instance with identical [char], [fg], and [bg]
+  /// values to the current cell.
   BufferCell copy() => BufferCell(char: char, fg: fg, bg: bg);
 
   /// Compares two sets for unordered equality.

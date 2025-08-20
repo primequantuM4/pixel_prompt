@@ -1,4 +1,3 @@
-import 'package:pixel_prompt/core/edge_insets.dart';
 import 'package:pixel_prompt/pixel_prompt.dart';
 
 void main() {

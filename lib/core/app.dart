@@ -104,6 +104,36 @@ class AppInstance extends ParentComponentInstance {
   /// The initially created children, preserved for reference.
   List<ComponentInstance> initialChildren;
 
+  /// Creates an application instance for the given root [App] component.
+  ///
+  /// The constructor initializes the application instance and performs
+  /// the initial build of the component tree. It also sets this instance
+  /// as the global singleton accessible via [AppInstance.instance].
+  ///
+  /// Parameters:
+  /// - [component]: The root [App] component that defines the application's
+  ///   structure and behavior. This component serves as the entry point
+  ///   for the entire component hierarchy.
+  ///
+  /// Initialization process:
+  /// 1. Creates empty initial state for child instances
+  /// 2. Sets this instance as the global singleton
+  /// 3. Builds the initial component tree by creating instances for all
+  ///    children of the root component
+  /// 4. Stores both the current and initial children for reference
+  ///
+  /// Example:
+  /// ```dart
+  /// final app = App(children: [Header(), Content(), Footer()]);
+  /// final appInstance = AppInstance(app);
+  /// ```
+  ///
+  /// Throws:
+  /// - May throw if the component tree cannot be built properly
+  ///
+  /// See also:
+  /// - [AppInstance.instance] to access the singleton instance
+  /// - [App.createInstance] for the component instance creation mechanism
   AppInstance(this.component)
     : _childrenInstance = [],
       initialChildren = [],

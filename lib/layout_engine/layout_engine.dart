@@ -68,6 +68,14 @@ class LayoutEngine {
   /// Stores the final positioned results after computation.
   final List<PositionedComponentInstance> result = [];
 
+  /// Creates a layout engine with the given configuration.
+  ///
+  /// Parameters:
+  /// - [rootInstance]: The root component in the layout hierarchy
+  /// - [children]: Direct children of the root instance to be laid out
+  /// - [direction]: Layout direction for arranging children (horizontal/vertical)
+  /// - [bounds]: The total available area for layout
+  /// - [childGap]: Space between children in the layout direction, defaults to 0
   LayoutEngine({
     required this.rootInstance,
     required this.children,
