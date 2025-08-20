@@ -203,8 +203,8 @@ class _SnakeState extends ComponentState<Snake> implements InputHandler {
                 "Score: $score ${state == GameState.paused ? '(PAUSED)' : ''}",
                 style: TextComponentStyle(
                   color: state == GameState.paused
-                      ? ColorRGB(255, 140, 0) // amber when paused
-                      : ColorRGB(255, 215, 0), // gold when playing
+                      ? ColorRGB(255, 140, 0)
+                      : ColorRGB(255, 215, 0),
                   styles: {FontStyle.bold},
                   margin: EdgeInsets.only(bottom: 1),
                 ),
@@ -274,13 +274,10 @@ class _SnakeState extends ComponentState<Snake> implements InputHandler {
     }
     final int index = snake.indexWhere((s) => s.pos == pos);
     if (index != -1) {
-      // brighter head
       return _styledCell(
-        index == 0 ? '█' : '█',
-        index == 0
-            ? ColorRGB(0, 255, 80) // snake head neon green
-            : ColorRGB(0, 200, 0),
-      ); // body darker green
+        '█',
+        index == 0 ? ColorRGB(0, 255, 80) : ColorRGB(0, 200, 0),
+      );
     }
     if (food == pos) {
       return _styledCell(foodBig ? '●' : '•', ColorRGB(220, 0, 0));
