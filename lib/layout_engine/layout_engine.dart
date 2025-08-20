@@ -73,7 +73,7 @@ class LayoutEngine {
     required this.children,
     required this.direction,
     required this.bounds,
-    this.childGap = 1,
+    this.childGap = 0,
   });
 
   /// Computes the layout starting from [rootInstance].
@@ -197,7 +197,7 @@ class LayoutEngine {
       }
     }
 
-    return requiredWidth;
+    return requiredWidth + 20;
   }
 
   /// Computes the total height needed to fit all [children]
@@ -218,6 +218,6 @@ class LayoutEngine {
       }
     }
 
-    return requiredHeight;
+    return requiredHeight + 10;
   }
 }
