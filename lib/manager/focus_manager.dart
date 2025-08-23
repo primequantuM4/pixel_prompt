@@ -81,6 +81,7 @@ class FocusManager implements InputHandler {
   /// the UI to avoid dangling references.
   void reset() {
     context.componentInstances.clear();
+    context.hoveredComponent = null;
   }
 
   /// Handles cycling focus forward (`Tab`) or backward (`Shift+Tab`).
