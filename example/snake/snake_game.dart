@@ -198,9 +198,10 @@ class _SnakeState extends ComponentState<Snake> implements InputHandler {
               TextComponent(
                 "Score: $score ${state == GameState.paused ? '(PAUSED)' : ''}",
                 style: TextComponentStyle(
-                  color: state == GameState.paused
-                      ? ColorRGB(255, 140, 0)
-                      : ColorRGB(255, 215, 0),
+                  color:
+                      state == GameState.paused
+                          ? ColorRGB(255, 140, 0)
+                          : ColorRGB(255, 215, 0),
                   styles: {FontStyle.bold},
                   margin: EdgeInsets.only(bottom: 1),
                 ),
@@ -321,5 +322,5 @@ class _SnakeState extends ComponentState<Snake> implements InputHandler {
 }
 
 void main() {
-  App(children: [Snake()]).run();
+  App(children: [Snake()]).run(fullScreenMode: true);
 }

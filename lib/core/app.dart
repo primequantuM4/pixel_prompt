@@ -267,10 +267,15 @@ extension AppRunner on App {
   /// Initializes and runs the app.
   ///
   /// 1. Reads terminal size using [TerminalFunctions].
-  /// 2. Creates a [CanvasBuffer] for rendering.
-  /// 3. Initializes input handling, focus, and interactivity.
-  /// 4. Measures layout and renders the component tree.
-  void run() async {
+  /// 2. Optionally switches the terminal into fullscreen mode if
+  ///    [fullScreenMode] is true, using the entire screen.
+  /// 3. Creates a [CanvasBuffer] for rendering.
+  /// 4. Initializes input handling, focus, and interactivity.
+  /// 5. Measures layout and renders the component tree.
+  ///
+  /// The [fullScreenMode] parameter controls whether the app runs in
+  /// fullscreen or uses the current terminal viewport.
+  void run({bool fullScreenMode = false}) async {
     final AppInstance appInstance = createInstance() as AppInstance;
 
     final rawTerminalWidth = TerminalFunctions.hasTerminal
@@ -298,7 +303,12 @@ extension AppRunner on App {
     final terminalWidth = min(rawTerminalWidth, layoutWidth);
     final terminalHeight = min(rawTerminalHeight, layoutHeight);
 
-    final buffer = CanvasBuffer(width: terminalWidth, height: terminalHeight);
+    final buffer = CanvasBuffer(
+      width: terminalWidth,
+      height: terminalHeight,
+      isFullscreen: fullScreenMode,
+    );
+
     final RenderManager renderer = RenderManager(buffer: buffer);
     final Context context = Context();
 

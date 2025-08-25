@@ -7,6 +7,7 @@ import 'package:pixel_prompt/components/text_component_style.dart';
 import 'package:pixel_prompt/core/buffer_cell.dart';
 import 'package:pixel_prompt/core/rect.dart';
 import 'package:pixel_prompt/logger/logger.dart';
+import 'package:pixel_prompt/terminal/terminal_functions.dart';
 
 /// A terminal canvas buffer managing character cells and their styles.
 ///
@@ -58,16 +59,30 @@ class CanvasBuffer {
 
   /// Creates a [CanvasBuffer] with the specified [width] and [height].
   ///
-  /// Initializes the internal buffer with empty spaces.
-  CanvasBuffer({required this.width, required this.height})
-    : _screenBuffer = List.generate(
-        height,
-        (_) => List.filled(width, BufferCell(char: ' ')),
-      ),
-      _previousFrame = List.generate(
-        height,
-        (_) => List.filled(width, BufferCell(char: '')),
-      );
+  /// Initializes the internal buffer with empty spaces and prepares a previous
+  /// frame buffer for diff-based rendering.
+  ///
+  /// If [isFullscreen] is true, the terminal is switched into fullscreen mode
+  /// using [TerminalFunctions.enterFullScreen], hiding scrollback and
+  /// occupying the entire screen.
+  ///
+  /// The [isFullscreen] parameter allows the buffer to be immediately
+  /// ready for fullscreen rendering, otherwise it uses the current terminal
+  /// viewport.
+  CanvasBuffer({
+    required this.width,
+    required this.height,
+    this.isFullscreen = false,
+  }) : _screenBuffer = List.generate(
+         height,
+         (_) => List.filled(width, BufferCell(char: ' ')),
+       ),
+       _previousFrame = List.generate(
+         height,
+         (_) => List.filled(width, BufferCell(char: '')),
+       ) {
+    if (isFullscreen) TerminalFunctions.enterFullScreen();
+  }
 
   /// Sets the original terminal cursor offset for relative rendering.
   ///
