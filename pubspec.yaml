@@ -1,6 +1,6 @@
 name: pixel_prompt
 description: A fast, extensible terminal UI (TUI) framework for Dart with a custom renderer, component tree layout, and support for interactive apps.
-version: 0.1.3
+version: 0.1.4-wip
 
 environment:
   sdk: ^3.8.1
@@ -10,11 +10,10 @@ repository: https://github.com/primequantuM4/pixel_prompt
 issue_tracker: https://github.com/primequantuM4/pixel_prompt/issues
 
 dependencies:
-  dartdoc: ^8.3.4
   ffi: ^2.1.4
   win32: ^5.14.0
   # path: ^1.8.0
 
 dev_dependencies:
-  lints: ^5.0.0
+  lints: ^6.0.0
   test: ^1.24.0

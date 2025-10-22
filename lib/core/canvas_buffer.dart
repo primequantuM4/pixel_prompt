@@ -87,7 +87,7 @@ class CanvasBuffer {
   /// Sets the original terminal cursor offset for relative rendering.
   ///
   /// Typically set to the terminal’s current cursor position before rendering.
-  setTerminalOffset(int column, int line) {
+  void setTerminalOffset(int column, int line) {
     cursorOriginalColumn = column;
     cursorOriginalLine = line;
   }
