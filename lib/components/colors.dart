@@ -210,6 +210,12 @@ class Colors implements AnsiColorType {
 /// Supports generating ANSI escape sequences for foreground and background colors
 /// in the RGB format, along with dimming support.
 ///
+/// ## macOS Compatibility
+/// The default **Terminal.app** on macOS does **not** support true color
+/// (24-bit RGB) sequences. It only supports 8-bit colors.
+/// - If your application must run inside Terminal.app, prefer using
+///   the [Colors] class for compatibility.
+/// - Other macOS terminals such as iTerm2 and Warp do support 24-bit RGB.
 /// ## Properties
 /// - [r], [g], [b]: Red, Green, Blue components (0-255).
 ///
