@@ -189,6 +189,19 @@ class CanvasBuffer {
     }
   }
 
+  /// Fills a rectangular [area] with a specified [backgroundColor].
+  ///
+  /// All cells within [area] will have their background color set to [backgroundColor].
+  void fill(Rect area, AnsiColorType backgroundColor) {
+    for (int line = area.y; line < area.y + area.height; line++) {
+      if (line >= _screenBuffer.length) break;
+      for (int column = area.x; column < area.x + area.width; column++) {
+        if (column >= _screenBuffer[0].length) break;
+        _screenBuffer[line][column].bg = backgroundColor;
+      }
+    }
+  }
+
   /// Flushes the contents of a rectangular [area] to the terminal.
   ///
   /// This writes spaces over the specified area at the current cursor position,

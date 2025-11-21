@@ -12,6 +12,7 @@ export 'components/checkbox.dart';
 export 'components/border_style.dart';
 export 'components/text_field_component.dart';
 export 'components/button_component.dart';
+export 'components/sized_box.dart';
 export 'core/app.dart';
 export 'core/stateful_component.dart';
 export 'core/component_state.dart';

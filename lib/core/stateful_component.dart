@@ -180,9 +180,10 @@ class StatefulComponentInstance extends ParentComponentInstance {
   /// Logs each render action for tracing via [Logger.trace].
   @override
   void render(CanvasBuffer buffer, Rect bounds) {
+    this.bounds = bounds;
     for (final child in childrenInstance) {
       Logger.trace("StatefulComponent", "Item $child is being rendered");
-      child.render(buffer, child.bounds);
+      child.render(buffer, bounds);
     }
   }
 }
